@@ -6,9 +6,15 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
-const handler = async ({ apiID, dbResourceId, dbName}) => {
+import { RID } from "../../../../utils/utils";
+const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn }) => {
 
-    const table = new dynamodb.Table("test0table", {
+    // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
+
+    const r_id = RID(4);
+    const unique_db_name = `${dbName}_${r_id}`;
+
+    const table = new dynamodb.Table(`dynamodb-table-${unique_db_name}-${rid}`, {
         attributes: [{
             name: "id",
             type: "S"
@@ -35,7 +41,7 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
     };
     
     // Create a role and attach our new policy
-    const lam_role = new iam.Role("myRole", {
+    const lam_role = new iam.Role(`role-${unique_db_name}-${rid}`, {
         assumeRolePolicy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [
@@ -50,7 +56,7 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
         }),
     });
 
-    new iam.RolePolicy("myRolePolicy", {
+    new iam.RolePolicy(`policy-${unique_db_name}-${rid}`, {
         role: lam_role.id,
         policy: JSON.stringify(lam_policy)
     });
@@ -61,7 +67,7 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
 
 
     // Define a new Lambda function
-    const createFunc = new aws.lambda.Function("createFunction", {
+    const createFunc = new aws.lambda.Function(`create-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "handler.zip")),
         runtime: "nodejs14.x",
         handler: "handler.createHandler",
@@ -74,7 +80,7 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
     });
 
     
-    const readFunc = new aws.lambda.Function("readFunction", {
+    const readFunc = new aws.lambda.Function(`read-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
         runtime: "nodejs14.x",
         handler: "read.readHandler",
@@ -86,7 +92,7 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
         },
     });
     
-    const updateFunc = new aws.lambda.Function("updateFunction", {
+    const updateFunc = new aws.lambda.Function(`update-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
         runtime: "nodejs14.x",
         handler: "update.updateHandler",
@@ -98,7 +104,7 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
         },
     });
     
-    const deleteFunc = new aws.lambda.Function("deleteFunction", {
+    const deleteFunc = new aws.lambda.Function(`delete-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
         runtime: "nodejs14.x",
         handler: "delete.deleteHandler",
@@ -111,152 +117,171 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
     });
    
 
-    const folderdbNameResource = new aws.apigateway.Resource("folder-dbName-resource", {
+    const folderdbNameResource = new aws.apigateway.Resource(`folder-dbName-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: dbResourceId,
         pathPart: dbName,
     });
     
-    const folderCreateResource = new aws.apigateway.Resource("folder-dynamodb-resource", {
+    const folderCreateResource = new aws.apigateway.Resource(`folder-dynamodb-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
         pathPart: "create",
+    }, {
+        dependsOn: [folderdbNameResource], // Make the integration dependent on the deleteMethod.
     });
 
-    const folderReadResource = new aws.apigateway.Resource("folder-read-resource", {
+    const folderReadResource = new aws.apigateway.Resource(`folder-read-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
         pathPart: "read",   
+    }, {
+        dependsOn: [folderdbNameResource], // Make the integration dependent on the deleteMethod.
     });
 
 
-    const folderUpdateResource = new aws.apigateway.Resource("folder-update-resource", {
+    const folderUpdateResource = new aws.apigateway.Resource(`folder-update-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
         pathPart: "update",
+    }, {
+        dependsOn: [folderdbNameResource], // Make the integration dependent on the deleteMethod.
     });
 
 
-    const folderDeleteResource = new aws.apigateway.Resource("folder-delete-resource", {
+    const folderDeleteResource = new aws.apigateway.Resource(`folder-delete-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
         pathPart: "delete",
+    }, {
+        dependsOn: [folderdbNameResource], // Make the integration dependent on the deleteMethod.
     });
 
     
-    const createMethod = new aws.apigateway.Method("create-method", {
+    const createMethod = new aws.apigateway.Method(`create-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderCreateResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
+    }, {
+        dependsOn: [folderCreateResource], // Make the integration dependent on the deleteMethod.
     });
      
 
-    const readMethod = new aws.apigateway.Method("read-method", {
+    const readMethod = new aws.apigateway.Method(`read-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderReadResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
+    }, {
+        dependsOn: [folderReadResource], // Make the integration dependent on the deleteMethod.
     });
 
-    const updateMethod = new aws.apigateway.Method("update-method", {
+    const updateMethod = new aws.apigateway.Method(`update-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderUpdateResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
+    }, {
+        dependsOn: [folderUpdateResource], // Make the integration dependent on the deleteMethod.
     });
 
-    const deleteMethod = new aws.apigateway.Method("delete-method", {
+    const deleteMethod = new aws.apigateway.Method(`delete-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderDeleteResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
+    }, {
+        dependsOn: [folderDeleteResource], // Make the integration dependent on the deleteMethod.
     });
 
-    const createIntegration = new aws.apigateway.Integration("create-integration", {
+    const createIntegration = new aws.apigateway.Integration(`create-integration-${unique_db_name}-${rid}`, {
         httpMethod: createMethod.httpMethod,
         integrationHttpMethod: "POST",
         resourceId: folderCreateResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: createFunc.invokeArn,
+    }, {
+        dependsOn: [createFunc, createMethod], // Make the integration dependent on the deleteMethod.
     });
 
-    const readIntegration = new aws.apigateway.Integration("read-integration", {                            
+    const readIntegration = new aws.apigateway.Integration(`read-integration-${unique_db_name}-${rid}`, {                            
         httpMethod: readMethod.httpMethod,
         integrationHttpMethod: "POST",
         resourceId: folderReadResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: readFunc.invokeArn,
+    }, {
+        dependsOn: [readFunc, readMethod], // Make the integration dependent on the deleteMethod.
     });
     
-    const updateIntegration = new aws.apigateway.Integration("update-integration", {
+    const updateIntegration = new aws.apigateway.Integration(`update-integration-${unique_db_name}-${rid}`, {
         httpMethod: updateMethod.httpMethod,
         integrationHttpMethod: "POST",
         resourceId: folderUpdateResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: updateFunc.invokeArn,
+    }, {
+        dependsOn: [updateFunc, updateMethod], // Make the integration dependent on the deleteMethod.
     });
 
-    const deleteIntegration = new aws.apigateway.Integration("delete-integration", {
+    const deleteIntegration = new aws.apigateway.Integration(`delete-integration-${unique_db_name}-${rid}`, {
         httpMethod: deleteMethod.httpMethod,
         integrationHttpMethod: "POST",
         resourceId: folderDeleteResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: deleteFunc.invokeArn,
+    }, {
+        dependsOn: [deleteFunc, deleteMethod], // Make the integration dependent on the deleteMethod.
     });
-    
 
-    let apiId= apiID;
-    let region = "us-east-2"; // like "us-east-2"
-    let accountId = "442052175141"; //put your account ID
-
-    const createApiGatewayInvokePermission = new aws.lambda.Permission('createApiGatewayInvokePermission', {
+    const createApiGatewayInvokePermission = new aws.lambda.Permission(`create-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`arn:aws:execute-api:${region}:${accountId}:${apiId}/*/*`
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
-    const readApiGatewayInvokePermission = new aws.lambda.Permission('readApiGatewayInvokePermission', {
+    const readApiGatewayInvokePermission = new aws.lambda.Permission(`read-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: readFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`arn:aws:execute-api:${region}:${accountId}:${apiId}/*/*`
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
-    const updateApiGatewayInvokePermission = new aws.lambda.Permission('updateApiGatewayInvokePermission', {
+    const updateApiGatewayInvokePermission = new aws.lambda.Permission(`update-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: updateFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`arn:aws:execute-api:${region}:${accountId}:${apiId}/*/*`
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
-    const deleteApiGatewayInvokePermission = new aws.lambda.Permission('deleteApiGatewayInvokePermission', {
+    const deleteApiGatewayInvokePermission = new aws.lambda.Permission(`delete-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: deleteFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`arn:aws:execute-api:${region}:${accountId}:${apiId}/*/*`
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
-    const deployment = new aws.apigateway.Deployment("apiDeployment", {
+    const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_db_name}-${rid}`, {
         restApi: apiID,
         stageName: "stage", // Uncomment this line if you want to specify a stage name.
     }, {  dependsOn: [
-        createMethod, createIntegration,
-        readMethod, readIntegration,
-        updateMethod,updateIntegration,
-        deleteMethod, deleteIntegration
+        createIntegration,
+        readIntegration,
+        updateIntegration,
+        deleteIntegration
     ] });
     
-    return { apiID, dbResourceId, dbName};
+    return { apiID, apiName, dbResourceId, dbName, unique_db_name };
 };
 
 export default handler;
