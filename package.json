@@ -1,0 +1,29 @@
+{
+  "name": "crud-hub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^5.42.0",
+    "@pulumi/aws-apigateway": "^1.0.1",
+    "@pulumi/awsx": "^1.0.0",
+    "@pulumi/pulumi": "^3.76.0",
+    "@types/node": "20.4.5",
+    "@types/react": "18.2.17",
+    "@types/react-dom": "18.2.7",
+    "aws": "^0.0.3-2",
+    "aws-sdk": "^2.1400.0",
+    "eslint": "8.46.0",
+    "eslint-config-next": "13.4.12",
+    "next": "13.4.12",
+    "pulumi": "^0.0.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.1.6"
+  }
+}
