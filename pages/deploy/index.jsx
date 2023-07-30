@@ -1,38 +1,21 @@
 import React, { useState, useEffect } from 'react';
-
 import { Button, Form } from 'react-bootstrap';
 import { deployCRUDAPI } from '../../utils/utils';
 
-export default ({ }) => {
-
-
-    // pul-0559ec8ece852a19a0f45f3217b7b02257fbabff
-
+const DeployIndex = () => {
     const [pulumiAccessToken, setPulumiAccessToken] = useState();
     const [projectName, setProjectName] = useState();
     const [stackName, setStackName] = useState();
 
-
-
-
-
-
     const handleSubmit = async () => {
         const response = await deployCRUDAPI({ pulumiAccessToken, projectName, stackName });
         console.log(response)
-
-        // const result = await response.json();
-
-        // if (response.ok) {
-        //     alert('Website deployed at URL: ' + result.url);
-        // } else {
-        //     alert('Error: ' + result.message);
-        // }
     };
 
-    return (<>
-        <h2 style={{ marginBottom: 20, fontWeight: 'bold' }}>Deploy Dynamic CRUD API</h2>
-        <Form onSubmit={console.log}>
+    return (
+        <>
+            <h2 style={{ marginBottom: 20, fontWeight: 'bold' }}>Deploy Dynamic CRUD API</h2>
+            <Form onSubmit={console.log}>
             <Form.Group className="mb-3" controlId="formBasicPulumiAccessToken">
                 <Form.Label>Pulumi Access Token</Form.Label>
                 <Form.Control
@@ -73,8 +56,8 @@ export default ({ }) => {
             <Button onClick={handleSubmit} variant="primary" type="button">
                 Submit
             </Button>
-        </Form>
-        <style jsx global>{`
+            </Form>
+            <style jsx global>{`
             html,
             body {
             padding: 0;
@@ -87,5 +70,10 @@ export default ({ }) => {
             box-sizing: border-box;
             }
         `}</style>
-    </>)
+        </>
+    );
 }
+
+DeployIndex.displayName = 'DeployIndex';
+
+export default DeployIndex;
