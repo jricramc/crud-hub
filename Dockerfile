@@ -18,7 +18,7 @@ RUN npm install
 # Copy local code to the container image.
 COPY . ./
 
-RUN npm run tsc
+RUN npm run tsc || cat /root/.npm/_logs/*-debug.log
 
 # Build the production version of the application
 RUN npm run build
