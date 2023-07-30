@@ -18,12 +18,18 @@
     "@types/react-dom": "18.2.7",
     "aws": "^0.0.3-2",
     "aws-sdk": "^2.1400.0",
+    "axios": "^1.4.0",
+    "bootstrap": "^5.3.1",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "next": "13.4.12",
+    "node-fetch": "^3.3.2",
     "pulumi": "^0.0.1",
     "react": "18.2.0",
+    "react-bootstrap": "^2.8.0",
     "react-dom": "18.2.0",
-    "typescript": "5.1.6"
+    "sass": "^1.64.1",
+    "typescript": "5.1.6",
+    "unfetch": "^4.2.0"
   }
 }

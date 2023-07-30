@@ -6,10 +6,13 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
+import { RID } from "../../../../utils/utils";
 
 const handler = async () => {
 
-    const table = new dynamodb.Table("test0table", {
+    const rid = RID();
+
+    const table = new dynamodb.Table(`ledger-table-${rid}`, {
         attributes: [{
             name: "id",
             type: "S"
@@ -36,7 +39,7 @@ const handler = async () => {
     };
     
     // Create a role and attach our new policy
-    const lam_role = new iam.Role("myRole", {
+    const lam_role = new iam.Role(`lam-role-${rid}`, {
         assumeRolePolicy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [
@@ -51,7 +54,7 @@ const handler = async () => {
         }),
     });
 
-    new iam.RolePolicy("myRolePolicy", {
+    new iam.RolePolicy(`role-policy-${rid}`, {
         role: lam_role.id,
         policy: JSON.stringify(lam_policy)
     });
@@ -62,7 +65,7 @@ const handler = async () => {
 
 
     // Define a new Lambda function
-    const createFunc = new aws.lambda.Function("createFunction", {
+    const createFunc = new aws.lambda.Function(`ledger-create-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "handler.zip")),
         runtime: "nodejs14.x",
         handler: "handler.createHandler",
@@ -75,7 +78,7 @@ const handler = async () => {
     });
 
     
-    const readFunc = new aws.lambda.Function("readFunction", {
+    const readFunc = new aws.lambda.Function(`ledger-read-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
         runtime: "nodejs14.x",
         handler: "read.readHandler",
@@ -87,7 +90,7 @@ const handler = async () => {
         },
     });
     
-    const updateFunc = new aws.lambda.Function("updateFunction", {
+    const updateFunc = new aws.lambda.Function(`ledger-update-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
         runtime: "nodejs14.x",
         handler: "update.updateHandler",
@@ -99,7 +102,7 @@ const handler = async () => {
         },
     });
     
-    const deleteFunc = new aws.lambda.Function("deleteFunction", {
+    const deleteFunc = new aws.lambda.Function(`ledger-delete-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
         runtime: "nodejs14.x",
         handler: "delete.deleteHandler",
@@ -111,64 +114,9 @@ const handler = async () => {
         },
     });
 
-    // const testLambda = new aws.lambda.Function("mylambda", {
-    //     code: new pulumi.asset.AssetArchive({
-    //         "index.js": new pulumi.asset.StringAsset(`const fetch = require('node-fetch');
-
-    //         exports.handler = async (event, context) => {
-    //             try {
-    //                 const response = await fetch('http://localhost:3002/api/deployNewRouteForAPI-copy', {
-    //                     method: 'POST',
-    //                     headers: {
-    //                         'Content-Type': 'application/json',
-    //                     },
-    //                     body: JSON.stringify({ message: 'Deploying new route' }),
-    //                 });
-            
-    //                 const data = await response.json();
-            
-    //                 return {
-    //                     statusCode: 200,
-    //                     body: JSON.stringify(data),
-    //                 };
-    //             } catch (error) {
-    //                 console.log(error);
-    //                 return {
-    //                     statusCode: 500,
-    //                     body: JSON.stringify({ error: 'Failed to execute request' }),
-    //                 };
-    //             }
-    //         };
-    //         `),
-    //     }),
-    //     role: lam_role.arn,
-    //     handler: "index.handler",
-    //     runtime: "nodejs14.x",
-    // });
-
-    const testLambda = new aws.lambda.Function("mylambda", {
-        code: new pulumi.asset.AssetArchive({
-            "index.js": new pulumi.asset.StringAsset(`
-            exports.handler = async (event) => {
-                const { proxy } = event.pathParameters || {}; // Extract the value of the "proxy" variable from the event
-            
-                const response = {
-                    statusCode: 200,
-                    body: JSON.stringify({ proxyValue: proxy }),
-                };
-            
-                return response;
-            };
-            `),
-        }),
-        role: lam_role.arn,
-        handler: "index.handler",
-        runtime: "nodejs14.x",
-    });
-
 
     // Create a new Rest API Gateway using awsx.
-    const api = new apigateway.RestAPI("myApi", {
+    const api = new apigateway.RestAPI(`ledger-crud-api-${rid}`, {
         routes: [
             { path: "/ledger/create", method: "POST", eventHandler: createFunc },
             { path: "/ledger/read", method: "POST", eventHandler: readFunc },
@@ -177,56 +125,15 @@ const handler = async () => {
         ],
     });
 
-    const { api: { id: restApiId, rootResourceId } } = api;
+    const { api: { id: restApiId, rootResourceId, executionArn } } = api;
 
-    const folderMainDynamoDBResource = new aws.apigateway.Resource("folder-Main-DynamoDB-Resource", {
+    const folderMainDynamoDBResource = new aws.apigateway.Resource(`folder-Main-DynamoDB-Resource-${rid}`, {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "dynamodb",
     });
-
-
-    const folderCreateResource = new aws.apigateway.Resource("folder-create-resource", {
-        restApi: restApiId,
-        parentId: rootResourceId,
-        pathPart: "create",
-    });
     
-    const folderDynamodbResource = new aws.apigateway.Resource("folder-dynamodb-resource", {
-        restApi: restApiId,
-        parentId: folderCreateResource.id,
-        pathPart: "dynamodb",
-    });
-
-    const folderProxyResource = new aws.apigateway.Resource("folder-proxy-resource", {
-        restApi: restApiId,
-        parentId: folderDynamodbResource.id,
-        pathPart: "{proxy}",
-    });
-    
-    const method = new aws.apigateway.Method("get-method", {
-        restApi: restApiId,
-        resourceId: folderProxyResource.id,
-        httpMethod: "GET",
-        authorization: "NONE",
-        apiKeyRequired: false,
-    });
-
-    const integration = new aws.apigateway.Integration("myintegration", {
-        restApi: restApiId,
-        resourceId: folderProxyResource.id,
-        httpMethod: method.httpMethod,
-        type: "AWS_PROXY",
-        integrationHttpMethod: "POST",
-        uri: testLambda.invokeArn,
-    });
-
-    const deployment = new aws.apigateway.Deployment("apiDeployment", {
-        restApi: restApiId,
-        stageName: "stage", // Uncomment this line if you want to specify a stage name.
-    }, { dependsOn: [method, integration] });
-    
-    return { url: api.url, api, id: restApiId, rootResourceId, dbResourceId: folderMainDynamoDBResource.id };
+    return { url: api.url, api, apiID: restApiId, rootResourceId, dbResourceId: folderMainDynamoDBResource.id, lam_role, executionArn, rid };
 };
 
 export default handler;

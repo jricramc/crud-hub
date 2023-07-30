@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import crud_api from './pulumi/programs/crud_api'
+import crud_dynamic_endpoints from './pulumi/programs/crud_dynamic_endpoints';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
@@ -13,15 +14,55 @@ const handler = async (req, res) => {
 
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
-            stackName: stackName,
+            stackName: `${stackName}-pt-1`,
             projectName: projectName,
             program: crud_api,
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
-        const upRes = await stack.up({ onOutput: console.log });
-        console.log('upRes:::::::::::', upRes);
-        res.status(200).json({ id: stackName, upRes });
+        const upRes1 = await stack.up({ onOutput: console.log });
+
+        const {
+          outputs: {
+            apiID: { value: api_id },
+            rootResourceId: { value: root_resource_id },
+            dbResourceId: { value: db_resource_id },
+            lam_role: { value: { arn: lam_role_arn }},
+            executionArn: { value: execution_arn },
+            rid: { value: r_id },
+          }
+        } = upRes1;
+
+        const stack2 = await LocalWorkspace.createStack({
+          stackName: `${stackName}-pt-2`,
+          projectName: projectName,
+          program: async () =>  await crud_dynamic_endpoints({
+            apiID: api_id,
+            rootResourceId: root_resource_id,
+            dbResourceId: db_resource_id,
+            lam_role_arn,
+            executionArn: execution_arn,
+            rid: r_id,
+          }),
+        });
+
+        const upRes2 = await stack2.up({ onOutput: console.log });
+
+        res.status(200).json({
+          stackName,
+          upRes: {
+            part1: upRes1,
+            part2: upRes2,
+          },
+          api_id,
+          root_resource_id,
+          db_resource_id,
+          lam_role_arn,
+          execution_arn,
+          r_id,
+        });
+
+
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {
     console.error(error);

@@ -25,6 +25,7 @@ const handler = async (req, res) => {
         await stack.setConfig("aws:region", { value: "us-east-2" });
         const upRes = await stack.up({ onOutput: console.log });
         console.log('upRes:::::::::::', upRes);
+
         res.status(200).json({ id: stackName, upRes });
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {

@@ -109,61 +109,6 @@ const handler = async ({ apiID, dbResourceId, dbName}) => {
             },
         },
     });
-
-    // const testLambda = new aws.lambda.Function("mylambda", {
-    //     code: new pulumi.asset.AssetArchive({
-    //         "index.js": new pulumi.asset.StringAsset(`const fetch = require('node-fetch');
-
-    //         exports.handler = async (event, context) => {
-    //             try {
-    //                 const response = await fetch('http://localhost:3002/api/deployNewRouteForAPI-copy', {
-    //                     method: 'POST',
-    //                     headers: {
-    //                         'Content-Type': 'application/json',
-    //                     },
-    //                     body: JSON.stringify({ message: 'Deploying new route' }),
-    //                 });
-            
-    //                 const data = await response.json();
-            
-    //                 return {
-    //                     statusCode: 200,
-    //                     body: JSON.stringify(data),
-    //                 };
-    //             } catch (error) {
-    //                 console.log(error);
-    //                 return {
-    //                     statusCode: 500,
-    //                     body: JSON.stringify({ error: 'Failed to execute request' }),
-    //                 };
-    //             }
-    //         };
-    //         `),
-    //     }),
-    //     role: lam_role.arn,
-    //     handler: "index.handler",
-    //     runtime: "nodejs14.x",
-    // });
-
-    const testLambda = new aws.lambda.Function("mylambda", {
-        code: new pulumi.asset.AssetArchive({
-            "index.js": new pulumi.asset.StringAsset(`
-            exports.handler = async (event) => {
-                const { proxy } = event.pathParameters || {}; // Extract the value of the "proxy" variable from the event
-            
-                const response = {
-                    statusCode: 200,
-                    body: JSON.stringify({ proxyValue: proxy }),
-                };
-            
-                return response;
-            };
-            `),
-        }),
-        role: lam_role.arn,
-        handler: "index.handler",
-        runtime: "nodejs14.x",
-    });
    
 
     const folderdbNameResource = new aws.apigateway.Resource("folder-dbName-resource", {
