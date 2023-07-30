@@ -5,7 +5,7 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   const { method, body, headers } = req;
   // const b = body.apiID ? body : JSON.parse(body);
-  const { apiID, dbResourceId, dbName} = body;
+  const { apiID, apiName, dbResourceId, dbName, rid, executionArn } = body;
   const stackName = `addcrudapi-dbResourceId-${dbResourceId}-apiID-${apiID}-${RID()}`;
   try {
     
@@ -19,7 +19,7 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_crud_api({ apiID, dbResourceId, dbName }),
+            program: async () =>  await add_crud_api({ apiID, apiName, dbResourceId, dbName, rid, executionArn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });

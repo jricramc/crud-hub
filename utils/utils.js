@@ -15,10 +15,10 @@ const deployCRUDAPI = async ({ pulumiAccessToken, projectName, stackName }) => {
   } return Promise.reject(`error ${res.status} received from server`);
 };
 
-const RID = () => {
+const RID = (l = 8) => {
     const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let rid = '';
-    for (let i = 0; i < 15; i += 1) {
+    for (let i = 0; i < l; i += 1) {
         const r = Math.random() * c.length;
         rid += c.substring(r, r + 1);
     }
