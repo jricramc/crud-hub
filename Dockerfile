@@ -1,4 +1,4 @@
-FROM node:16.5
+FROM node:16.8.0
 
 # Install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
