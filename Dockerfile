@@ -1,5 +1,5 @@
 # Use the official lightweight Node.js 16 image.
-FROM node:16.8.0
+FROM node:18
 
 # Install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
@@ -8,10 +8,12 @@ RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH="/root/.pulumi/bin:${PATH}"
 
 # Set working directory
-WORKDIR /app
+WORKDIR /usr/src/
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
+
+RUN printenv
 
 # Install dependencies
 RUN npm install
