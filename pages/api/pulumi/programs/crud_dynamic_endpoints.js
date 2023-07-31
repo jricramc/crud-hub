@@ -46,7 +46,7 @@ const handler = async ({ apiID, apiName, rootResourceId, dbResourceId, lam_role_
                             const { dbname } = event.pathParameters || {}; // Extract the value of the "dbname" variable from the event
                             const postData = JSON.stringify({
                                 apiID: "${apiID}",
-                                apiName: "${apiName}"
+                                apiName: "${apiName}",
                                 dbResourceId: "${dbResourceId}",
                                 dbName: dbname,
                                 rid: "${rid}",
@@ -54,7 +54,7 @@ const handler = async ({ apiID, apiName, rootResourceId, dbResourceId, lam_role_
                             });
     
                             const options = {
-                                hostname: 'crud-hub.onrender.com',
+                                hostname: 'crudhub.onrender.com',
                                 path: '/api/deployAddCrudAPI',
                                 method: 'POST',
                                 headers: {

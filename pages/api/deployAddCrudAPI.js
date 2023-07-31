@@ -23,10 +23,11 @@ const handler = async (req, res) => {
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
-        const upRes = await stack.up({ onOutput: console.log });
-        console.log('upRes:::::::::::', upRes);
-
-        res.status(200).json({ id: stackName, upRes });
+        await stack.up({ onOutput: () => {} }).then((...args) => {
+          res.status(200).json({ type: 'success', ...args });
+        }).catch((...args) => {
+          res.status(200).json({ type: 'error', ...args });
+        });
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {
     console.error(error);
