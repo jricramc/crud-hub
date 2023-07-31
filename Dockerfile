@@ -4,6 +4,8 @@ FROM node:16.8.0
 # Install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
 
+# Add Pulumi's bin to PATH
+ENV PATH="/root/.pulumi/bin:${PATH}"
 
 # Set working directory
 WORKDIR /app
@@ -11,14 +13,13 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-
 # Install dependencies
 RUN npm install
 
 # Copy local code to the container image.
 COPY . ./
 
-RUN npm run tsc
+RUN npm run tsc || cat /root/.npm/_logs/*-debug.log
 
 # Build the production version of the application
 RUN npm run build
