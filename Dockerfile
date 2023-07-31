@@ -4,13 +4,14 @@ FROM node:16.8.0
 # Install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
 
+# Add Pulumi's bin to PATH
+ENV PATH="/root/.pulumi/bin:${PATH}"
 
 # Set working directory
 WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
-
 
 # Install dependencies
 RUN npm install
