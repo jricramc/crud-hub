@@ -1,6 +1,9 @@
 # Use the official lightweight Node.js 16 image.
 FROM node:18
 
+ARG PULUMI_ACCESS_TOKEN
+ENV PULUMI_ACCESS_TOKEN=${PULUMI_ACCESS_TOKEN}
+
 # Set working directory
 WORKDIR /usr/src/app
 
