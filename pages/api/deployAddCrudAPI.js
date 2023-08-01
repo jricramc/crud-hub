@@ -16,6 +16,7 @@ const handler = async (req, res) => {
 
     console.log('body: ', body)
     console.log('stackName: ', stackName);
+    console.log('dbname', dbName)
     console.log("puLUMI_ACCESS_TOKEN: ", process.env.PULUMI_ACCESS_TOKEN)
 
     if (method === 'POST') {
