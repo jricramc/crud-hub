@@ -13,6 +13,10 @@ RUN npm install
 # Copy local code to the container image.
 COPY . .
 
+RUN echo "Environment variables:" && \
+    echo "--------------------" && \
+    node -e "console.log(process.env);" && \
+    echo "--------------------"
 # Install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
 
