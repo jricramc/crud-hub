@@ -57,7 +57,7 @@ export default function Home() {
 
 				{/* <!-- Header --> */}
 					<header id="header" className="alt">
-						<h1><a href="#">Spectral</a></h1>
+						<h1><a href="#">CrudHUB</a></h1>
 						<nav id="nav">
 							<ul>
 								<li className="special">
@@ -79,12 +79,10 @@ export default function Home() {
 				{/* <!-- Banner --> */}
 					<section id="banner">
 						<div className="inner">
-							<h2>Spectral</h2>
-							<p>Another fine responsive<br />
-							site template freebie<br />
-							crafted by <a href="http://html5up.net">HTML5 UP</a>.</p>
+							<h2>CrudHUB</h2>
+							<p>Build fully functional<br />and Hosted APIs in seconds</p>
 							<ul className="actions special">
-								<li><a href="#" className="button primary">Activate</a></li>
+								<li><a href="#" className="button primary">Sign In</a></li>
 							</ul>
 						</div>
 						<a href="#one" className="more scrolly">Learn More</a>
@@ -94,10 +92,10 @@ export default function Home() {
 					<section id="one" className="wrapper style1 special">
 						<div className="inner">
 							<header className="major">
-								<h2>Arcu aliquet vel lobortis ata nisl<br />
-								eget augue amet aliquet nisl cep donec</h2>
-								<p>Aliquam ut ex ut augue consectetur interdum. Donec amet imperdiet eleifend<br />
-								fringilla tincidunt. Nullam dui leo Aenean mi ligula, rhoncus ullamcorper.</p>
+								<h2>
+                                The product web developers didn't know they needed
+                                </h2>
+								<p>Aliquam ut ex ut augue consectetur interdum. Donec hendrerit imperdiet. Mauris eleifend fringilla nullam aenean mi ligula.</p>
 							</header>
 							<ul className="icons major">
 								<li><span className="icon fa-gem major style1"><span className="label">Lorem</span></span></li>
@@ -111,22 +109,22 @@ export default function Home() {
 					<section id="two" className="wrapper alt style2">
 						<section className="spotlight">
 							<div className="image"><img src="images/pic01.jpg" alt="" /></div><div className="content">
-								<h2>Magna primis lobortis<br />
-								sed ullamcorper</h2>
+								<h2>Speed up your development<br />
+								 cycle and pivot faster</h2>
 								<p>Aliquam ut ex ut augue consectetur interdum. Donec hendrerit imperdiet. Mauris eleifend fringilla nullam aenean mi ligula.</p>
 							</div>
 						</section>
 						<section className="spotlight">
 							<div className="image"><img src="images/pic02.jpg" alt="" /></div><div className="content">
-								<h2>Tortor dolore feugiat<br />
-								elementum magna</h2>
+								<h2>Automatic Documentation<br />
+								and data management out of the box</h2>
 								<p>Aliquam ut ex ut augue consectetur interdum. Donec hendrerit imperdiet. Mauris eleifend fringilla nullam aenean mi ligula.</p>
 							</div>
 						</section>
 						<section className="spotlight">
 							<div className="image"><img src="images/pic03.jpg" alt="" /></div><div className="content">
-								<h2>Augue eleifend aliquet<br />
-								sed condimentum</h2>
+								<h2>Free Hosting and access<br />
+								to expensive third party services</h2>
 								<p>Aliquam ut ex ut augue consectetur interdum. Donec hendrerit imperdiet. Mauris eleifend fringilla nullam aenean mi ligula.</p>
 							</div>
 						</section>
@@ -136,9 +134,8 @@ export default function Home() {
 					<section id="three" className="wrapper style3 special">
 						<div className="inner">
 							<header className="major">
-								<h2>Accumsan mus tortor nunc aliquet</h2>
-								<p>Aliquam ut ex ut augue consectetur interdum. Donec amet imperdiet eleifend<br />
-								fringilla tincidunt. Nullam dui leo Aenean mi ligula, rhoncus ullamcorper.</p>
+								<h2>Products we offer access to</h2>
+								<p>Our list of products is not limited to but incldues<br />the following systems and resources displayed below</p>
 							</header>
 							<ul className="features">
 								<li className="icon fa-paper-plane">
