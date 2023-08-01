@@ -9,8 +9,8 @@ const handler = async (req, res) => {
     const url = 'https://ihi0f9ogvg.execute-api.us-west-2.amazonaws.com/default/webhub-generate-code';
     const { method, body, headers } = req;
     const { content, projectName, stackName } = body;
-    const pulumiAccessToken = headers.pulumi_access_token;
-    process.env.PULUMI_ACCESS_TOKEN = pulumiAccessToken;
+    // const pulumiAccessToken = headers.pulumi_access_token;
+    // process.env.PULUMI_ACCESS_TOKEN = pulumiAccessToken;
 
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({

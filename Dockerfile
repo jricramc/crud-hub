@@ -16,6 +16,8 @@ RUN npm install
 # Copy local code to the container image.
 COPY . .
 
+RUN npm run build
+
 RUN echo "Environment variables:" && \
     echo "--------------------" && \
     node -e "console.log(process.env);" && \
@@ -27,7 +29,7 @@ RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH="/root/.pulumi/bin:${PATH}"
 
 # Build the app
-RUN npm run build
+
 
 # Run the web service on container startup.
 CMD ["npm", "run", "start"]
