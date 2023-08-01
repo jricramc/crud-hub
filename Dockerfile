@@ -14,7 +14,6 @@ RUN curl -fsSL https://get.pulumi.com | sh
 # Set working directory for Pulumi commands
 ENV PATH="/root/.pulumi/bin:${PATH}"
 
-
 # Set working directory
 WORKDIR /usr/src/app
 
