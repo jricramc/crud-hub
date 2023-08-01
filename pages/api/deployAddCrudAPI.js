@@ -9,13 +9,14 @@ const handler = async (req, res) => {
   const stackName = `addcrudapi-dbResourceId-${dbResourceId}-apiID-${apiID}-${RID()}`;
   try {
     
-    // const pulumiAccessToken = headers.pulumi_access_token;
+    const pulumiAccessToken = headers.pulumi_access_token;
+    console.log('pulumiAccessToken: ', pulumiAccessToken)
     // process.env.PULUMI_ACCESS_TOKEN = pulumiAccessToken;
 
 
     console.log('body: ', body)
     console.log('stackName: ', stackName);
-    console.log('accesstoken_pul', process.env.PULUMI_ACCESS_TOKEN)
+    console.log("puLUMI_ACCESS_TOKEN: ", process.env.PULUMI_ACCESS_TOKEN)
 
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
