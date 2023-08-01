@@ -1,26 +1,6 @@
 # Use the official lightweight Node.js 16 image.
 FROM node:18
 
-# Install Docker CLI
-RUN apt-get update && \
-    apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg2 \
-    software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add - && \
-    add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
-    $(lsb_release -cs) \
-    stable" && \
-    apt-get update && \
-    apt-get install -y docker-ce-cli
-
-# Copy Pulumi access token as a build-time argument
-ARG PULUMI_ACCESS_TOKEN
-ENV PULUMI_ACCESS_TOKEN=${PULUMI_ACCESS_TOKEN}
-
 # Set working directory
 WORKDIR /usr/src/app
 
@@ -38,9 +18,6 @@ RUN curl -fsSL https://get.pulumi.com | sh
 
 # Set working directory for Pulumi commands
 ENV PATH="/root/.pulumi/bin:${PATH}"
-
-# Log into Pulumi account using the environment variable
-RUN pulumi login --cloud-url https://api.pulumi.com
 
 # Build the app
 RUN npm run build
