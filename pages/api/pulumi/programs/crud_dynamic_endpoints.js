@@ -104,6 +104,7 @@ const handler = async ({ apiID, apiName, rootResourceId, dbResourceId, lam_role_
             role: lam_role_arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
+            timeout: 10, 
         }
     );
     
