@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 import '../src/app/assets/css/main.css';
 // import '../src/app/assets/css/noscript.css';
 
 export default function Home() {
 
-    const [preload, setPreload] = useState(true);
+	const { data: session } = useSession();
+	const [preload, setPreload] = useState(true);
+
+	console.log('session: ', session)
 
   useEffect(() => {
     // const scripts = [
@@ -84,7 +88,7 @@ export default function Home() {
                             {/* <p>Your one stop shop to build and manage your APIs</p> */}
 							{/* <p>Automating development, deployment, and management of APIs</p> */}
 							<ul className="actions special">
-								<li><a href="#" className="button primary">Sign In</a></li>
+								<li><button className="button primary" onClick={() => signIn('google', { callbackUrl: '/projects' })}>Sign In</button></li>
 							</ul>
 						</div>
 						<a href="#one" className="more scrolly">Learn More</a>
@@ -133,7 +137,7 @@ export default function Home() {
 					</section>
 
 				{/* <!-- Three --> */}
-					<section id="three" className="wrapper style3 special">
+					{/* <section id="three" className="wrapper style3 special">
 						<div className="inner">
 							<header className="major">
 								<h2>Products we offer access to</h2>
@@ -166,7 +170,7 @@ export default function Home() {
 								</li>
 							</ul>
 						</div>
-					</section>
+					</section> */}
 
 				{/* <!-- CTA --> */}
 					<section id="cta" className="wrapper style4">
@@ -176,7 +180,7 @@ export default function Home() {
 								<p>Aliquam ut ex ut augue consectetur interdum endrerit imperdiet amet eleifend fringilla.</p>
 							</header>
 							<ul className="actions stacked">
-								<li><a href="#" className="button fit primary">Activate</a></li>
+								<li><button className="button fit primary" onClick={() => signIn('google', { callbackUrl: '/projects' })}>Sign In</button></li>
 								<li><a href="#" className="button fit">Learn More</a></li>
 							</ul>
 						</div>
