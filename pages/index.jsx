@@ -62,7 +62,7 @@ export default function Home() {
 				{/* <!-- Header --> */}
 					<header id="header" className="alt">
 						<h1><a href="#">CrudHUB</a></h1>
-						<nav id="nav">
+						{/* <nav id="nav">
 							<ul>
 								<li className="special">
 									<a href="#menu" className="menuToggle"><span>Menu</span></a>
@@ -77,7 +77,7 @@ export default function Home() {
 									</div>
 								</li>
 							</ul>
-						</nav>
+						</nav> */}
 					</header>
 
 				{/* <!-- Banner --> */}
@@ -88,7 +88,12 @@ export default function Home() {
                             {/* <p>Your one stop shop to build and manage your APIs</p> */}
 							{/* <p>Automating development, deployment, and management of APIs</p> */}
 							<ul className="actions special">
-								<li><button className="button primary" onClick={() => signIn('google', { callbackUrl: '/projects' })}>Sign In</button></li>
+								<li>
+								<button
+									className="button primary"
+									onClick={() => signIn('google', { callbackUrl: '/projects' })}
+								>{session ? 'Open Projects' : 'Sign In'}</button>
+								</li>
 							</ul>
 						</div>
 						<a href="#one" className="more scrolly">Learn More</a>
@@ -180,7 +185,12 @@ export default function Home() {
 								<p>Aliquam ut ex ut augue consectetur interdum endrerit imperdiet amet eleifend fringilla.</p>
 							</header>
 							<ul className="actions stacked">
-								<li><button className="button fit primary" onClick={() => signIn('google', { callbackUrl: '/projects' })}>Sign In</button></li>
+								<li>
+									<button
+										className="button fit primary"
+										onClick={() => signIn('google', { callbackUrl: '/projects' })}
+									>{session ? 'Open Projects' : 'Sign In'}</button>
+								</li>
 								<li><a href="#" className="button fit">Learn More</a></li>
 							</ul>
 						</div>

@@ -1,29 +1,53 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { Modal, Button, Spinner, ProgressBar, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Modal, Button, Spinner, ProgressBar, OverlayTrigger, Tooltip, Form } from 'react-bootstrap';
 import $ from 'jquery';
 import { BoxArrowRight } from 'react-bootstrap-icons';
+import { RID, deployCRUDAPI } from '../../utils/utils';
 import styles from './index.module.scss';
 
 const Projects = ({}) => {
 
+    const { data: session } = useSession({ required: true });
+
+    const [selectedId, setSelectedId] = useState();
+    const [projects, setProjects] = useState([]);
+
+    const selectedProject = projects.find(({ id }) => id === selectedId);
+
+    const sP = selectedProject || { name: '...', url: '-'};
+
+    const [p, setP] = useState();
+
+    const [show, setShow] = useState();
+
+    const handleClose = () => setShow();
+
+    const [deploymentStatus, setDeploymentStatus] = useState();
+    const [name, setName] = useState('');
+
+    const handleSubmit = async () => {
+        setDeploymentStatus('deploying');
+        const n = (name?.length || name) ? name : 'Untitled';
+        const rid = RID()
+        // const response = await deployCRUDAPI({ email: session?.user?.email, name: (name?.length || name) ? name : 'Untitled', rid });
+        // console.log(response)
+        setTimeout(() => {
+            setDeploymentStatus('success');
+            const rid = RID();
+            setSelectedId(rid);
+            setProjects((prevState) => [...prevState, {
+                id: rid,
+                name: n,
+                url: 'https://53zl8kiry2.execute-api.us-east-2.amazonaws.com/stage',
+            }]);
+        }, 2000);
+    };
+
+    console.log('session: ', session);
     const connectionStatus = 'verified';
 
-    const selectedId = '1';
-    const projects = [
-        { id: '1', name: 'Name of Project' },
-        { id: '2', name: 'Coolest API Ever' },
-        { id: '3', name: 'Project 2' },
-        { id: '4', name: 'Untitled' },
-        { id: '5', name: 'Name of Project' },
-        { id: '6', name: 'Coolest API Ever' },
-        { id: '7', name: 'Project 2' },
-        { id: '8', name: 'Untitled' },
-        { id: '9', name: 'Name of Project' },
-        { id: '10', name: 'Coolest API Ever' },
-        { id: '11', name: 'Project 2' },
-        { id: '12', name: 'Untitled' },
-    ];
 
     const coreResource = {
         name: 'CORE API',
@@ -74,16 +98,6 @@ const Projects = ({}) => {
 
     const transition = '0.5s';
 
-    const RID = () => {
-        const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let rid = '';
-        for (let i = 0; i < 15; i += 1) {
-            const r = Math.random() * c.length;
-            rid += c.substring(r, r + 1);
-        }
-        return rid;
-    };
-
     const resourceTable = ({ resource, core}) => (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '30px 44px 10px 44px' }}>
             <div style={{ color: '#AEAEAE', fontSize: 12, marginBottom: 6 }}><span style={{ fontSize: 14, fontWeight: 'bold', marginRight: 6 }}>{resource.type}</span> created on 07/28/2023</div>
@@ -116,6 +130,17 @@ const Projects = ({}) => {
         </div>
     );
 
+    useEffect(() => {
+        if (projects.length === 0) {
+            setShow(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        setP();
+
+    }, [selectedId]);
+
     return (
     <>
         <div className={styles.container}>
@@ -134,26 +159,87 @@ const Projects = ({}) => {
                 <div style={{ flex: 1, width: '100%', overflow: 'scroll' }}>
                     <div
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 36, margin: 17, background: '#323335', borderRadius: 3, color: 'white' }}
+                        onClick={() => setShow(true)}
                     >
                         <div>New Project +</div>
                     </div>
-                    {projects.map(({ id, name }) => <div key={`projects-titles-${id}`} style={{ display: 'flex', cursor: 'default', height: 56, flexDirection: 'row' }}>
+                    {projects.map(({ id, name }) => <div key={`projects-titles-${id}`} style={{ display: 'flex', cursor: 'default', height: 56, flexDirection: 'row', alignItems: 'center' }}>
                         <div style={{ transition, cursor: 'pointer', height: 24, width: 4, background: 'white', marginRight: 34, opacity: selectedId === id ? 1 : 0 }} />
-                        <div style={{ transition, cursor: 'pointer', height: 24, color: selectedId === id ? 'white' : '#9F9F9F', fontWeight: 'bold', fontSize: 16 }}>{name}</div>
+                        <div
+                            style={{ transition, cursor: 'pointer', height: 24, color: selectedId === id ? 'white' : '#9F9F9F', fontWeight: 'bold', fontSize: 16 }}
+                            onClick={() => setSelectedId(id)}
+                        >{name}</div>
                     </div>)}
                 </div>
-                <div style={{ height: 240, width: '100%', background: 'rgba(255, 255, 255, 0.2)' }}></div>
+                <div style={{ background: 'linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255,255,255,0.1), rgba(255, 255, 255, 0))', height: 1 }} />
+                <div style={{ height: 175, width: '100%', display: 'flex', flexDirection: 'column', padding: '5px 29px 29px 29px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', padding: '27px 0px' }}>
+                        <img src={session?.user?.image} width={47} height={47} />
+                        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 19 }}>
+                            <div style={{ fontWeight: 'bold', color: 'white', fontSize: 16 }}>{session?.user?.name}</div>
+                            <div style={{ color: '#797A7C', fontSize: 14 }}>{session?.user?.email}</div>
+                        </div>
+                    </div>
+                    <Button variant="dark" style={{ color: '#AAABAD' }} onClick={() => signOut()}>Logout</Button>
+                </div>
             </div>
             <div className={styles.chatContainer}>
                 <div style={{ width: '100%', height: 112, background: 'white', display: 'flex', flexDirection: 'column', padding: '0px 44px' }}>
-                    <div style={{ color: 'black', fontWeight: 'bold', fontSize: 32, marginTop: 20 }}>Name of Project</div>
-                    <div style={{ color: '#7D7D7D', fontSize: 14  }}>https://53zl8kiry2.execute-api.us-east-2.amazonaws.com/stage</div>
+                    <div style={{ color: 'black', fontWeight: 'bold', fontSize: 32, marginTop: 20 }}>{sP.name}</div>
+                    <div style={{ color: '#7D7D7D', fontSize: 14  }}>{sP.url}</div>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', paddingBottom: 30 }}>
-                    {resourceTable({ resource: coreResource, core: true })}
-                    {resources.map((r) => resourceTable({ resource: r, core: false }))}
-                </div>
+                {p
+                    ? <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', paddingBottom: 30 }}>
+                        {resourceTable({ resource: coreResource, core: true })}
+                        {resources.map((r) => resourceTable({ resource: r, core: false }))}
+                    </div>
+                    : <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', paddingBottom: '30vh' }}>
+                        {selectedProject ? <Spinner animation="border" /> : <span style={{ color: 'rgba(0, 0, 0, 0.2)', fontSize: 14, marginTop: 8 }}>No Projects</span>}
+                        {/* <span style={{ color: 'rgba(0, 0, 0, 0.2)', fontSize: 14, marginTop: 8 }}>Loading CRUD API data...</span> */}
+                    </div>
+                }
             </div>
+            <Modal show={show} size="lg">
+                <Modal.Header>
+                    <Modal.Title><h2 style={{ fontWeight: 'bold' }}>Create a CRUD API</h2></Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={console.log}>
+                        <Form.Group className="mb-3" controlId="formBasicProjectName">
+                            <Form.Label>Project Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Untitled"
+                                value={name}
+                                onChange={(ev) => setName(ev.target.value)}
+                                disabled={deploymentStatus === 'deploying' || deploymentStatus === 'success'}
+                            />
+                            {/* <Form.Text className="text-muted">
+                            We'll never share your email with anyone else.
+                            </Form.Text> */}
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    {deploymentStatus === undefined && <Button variant="secondary" onClick={handleClose}>
+                        Cancel
+                    </Button>}
+                    {deploymentStatus === undefined && <Button variant="primary" onClick={handleSubmit}>
+                        Deploy
+                    </Button>}
+                    {deploymentStatus === 'success' && <Button variant="success" onClick={() => {
+                        handleClose();
+                        setDeploymentStatus();
+                        setName('');
+                    }}>
+                        Done
+                    </Button>}
+                    {deploymentStatus === 'error' && <Button variant="primary" onClick={handleSubmit}>
+                        Try Again
+                    </Button>}
+                    {deploymentStatus === 'deploying' && <ProgressBar animated now={100} style={{ width: '100%' }} />}
+                </Modal.Footer>
+            </Modal>
             <Modal show={connectionStatus !== 'verified'}>
                 <Modal.Header>
                     <Modal.Title style={{ fontWeight: 'bold' }}>Establishing Connection</Modal.Title>

@@ -7,18 +7,21 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
-    const { content, projectName, stackName, email } = body;
+    const { name, email, rid } = body;
+
+    const projectName = 'js-test';
+    const stackName = `stack-${rid}`;
    
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
             stackName: `${stackName}-pt-1`,
-            projectName: projectName,
-            program: crud_api,
+            projectName,
+            program: async () => await crud_api({ rid }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
 
-        stack.up({ onOutput: console.log })
+        await stack.up({ onOutput: () => {} })
           .then(async (upRes1) => {
 
           const {
@@ -30,7 +33,6 @@ const handler = async (req, res) => {
               dbResourceId: { value: db_resource_id },
               lam_role: { value: { arn: lam_role_arn }},
               executionArn: { value: execution_arn },
-              rid: { value: r_id },
             }
           } = upRes1;
 
@@ -71,32 +73,17 @@ const handler = async (req, res) => {
               rootResourceId: root_resource_id,
               dbResourceId: db_resource_id,
               lam_role_arn,
-              executionArn: execution_arn,
-              rid: r_id,
-            }),
+              execution_arn,
+              r_id,
+            });
+          }).catch((err) => {
+            console.log('err: ', err);
+            res.status(409).json({ err })
           });
-
-          const upRes2 = await stack2.up({ onOutput: console.log });
-
-          res.status(200).json({
-            stackName,
-            upRes: {
-              part1: upRes1,
-              part2: upRes2,
-            },
-            api_id,
-            root_resource_id,
-            db_resource_id,
-            lam_role_arn,
-            execution_arn,
-            r_id,
-          });
-
         }).catch((err) => {
-          res.status(200).json({ err })
+          console.log('err: ', err);
+          res.status(409).json({ err })
         });
-
-
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {
     console.error(error);
