@@ -6,12 +6,10 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
   try {
-    const url = 'https://ihi0f9ogvg.execute-api.us-west-2.amazonaws.com/default/webhub-generate-code';
+    // const url = 'https://ihi0f9ogvg.execute-api.us-west-2.amazonaws.com/default/webhub-generate-code';
     const { method, body, headers } = req;
-    const { content, projectName, stackName } = body;
-    // const pulumiAccessToken = headers.pulumi_access_token;
-    // process.env.PULUMI_ACCESS_TOKEN = pulumiAccessToken;
-
+    const { content, projectName, stackName, email } = body;
+   
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
             stackName: `${stackName}-pt-1`,
@@ -26,6 +24,7 @@ const handler = async (req, res) => {
 
           const {
             outputs: {
+              url: { value: url },
               apiID: { value: api_id },
               apiName: { value: api_name },
               rootResourceId: { value: root_resource_id },
@@ -36,6 +35,26 @@ const handler = async (req, res) => {
             }
           } = upRes1;
 
+          const data = { 
+            url, api_id, api_name, root_resource_id, db_resource_id, lam_role_arn, execution_arn, r_id
+          };
+          const route = 'ledger/create';
+          const ledger_url = `${url}${route}`;
+
+          console.log('ledger_url', ledger_url)
+
+          const response = await axios({
+            url: ledger_url,
+            method: 'POST',
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Content-Type': 'application/json',
+            },
+            data: data,
+          });
+          console.log('body', data);
+          console.log('res data', response.data);
+        
           const stack2 = await LocalWorkspace.createStack({
             stackName: `${stackName}-pt-2`,
             projectName: projectName,

@@ -126,13 +126,16 @@ const handler = async () => {
     });
 
     const { api: { id: restApiId, name: apiName, rootResourceId, executionArn } } = api;
+    
 
     const folderMainDynamoDBResource = new aws.apigateway.Resource(`folder-Main-DynamoDB-Resource-${rid}`, {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "dynamodb",
     });
+
     
+
     return {
         url: api.url,
         api,
@@ -145,5 +148,6 @@ const handler = async () => {
         rid,
     };
 };
+
 
 export default handler;
