@@ -8,7 +8,7 @@ const DeployIndex = () => {
     const [stackName, setStackName] = useState();
 
     const handleSubmit = async () => {
-        const response = await deployCRUDAPI({ pulumiAccessToken, projectName, stackName });
+        const response = await deployCRUDAPI({ projectName, stackName });
         console.log(response)
     };
 
@@ -16,46 +16,46 @@ const DeployIndex = () => {
         <>
             <h2 style={{ marginBottom: 20, fontWeight: 'bold' }}>Deploy Dynamic CRUD API</h2>
             <Form onSubmit={console.log}>
-            <Form.Group className="mb-3" controlId="formBasicPulumiAccessToken">
-                <Form.Label>Pulumi Access Token</Form.Label>
-                <Form.Control
-                    type="text"
-                    placeholder="token id"
-                    value={pulumiAccessToken}
-                    onChange={(ev) => setPulumiAccessToken(ev.target.value)}
-                />
-                {/* <Form.Text className="text-muted">
-                We'll never share your email with anyone else.
-                </Form.Text> */}
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formBasicProjectName">
-                <Form.Label>Project Name</Form.Label>
-                <Form.Control
-                    type="text"
-                    placeholder="test"
-                    value={projectName}
-                    onChange={(ev) => setProjectName(ev.target.value)}
-                />
-                {/* <Form.Text className="text-muted">
-                We'll never share your email with anyone else.
-                </Form.Text> */}
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formBasicStackName">
-                <Form.Label>Stack Name</Form.Label>
-                <Form.Control
-                    type="text"
-                    placeholder="stack XXX"
-                    value={stackName}
-                    onChange={(ev) => setStackName(ev.target.value)}
-                />
-                {/* <Form.Text className="text-muted">
-                We'll never share your email with anyone else.
-                </Form.Text> */}
-            </Form.Group>
+                <Form.Group className="mb-3" controlId="formBasicPulumiAccessToken">
+                    <Form.Label>Pulumi Access Token</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="token id"
+                        value={pulumiAccessToken}
+                        onChange={(ev) => setPulumiAccessToken(ev.target.value)}
+                    />
+                    {/* <Form.Text className="text-muted">
+                    We'll never share your email with anyone else.
+                    </Form.Text> */}
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="formBasicProjectName">
+                    <Form.Label>Project Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="test"
+                        value={projectName}
+                        onChange={(ev) => setProjectName(ev.target.value)}
+                    />
+                    {/* <Form.Text className="text-muted">
+                    We'll never share your email with anyone else.
+                    </Form.Text> */}
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="formBasicStackName">
+                    <Form.Label>Stack Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="stack XXX"
+                        value={stackName}
+                        onChange={(ev) => setStackName(ev.target.value)}
+                    />
+                    {/* <Form.Text className="text-muted">
+                    We'll never share your email with anyone else.
+                    </Form.Text> */}
+                </Form.Group>
 
-            <Button onClick={handleSubmit} variant="primary" type="button">
-                Submit
-            </Button>
+                <Button onClick={handleSubmit} variant="primary" type="button">
+                    Submit
+                </Button>
             </Form>
             <style jsx global>{`
             html,

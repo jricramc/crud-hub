@@ -8,9 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../utils/utils";
 
-const handler = async () => {
-
-    const rid = RID();
+const handler = async ({ rid }) => {
 
     const table = new dynamodb.Table(`ledger-table-${rid}`, {
         attributes: [{
