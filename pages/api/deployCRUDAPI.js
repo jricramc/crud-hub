@@ -75,7 +75,7 @@ const handler = async (req, res) => {
               lam_role_arn,
               execution_arn,
               r_id,
-            });
+            })
           }).catch((err) => {
             console.log('err: ', err);
             res.status(409).json({ err })
