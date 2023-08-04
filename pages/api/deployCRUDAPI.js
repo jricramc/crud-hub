@@ -18,71 +18,119 @@ const handler = async (req, res) => {
             projectName,
             program: async () => await crud_api({ rid }),
         });
+
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
 
         await stack.up({ onOutput: () => {} })
           .then(async (upRes1) => {
-
-          const {
-            outputs: {
-              url: { value: url },
-              apiID: { value: api_id },
-              apiName: { value: api_name },
-              rootResourceId: { value: root_resource_id },
-              dbResourceId: { value: db_resource_id },
-              lam_role: { value: { arn: lam_role_arn }},
-              executionArn: { value: execution_arn },
-            }
-          } = upRes1;
-
-          // const data = { 
-          //   url, api_id, api_name, root_resource_id, db_resource_id, lam_role_arn, execution_arn, r_id
-          // };
+            console.log('<<stage 1 complete>>')
+            const {
+              outputs: {
+                url: { value: api_url },
+                apiID: { value: api_id },
+                apiName: { value: api_name },
+                rootResourceId: { value: root_resource_id },
+                dbResourceId: { value: db_resource_id },
+                lam_role: { value: { arn: lam_role_arn }},
+                executionArn: { value: execution_arn },
+              }
+            } = upRes1;
 
           const data = {
-            id: api_id, // assuming api_id is a string value for the ID
-            name: api_name // assuming api_name is a string value for the name
-        };
+            r_id: rid,
+            api_url,
+            api_id,
+            api_name,
+            root_resource_id,
+            db_resource_id,
+            lam_role_arn,
+            execution_arn,
+          };
+
           const route = 'ledger/create';
-          const ledger_url = `${url}${route}`;
+          const ledger_url = `${api_url}${route}`;
 
           console.log('ledger_url', ledger_url)
-          try{
-            const response = await axios({
-              url: ledger_url,
+
+          await axios({
+            url: ledger_url,
+            method: 'POST',
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Content-Type': 'application/json',
+            },
+            data,
+          }).then(async (response_1) => {
+            console.log('response_1: ', response_1);
+
+            const db_data = {
+              rid,
+              email: "webhubhq@gmail.com", // assuming api_id is a string value for the ID
+              name, // assuming api_name is a string value for the name,
+              url: api_url,
+            };
+
+            const webhub_db_url= 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/create';
+
+            await axios({
+              url: webhub_db_url,
               method: 'POST',
               headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
               },
-              data: data,
+              data: db_data,
+            }).then(async (response_2) => {
+              console.log('response_2: ', response_2);
+
+              const stack2 = await LocalWorkspace.createStack({
+                projectName,
+                stackName: `${stackName}-pt-2`,
+                program: async () =>  await crud_dynamic_endpoints({
+                  apiID: api_id,
+                  apiName: api_name,
+                  rootResourceId: root_resource_id,
+                  dbResourceId: db_resource_id,
+                  lam_role_arn,
+                  execution_arn,
+                  r_id: rid,
+                })
+              });
+
+              await stack2.workspace.installPlugin("aws", "v4.0.0");
+              await stack2.setConfig("aws:region", { value: "us-east-2" });
+
+              await stack2.up({ onOutput: () => {} }).then((upRes2) => {
+                console.log('<<stage 2 complete>>')
+                res.status(200).json({
+                  upRes: {
+                    ...data,
+                    part1: upRes1,
+                    part2: upRes2,
+                  }
+                })
+              }).catch((err) => {
+                console.log('err_4: ', err);
+                res.status(409).json({ err })
+              });
+            }).catch((err) => {
+
+              console.log('err_3: ', err);
+              res.status(409).json({ err })
+
             });
-            console.log('body', data);
-            console.log('res data', response.data);
-          } catch (error) {
-            console.error('Error making request:', error.response.data);
-          }
-          
-          const stack2 = await LocalWorkspace.createStack({
-            stackName: `${stackName}-pt-2`,
-            projectName: projectName,
-            program: async () =>  await crud_dynamic_endpoints({
-              apiID: api_id,
-              apiName: api_name,
-              rootResourceId: root_resource_id,
-              dbResourceId: db_resource_id,
-              lam_role_arn,
-              execution_arn,
-              r_id,
-            })
           }).catch((err) => {
-            console.log('err: ', err);
+
+            console.log('err_2: ', err);
             res.status(409).json({ err })
+
           });
         }).catch((err) => {
-          console.log('err: ', err);
+
+          console.log('err_1: ', err);
           res.status(409).json({ err })
+          
         });
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {

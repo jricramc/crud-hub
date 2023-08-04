@@ -31,18 +31,18 @@ const Projects = ({}) => {
         setDeploymentStatus('deploying');
         const n = (name?.length || name) ? name : 'Untitled';
         const rid = RID()
-        // const response = await deployCRUDAPI({ email: session?.user?.email, name: (name?.length || name) ? name : 'Untitled', rid });
-        // console.log(response)
-        setTimeout(() => {
-            setDeploymentStatus('success');
-            const rid = RID();
-            setSelectedId(rid);
-            setProjects((prevState) => [...prevState, {
-                id: rid,
-                name: n,
-                url: 'https://53zl8kiry2.execute-api.us-east-2.amazonaws.com/stage',
-            }]);
-        }, 2000);
+        const response = await deployCRUDAPI({ email: session?.user?.email, name: (name?.length || name) ? name : 'Untitled', rid });
+        console.log(response)
+        // setTimeout(() => {
+        //     setDeploymentStatus('success');
+        //     const rid = RID();
+        //     setSelectedId(rid);
+        //     setProjects((prevState) => [...prevState, {
+        //         id: rid,
+        //         name: n,
+        //         url: 'https://53zl8kiry2.execute-api.us-east-2.amazonaws.com/stage',
+        //     }]);
+        // }, 2000);
     };
 
     console.log('session: ', session);
@@ -180,7 +180,7 @@ const Projects = ({}) => {
                             <div style={{ color: '#797A7C', fontSize: 14 }}>{session?.user?.email}</div>
                         </div>
                     </div>
-                    <Button variant="dark" style={{ color: '#AAABAD' }} onClick={() => signOut()}>Logout</Button>
+                    <Button variant="dark" style={{ color: '#AAABAD' }} onClick={async () => await signOut({ callbackUrl: "/api/auth/logout", })}>Logout</Button>
                 </div>
             </div>
             <div className={styles.chatContainer}>

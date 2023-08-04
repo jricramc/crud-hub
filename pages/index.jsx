@@ -181,8 +181,8 @@ export default function Home() {
 					<section id="cta" className="wrapper style4">
 						<div className="inner">
 							<header>
-								<h2>Arcue ut vel commodo</h2>
-								<p>Aliquam ut ex ut augue consectetur interdum endrerit imperdiet amet eleifend fringilla.</p>
+								<h2>Get Started</h2>
+								<p>Its time to stop wasting time, resource, and money and onboard on to the best backend development stack on the market today!</p>
 							</header>
 							<ul className="actions stacked">
 								<li>
@@ -191,7 +191,7 @@ export default function Home() {
 										onClick={() => signIn('google', { callbackUrl: '/projects' })}
 									>{session ? 'Open Projects' : 'Sign In'}</button>
 								</li>
-								<li><a href="#" className="button fit">Learn More</a></li>
+								{/* <li><a href="#" className="button fit">Learn More</a></li> */}
 							</ul>
 						</div>
 					</section>
@@ -206,7 +206,7 @@ export default function Home() {
 							<li><a href="#" className="icon solid fa-envelope"><span className="label">Email</span></a></li>
 						</ul>
 						<ul className="copyright">
-							<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							<li>&copy; CRUDHUB</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
 						</ul>
 					</footer>
 
