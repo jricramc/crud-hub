@@ -51,8 +51,6 @@ const handler = async (req, res) => {
           const route = 'ledger/create';
           const ledger_url = `${api_url}${route}`;
 
-          console.log('ledger_url', ledger_url)
-
           await axios({
             url: ledger_url,
             method: 'POST',
@@ -60,16 +58,24 @@ const handler = async (req, res) => {
               'Access-Control-Allow-Origin': '*',
               'Content-Type': 'application/json',
             },
-            data,
+            data: {
+              id: rid,
+              name: JSON.stringify(data),
+            },
           }).then(async (response_1) => {
-            console.log('response_1: ', response_1);
+            console.log('<<stage 1.1 complete>>')
 
-            const db_data = {
+            const db_data_ = {
               rid,
               email: "webhubhq@gmail.com", // assuming api_id is a string value for the ID
               name, // assuming api_name is a string value for the name,
               url: api_url,
             };
+
+            const db_data = {
+              id: "webhubhq@gmail.com",
+              name: JSON.stringify(db_data_),
+            }
 
             const webhub_db_url= 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/create';
 
@@ -82,7 +88,7 @@ const handler = async (req, res) => {
               },
               data: db_data,
             }).then(async (response_2) => {
-              console.log('response_2: ', response_2);
+              console.log('<<stage 1.2 complete>>')
 
               const stack2 = await LocalWorkspace.createStack({
                 projectName,
@@ -93,8 +99,8 @@ const handler = async (req, res) => {
                   rootResourceId: root_resource_id,
                   dbResourceId: db_resource_id,
                   lam_role_arn,
-                  execution_arn,
-                  r_id: rid,
+                  executionArn: execution_arn,
+                  rid,
                 })
               });
 
@@ -105,7 +111,7 @@ const handler = async (req, res) => {
                 console.log('<<stage 2 complete>>')
                 res.status(200).json({
                   upRes: {
-                    ...data,
+                    data,
                     part1: upRes1,
                     part2: upRes2,
                   }
@@ -130,7 +136,7 @@ const handler = async (req, res) => {
 
           console.log('err_1: ', err);
           res.status(409).json({ err })
-          
+
         });
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {

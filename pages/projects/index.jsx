@@ -4,12 +4,13 @@ import { useRouter } from 'next/router';
 import { Modal, Button, Spinner, ProgressBar, OverlayTrigger, Tooltip, Form } from 'react-bootstrap';
 import $ from 'jquery';
 import { BoxArrowRight } from 'react-bootstrap-icons';
-import { RID, deployCRUDAPI } from '../../utils/utils';
+import { RID, apiRequest, deployCRUDAPI, getUserProjects } from '../../utils/utils';
 import styles from './index.module.scss';
 
 const Projects = ({}) => {
 
     const { data: session } = useSession({ required: true });
+    const session_email = session?.user?.email;
 
     const [selectedId, setSelectedId] = useState();
     const [projects, setProjects] = useState([]);
@@ -31,18 +32,20 @@ const Projects = ({}) => {
         setDeploymentStatus('deploying');
         const n = (name?.length || name) ? name : 'Untitled';
         const rid = RID()
-        const response = await deployCRUDAPI({ email: session?.user?.email, name: (name?.length || name) ? name : 'Untitled', rid });
-        console.log(response)
-        // setTimeout(() => {
-        //     setDeploymentStatus('success');
-        //     const rid = RID();
-        //     setSelectedId(rid);
-        //     setProjects((prevState) => [...prevState, {
-        //         id: rid,
-        //         name: n,
-        //         url: 'https://53zl8kiry2.execute-api.us-east-2.amazonaws.com/stage',
-        //     }]);
-        // }, 2000);
+        await deployCRUDAPI({ email: session?.user?.email, name: n, rid })
+            .then(({ upRes: { data: { r_id, api_url } } }) => {
+                setDeploymentStatus('success');
+                setSelectedId(r_id);
+                setProjects((prevState) => [...prevState, {
+                    id: r_id,
+                    name: n,
+                    url: api_url,
+                }]);
+            })
+            .catch((err) => {
+                console.log('err: ', err)
+                setDeploymentStatus('error');
+            });
     };
 
     console.log('session: ', session);
@@ -131,9 +134,24 @@ const Projects = ({}) => {
     );
 
     useEffect(() => {
-        if (projects.length === 0) {
-            setShow(true);
-        }
+        console.log('getting user projects')
+        // getUserProjects({ email: session_email }).then((res) => {
+        //     console.log('res: ', res);
+        //     // if (projects.length === 0) {
+        //     //     setShow(true);
+        //     // }
+        // }).catch((err) => {})
+
+        const url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/read';
+        apiRequest({ url, method: 'POST' })
+            .then((projects) => {
+                console.log('res: ', res);
+                // const user_projects = projects.filter(({ id }) => id === session_email);
+                // if (user_projects.length === 0) {
+                //     setShow(true);
+                // }
+            }).catch((err) => {})
+
     }, []);
 
     useEffect(() => {
@@ -177,7 +195,7 @@ const Projects = ({}) => {
                         <img src={session?.user?.image} width={47} height={47} />
                         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 19 }}>
                             <div style={{ fontWeight: 'bold', color: 'white', fontSize: 16 }}>{session?.user?.name}</div>
-                            <div style={{ color: '#797A7C', fontSize: 14 }}>{session?.user?.email}</div>
+                            <div style={{ color: '#797A7C', fontSize: 14 }}>{session_email}</div>
                         </div>
                     </div>
                     <Button variant="dark" style={{ color: '#AAABAD' }} onClick={async () => await signOut({ callbackUrl: "/api/auth/logout", })}>Logout</Button>

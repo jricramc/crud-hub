@@ -15,10 +15,9 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     const unique_db_name = `${dbName}_${r_id}`;
 
     const table = new dynamodb.Table(`dynamodb-table-${unique_db_name}-${rid}`, {
-        attributes: [{
-            name: "id",
-            type: "S"
-        }],
+        attributes: [
+            { name: "id", type: "S" },
+        ],
         hashKey: "id",
         billingMode: "PAY_PER_REQUEST",
     });
