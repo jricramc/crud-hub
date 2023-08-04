@@ -11,11 +11,17 @@ import { RID } from "../../../../utils/utils";
 const handler = async ({ rid }) => {
 
     const table = new dynamodb.Table(`ledger-table-${rid}`, {
-        attributes: [{
-            name: "id",
-            type: "S"
-        }],
-        hashKey: "id",
+        attributes: [
+            { name: "r_id", type: "S" },
+            { name: "api_url", type: "S" },
+            { name: "api_id", type: "S" },
+            { name: "api_name", type: "S" },
+            { name: "root_resource_id", type: "S" },
+            { name: "db_resource_id", type: "S" },
+            { name: "lam_role_arn", type: "S" },
+            { name: "execution_arn", type: "S" },
+        ],
+        hashKey: "r_id",
         billingMode: "PAY_PER_REQUEST",
     });
 
