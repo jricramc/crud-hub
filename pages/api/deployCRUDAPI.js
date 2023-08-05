@@ -67,13 +67,13 @@ const handler = async (req, res) => {
 
             const db_data_ = {
               rid,
-              email: "webhubhq@gmail.com", // assuming api_id is a string value for the ID
+              email, // assuming api_id is a string value for the ID
               name, // assuming api_name is a string value for the name,
               url: api_url,
             };
 
             const db_data = {
-              id: "webhubhq@gmail.com",
+              id: email,
               name: JSON.stringify(db_data_),
             }
 

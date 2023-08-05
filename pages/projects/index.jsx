@@ -13,9 +13,9 @@ const Projects = ({}) => {
     const session_email = session?.user?.email;
 
     const [selectedId, setSelectedId] = useState();
-    const [projects, setProjects] = useState([]);
+    const [projects, setProjects] = useState();
 
-    const selectedProject = projects.find(({ id }) => id === selectedId);
+    const selectedProject = (projects || []).find(({ id }) => id === selectedId);
 
     const sP = selectedProject || { name: '...', url: '-'};
 
@@ -134,28 +134,43 @@ const Projects = ({}) => {
     );
 
     useEffect(() => {
-        console.log('getting user projects')
-        // getUserProjects({ email: session_email }).then((res) => {
-        //     console.log('res: ', res);
-        //     // if (projects.length === 0) {
-        //     //     setShow(true);
-        //     // }
-        // }).catch((err) => {})
 
-        const url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/read';
-        apiRequest({ url, method: 'POST' })
-            .then((projects) => {
-                console.log('res: ', res);
-                // const user_projects = projects.filter(({ id }) => id === session_email);
-                // if (user_projects.length === 0) {
-                //     setShow(true);
-                // }
-            }).catch((err) => {})
+        if (session_email && projects === undefined) {
+            console.log('getting user projects')
+            const url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/read';
+            apiRequest({ url, method: 'POST' })
+                .then((prjcts) => {
+                    const projs = prjcts.map(({ name }) => {
+                        let obj = {};
+                        try {
+                            obj = JSON.parse(name);
+                        } catch (err) {
+                            obj = {};
+                        }
+                        return {id: obj.rid, ...obj };
+                    });
 
-    }, []);
+                    console.log('projs: ', projs);
+
+                    const user_projects = projs.filter(({ email }) => email === session_email);
+                    console.log('user_projects: ', user_projects);
+                    if (user_projects.length === 0) {
+                        setShow(true);
+                    }
+                    setProjects(user_projects);
+                }).catch((err) => {
+                    console.log('err: ', err)
+                })
+
+        }
+
+    }, [session]);
 
     useEffect(() => {
         setP();
+        setTimeout(() => {
+            setP(true);
+        }, 4000);
 
     }, [selectedId]);
 
@@ -181,7 +196,7 @@ const Projects = ({}) => {
                     >
                         <div>New Project +</div>
                     </div>
-                    {projects.map(({ id, name }) => <div key={`projects-titles-${id}`} style={{ display: 'flex', cursor: 'default', height: 56, flexDirection: 'row', alignItems: 'center' }}>
+                    {(projects || []).map(({ id, name }) => <div key={`projects-titles-${id}`} style={{ display: 'flex', cursor: 'default', height: 56, flexDirection: 'row', alignItems: 'center' }}>
                         <div style={{ transition, cursor: 'pointer', height: 24, width: 4, background: 'white', marginRight: 34, opacity: selectedId === id ? 1 : 0 }} />
                         <div
                             style={{ transition, cursor: 'pointer', height: 24, color: selectedId === id ? 'white' : '#9F9F9F', fontWeight: 'bold', fontSize: 16 }}
