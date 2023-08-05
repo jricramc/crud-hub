@@ -54,7 +54,7 @@ const Projects = ({}) => {
 
     const coreResource = {
         name: 'CORE API',
-        baseUrl: '/core',
+        baseUrl: '/ledger',
         type: 'CORE CRUD API',
         created: new Date(),
         links: [
