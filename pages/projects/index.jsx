@@ -108,8 +108,9 @@ const Projects = ({}) => {
                 <div style={{ padding: '0px 31px', height: 45, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <img
                         src={`/images/aws-${typeToImage[resource.type]}.svg`}
-                        alt="aws dynamodb service icon"
+                        alt={`aws ${resource.type} service icon`}
                         width={45} height={45}
+                        style={{ borderRadius: 4 }}
                     />
                     <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 29 }}>
                         <div style={{ fontSize: 20, fontWeight: 'bold', color: '#262B2E' }}>{resource.name.toUpperCase()}</div>
@@ -217,7 +218,7 @@ const Projects = ({}) => {
                 </div>
             </div>
             <div className={styles.chatContainer}>
-                <div style={{ width: '100%', height: 112, background: 'white', display: 'flex', flexDirection: 'column', padding: '0px 44px' }}>
+                <div style={{ width: '100%', height: 112, background: 'white', display: 'flex', flexDirection: 'column', padding: '0px 44px', borderBottom: '1px solid rgba(0, 0, 0, 0.05)' }}>
                     <div style={{ color: 'black', fontWeight: 'bold', fontSize: 32, marginTop: 20 }}>{sP.name}</div>
                     <div style={{ color: '#7D7D7D', fontSize: 14  }}>{sP.url}</div>
                 </div>
