@@ -5,6 +5,10 @@ import getConfig from 'next/config';
 const { publicRuntimeConfig } = getConfig();
 
 export default NextAuth({
+
+  // Configure the base URL
+  baseUrl: process.env.NEXT_AUTH_URL || publicRuntimeConfig.NEXT_AUTH_URL, // Replace with your actual base URL
+
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || publicRuntimeConfig.GOOGLE_CLIENT_ID,
