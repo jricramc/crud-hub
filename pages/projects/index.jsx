@@ -33,7 +33,9 @@ const Projects = ({}) => {
         const n = (name?.length || name) ? name : 'Untitled';
         const rid = RID()
         await deployCRUDAPI({ email: session?.user?.email, name: n, rid })
-            .then(({ upRes: { data: { r_id, api_url } } }) => {
+            .then((response) => {
+                console.log('response: ', response);
+                const { upRes: { data: { r_id, api_url } } } = response;
                 setDeploymentStatus('success');
                 setSelectedId(r_id);
                 setProjects((prevState) => [...prevState, {

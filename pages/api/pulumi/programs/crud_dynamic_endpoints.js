@@ -6,7 +6,7 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import fetch from "node-fetch"
 
-const handler = async ({ apiID, apiName, rootResourceId, dbResourceId, lam_role_arn, executionArn, rid }) => {
+const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, lam_role_arn, executionArn, rid }) => {
 
     const folderCreateResource = new aws.apigateway.Resource(`folder-create-resource-${rid}`, {
         restApi: apiID,
@@ -39,66 +39,83 @@ const handler = async ({ apiID, apiName, rootResourceId, dbResourceId, lam_role_
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
-                    const https = require('https');
-    
-                    exports.handler = async (event, context) => {
+                    const axios = require('axios');
+
+                    exports.handler = async (event) => {
+                        const { dbname } = event.pathParameters || {}; // Extract the value of the "dbname" variable from the event
+                    
+                        const body = {
+                            apiID: "${apiID}",
+                            apiName: "${apiName}",
+                            dbResourceId: "${dbResourceId}",
+                            dbName: dbname,
+                            rid: "${rid}",
+                            executionArn: "${executionArn}",
+                        };
+                    
                         try {
-                            const { dbname } = event.pathParameters || {}; // Extract the value of the "dbname" variable from the event
-                            const postData = JSON.stringify({
-                                apiID: "${apiID}",
-                                apiName: "${apiName}",
-                                dbResourceId: "${dbResourceId}",
-                                dbName: dbname,
-                                rid: "${rid}",
-                                executionArn: "${executionArn}",
-                            });
-    
-                            const options = {
-                                hostname: 'crudhub.onrender.com',
-                                path: '/api/deployAddCrudAPI',
+                            const response1 = await axios({
+                                url: 'https://crudhub.onrender.com/api/deployAddCrudAPI',
                                 method: 'POST',
                                 headers: {
+                                    'Access-Control-Allow-Origin': '*',
                                     'Content-Type': 'application/json',
-                                    'Content-Length': postData.length,
                                 },
-                            };
-    
-                            return new Promise((resolve, reject) => {
-                                const req = https.request(options, (res) => {
-                                    let data = '';
-                                    res.on('data', (chunk) => {
-                                        data += chunk;
-                                    });
-    
-                                    res.on('end', () => {
-                                        console.log('Response:', data);
-                                        resolve({
-                                            statusCode: 200,
-                                            body: JSON.stringify(data),
-                                        });
-                                    });
-                                });
-    
-                                req.on('error', (error) => {
-                                    console.error('Error:', error.message);
-                                    reject({
-                                        statusCode: 500,
-                                        body: JSON.stringify({ error: 'Failed to execute request' }),
-                                    });
-                                });
-    
-                                // Send the POST request
-                                req.write(postData);
-                                req.end();
+                                data: JSON.stringify(body),
                             });
+                    
+                            console.log('Response 1:', response1.data);
+
+                            // need to make another request to the ledger to save the fact that we successfully created a new dynamodb resource for this API
+                            try {
+
+                                const response2 = await axios({
+                                    url: 'https://${apiUrl}/ledger/create',
+                                    method: 'POST',
+                                    headers: {
+                                        'Access-Control-Allow-Origin': '*',
+                                        'Content-Type': 'application/json',
+                                    },
+                                    data: JSON.stringify({
+                                        id: '${RID()}',
+                                        name: 'dynamodb-' + dbname,
+                                    }),
+                                });
+
+                                return {
+                                    statusCode: response.status,
+                                    body: JSON.stringify(response.data),
+                                };
+
+                            } catch (error) {
+                                console.error('Error stage 2:', error);
+                    
+                                return {
+                                    statusCode: error.response ? error.response.status : 500,
+                                    body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
+                                };
+                            }
+                    
                         } catch (error) {
-                            console.log(error);
+                            console.error('Error stage 1:', error);
+                    
                             return {
-                                statusCode: 500,
-                                body: JSON.stringify({ error: 'Failed to execute request' }),
+                                statusCode: error.response ? error.response.status : 500,
+                                body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
                             };
                         }
                     };
+                `),
+                'package.json': new pulumi.asset.StringAsset(`
+                {
+                    "name": "create-dynamodb-resource-lambda-axios",
+                    "version": "1.0.0",
+                    "description": "lambda function that creates a dynamodb resource crud api and then adds the data to the ledger using axios post request.",
+                    "main": "index.js",
+                    "dependencies": {
+                        "axios": "^0.21.1"
+                    }
+                }
                 `),
             }),
             role: lam_role_arn,
