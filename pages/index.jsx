@@ -5,10 +5,6 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import '../src/app/assets/css/main.css';
 // import '../src/app/assets/css/noscript.css';
 
-import getConfig from 'next/config';
-
-const { publicRuntimeConfig } = getConfig();
-
 export default function Home() {
 
 	const { data: session } = useSession();
@@ -193,7 +189,7 @@ export default function Home() {
 									<button
 										className="button fit primary"
 										onClick={() => signIn('google', { callbackUrl: '/projects' })}
-									>{session ? 'Open Projects' : publicRuntimeConfig.NEXT_AUTH_URL }</button>
+									>{session ? 'Open Projects' : 'Sign In'}</button>
 								</li>
 								{/* <li><a href="#" className="button fit">Learn More</a></li> */}
 							</ul>
