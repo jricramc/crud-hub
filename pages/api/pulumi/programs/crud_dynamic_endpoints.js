@@ -5,6 +5,7 @@ import * as apigateway from "@pulumi/aws-apigateway";
 import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import fetch from "node-fetch"
+import { RID } from "../../../../utils/utils";
 
 const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, lam_role_arn, executionArn, rid }) => {
 
