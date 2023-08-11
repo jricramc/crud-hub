@@ -7,7 +7,7 @@ const { publicRuntimeConfig } = getConfig();
 export default NextAuth({
 
   // Configure the base URL
-  baseUrl: process.env.NEXT_AUTH_URL || publicRuntimeConfig.NEXT_AUTH_URL, // Replace with your actual base URL
+  // baseUrl: process.env.NEXTAUTH_URL || publicRuntimeConfig.NEXTAUTH_URL, // Replace with your actual base URL
 
   providers: [
     GoogleProvider({

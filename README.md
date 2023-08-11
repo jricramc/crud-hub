@@ -19,7 +19,7 @@ For this project to work locally you must have envirnoment variables filled out.
 GOOGLE_CLIENT_ID={YOUR GOOG CLIENT ID}
 GOOGLE_CLIENT_SECRET={YOUR GOOGLE CLIENT SECRET}
 JWT_SECRET={JWT SECRET}
-NEXT_AUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000
 ```
 
 ## Content
