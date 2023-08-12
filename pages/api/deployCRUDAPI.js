@@ -96,6 +96,7 @@ const handler = async (req, res) => {
                 program: async () =>  await crud_dynamic_endpoints({
                   apiID: api_id,
                   apiName: api_name,
+                  apiUrl: api_url,
                   rootResourceId: root_resource_id,
                   dbResourceId: db_resource_id,
                   lam_role_arn,

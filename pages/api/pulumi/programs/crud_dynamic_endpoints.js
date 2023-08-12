@@ -98,8 +98,8 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl}',
-                            path: '/ledger/create',
+                            host: '${apiUrl.slice(0,-7)}',
+                            path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
