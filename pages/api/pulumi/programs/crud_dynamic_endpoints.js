@@ -40,83 +40,58 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
-                    const axios = require('axios');
 
-                    exports.handler = async (event) => {
-                        const { dbname } = event.pathParameters || {}; // Extract the value of the "dbname" variable from the event
-                    
-                        const body = {
-                            apiID: "${apiID}",
-                            apiName: "${apiName}",
-                            dbResourceId: "${dbResourceId}",
-                            dbName: dbname,
-                            rid: "${rid}",
-                            executionArn: "${executionArn}",
-                        };
-                    
-                        try {
-                            const response1 = await axios({
-                                url: 'https://crudhub.onrender.com/api/deployAddCrudAPI',
-                                method: 'POST',
-                                headers: {
-                                    'Access-Control-Allow-Origin': '*',
-                                    'Content-Type': 'application/json',
-                                },
-                                data: JSON.stringify(body),
-                            });
-                    
-                            console.log('Response 1:', response1.data);
+                const https = require('https');
 
-                            // need to make another request to the ledger to save the fact that we successfully created a new dynamodb resource for this API
-                            try {
-
-                                const response2 = await axios({
-                                    url: 'https://${apiUrl}/ledger/create',
-                                    method: 'POST',
-                                    headers: {
-                                        'Access-Control-Allow-Origin': '*',
-                                        'Content-Type': 'application/json',
-                                    },
-                                    data: JSON.stringify({
-                                        id: '${RID()}',
-                                        name: 'dynamodb-' + dbname,
-                                    }),
-                                });
-
-                                return {
-                                    statusCode: response.status,
-                                    body: JSON.stringify(response.data),
-                                };
-
-                            } catch (error) {
-                                console.error('Error stage 2:', error);
-                    
-                                return {
-                                    statusCode: error.response ? error.response.status : 500,
-                                    body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
-                                };
-                            }
-                    
-                        } catch (error) {
-                            console.error('Error stage 1:', error);
-                    
-                            return {
-                                statusCode: error.response ? error.response.status : 500,
-                                body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
-                            };
-                        }
+                const doPostRequest = () => {
+                
+                  const data = {
+                    apiID: "${apiID}",
+                    apiName: "${apiName}",
+                    dbResourceId: "${dbResourceId}",
+                    dbName: dbname,
+                    rid: "${rid}",
+                    executionArn: "${executionArn}",
+                  };
+                
+                  return new Promise((resolve, reject) => {
+                    const options = {
+                      host: 'https://crudhub.onrender.com',
+                      path: '/api/deployAddCrudAPI',
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      }
                     };
-                `),
-                'package.json': new pulumi.asset.StringAsset(`
-                {
-                    "name": "create-dynamodb-resource-lambda-axios",
-                    "version": "1.0.0",
-                    "description": "lambda function that creates a dynamodb resource crud api and then adds the data to the ledger using axios post request.",
-                    "main": "index.js",
-                    "dependencies": {
-                        "axios": "^0.21.1"
-                    }
-                }
+                    
+                    // create the request object with the callback with the result
+                    const req = https.request(options, (res) => {
+                      resolve(JSON.stringify(res.statusCode));
+                    });
+                
+                    // handle the possible errors
+                    req.on('error', (e) => {
+                      reject(e.message);
+                    });
+                    
+                    // do the request
+                    req.write(JSON.stringify(data));
+                
+                    // finish the request
+                    req.end();
+                  });
+                };
+                
+                
+                exports.handler = async (event) => {
+                  const finaResult = await doPostRequest()
+                    .then(result => console.log('Status code: ', result))
+                    .catch(err => console.error('Error doing the request for the event: ', JSON.stringify(event), ' => ', err));
+
+                    return {
+                        finaResult
+                    };
+                };
                 `),
             }),
             role: lam_role_arn,
@@ -125,6 +100,97 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
             timeout: 10, 
         }
     );
+
+    // const createDynamoDBCrudApiLambda = new aws.lambda.Function(
+    //     `create-dynamodb-crud-api-lambda-${rid}`,
+    //     {
+    //         code: new pulumi.asset.AssetArchive({
+    //             "index.js": new pulumi.asset.StringAsset(`
+    //                 const axios = require('axios');
+
+    //                 exports.handler = async (event) => {
+    //                     const { dbname } = event.pathParameters || {}; // Extract the value of the "dbname" variable from the event
+                    
+    //                     const body = {
+    //                         apiID: "${apiID}",
+    //                         apiName: "${apiName}",
+    //                         dbResourceId: "${dbResourceId}",
+    //                         dbName: dbname,
+    //                         rid: "${rid}",
+    //                         executionArn: "${executionArn}",
+    //                     };
+                    
+    //                     try {
+    //                         const response1 = await axios({
+    //                             url: 'https://crudhub.onrender.com/api/deployAddCrudAPI',
+    //                             method: 'POST',
+    //                             headers: {
+    //                                 'Access-Control-Allow-Origin': '*',
+    //                                 'Content-Type': 'application/json',
+    //                             },
+    //                             data: JSON.stringify(body),
+    //                         });
+                    
+    //                         console.log('Response 1:', response1.data);
+
+    //                         // need to make another request to the ledger to save the fact that we successfully created a new dynamodb resource for this API
+    //                         try {
+
+    //                             const response2 = await axios({
+    //                                 url: 'https://${apiUrl}/ledger/create',
+    //                                 method: 'POST',
+    //                                 headers: {
+    //                                     'Access-Control-Allow-Origin': '*',
+    //                                     'Content-Type': 'application/json',
+    //                                 },
+    //                                 data: JSON.stringify({
+    //                                     id: '${RID()}',
+    //                                     name: 'dynamodb-' + dbname,
+    //                                 }),
+    //                             });
+
+    //                             return {
+    //                                 statusCode: response.status,
+    //                                 body: JSON.stringify(response.data),
+    //                             };
+
+    //                         } catch (error) {
+    //                             console.error('Error stage 2:', error);
+                    
+    //                             return {
+    //                                 statusCode: error.response ? error.response.status : 500,
+    //                                 body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
+    //                             };
+    //                         }
+                    
+    //                     } catch (error) {
+    //                         console.error('Error stage 1:', error);
+                    
+    //                         return {
+    //                             statusCode: error.response ? error.response.status : 500,
+    //                             body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
+    //                         };
+    //                     }
+    //                 };
+    //             `),
+    //             'package.json': new pulumi.asset.StringAsset(`
+    //             {
+    //                 "name": "create-dynamodb-resource-lambda-axios",
+    //                 "version": "1.0.0",
+    //                 "description": "lambda function that creates a dynamodb resource crud api and then adds the data to the ledger using axios post request.",
+    //                 "main": "index.js",
+    //                 "dependencies": {
+    //                     "axios": "^0.21.1"
+    //                 }
+    //             }
+    //             `),
+    //         }),
+    //         role: lam_role_arn,
+    //         handler: "index.handler",
+    //         runtime: "nodejs14.x",
+    //         timeout: 10, 
+    //     }
+    // );
     
 
     // // Install node-fetch as a dependency
