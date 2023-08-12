@@ -35,69 +35,93 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         apiKeyRequired: false,
     });
 
+    // lambda test event
+    // {
+    //     "pathParameters": {
+    //         "dbname": "ricky6666"
+    //     }
+    // }
+
     const createDynamoDBCrudApiLambda = new aws.lambda.Function(
         `create-dynamodb-crud-api-lambda-${rid}`,
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
+                  const https = require('https');
 
-                const https = require('https');
-
-                const doPostRequest = () => {
-                
-                  const data = {
-                    apiID: "${apiID}",
-                    apiName: "${apiName}",
-                    dbResourceId: "${dbResourceId}",
-                    dbName: dbname,
-                    rid: "${rid}",
-                    executionArn: "${executionArn}",
+                  const doPostRequest = (dbname) => {
+                    const data = {
+                        apiID: "${apiID}",
+                        apiName: "${apiName}",
+                        dbResourceId: "${dbResourceId}",
+                        dbName: dbname,
+                        rid: "${rid}",
+                        executionArn: "${executionArn}",
+                      };
+                  
+                      return new Promise((resolve, reject) => {
+                          const options = {
+                              host: 'crudhub.onrender.com',
+                              path: '/api/deployAddCrudAPI',
+                              method: 'POST',
+                              headers: {
+                                  'Content-Type': 'application/json'
+                              }
+                          };
+                  
+                          const req = https.request(options, (res) => {
+                              let responseData = '';
+                              
+                              res.on('data', (chunk) => {
+                                  responseData += chunk;
+                              });
+                  
+                              res.on('end', () => {
+                                  resolve(responseData); // Resolve with the complete response data
+                              });
+                          });
+                  
+                          req.on('error', (e) => {
+                              reject(e.message);
+                          });
+                  
+                          req.write(JSON.stringify(data));
+                          req.end();
+                      });
                   };
-                
-                  return new Promise((resolve, reject) => {
-                    const options = {
-                      host: 'https://crudhub.onrender.com',
-                      path: '/api/deployAddCrudAPI',
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      }
-                    };
-                    
-                    // create the request object with the callback with the result
-                    const req = https.request(options, (res) => {
-                      resolve(JSON.stringify(res.statusCode));
-                    });
-                
-                    // handle the possible errors
-                    req.on('error', (e) => {
-                      reject(e.message);
-                    });
-                    
-                    // do the request
-                    req.write(JSON.stringify(data));
-                
-                    // finish the request
-                    req.end();
-                  });
-                };
-                
-                
-                exports.handler = async (event) => {
-                  const finaResult = await doPostRequest()
-                    .then(result => console.log('Status code: ', result))
-                    .catch(err => console.error('Error doing the request for the event: ', JSON.stringify(event), ' => ', err));
-
-                    return {
-                        finaResult
-                    };
-                };
+                  
+                  exports.handler = async (event) => {
+                      const { dbname } = event.pathParameters || {};
+                      const finalResult = await doPostRequest(dbname)
+                          .then(responseData => {
+                              // console.log('Response data:', responseData);
+                              try {
+                                const obj = JSON.parse(responseData);
+                                if (obj.type === 'success') {
+                                  return { type: 'success', ...obj['0']['outputs'] }
+                                } else {
+                                  return { type: 'error', err: 'pulumi returned an error code' }
+                                }
+                              } catch (err) {
+                                return { type: 'error', err }
+                              }
+                          })
+                          .catch(err => {
+                              // console.error('Error:', err);
+                              // throw err; // Re-throw the error to be caught by the Lambda handler
+                              return { type: 'error', err }
+                          });
+                  
+                      return {
+                          finalResult,
+                      };
+                  };
                 `),
             }),
             role: lam_role_arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
-            timeout: 10, 
+            timeout: 60, 
         }
     );
 
