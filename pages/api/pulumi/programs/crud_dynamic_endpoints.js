@@ -47,9 +47,9 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
-                  const https = require('https');
+                const https = require('https');
 
-                  const doPostRequest = (dbname) => {
+                const createDynamoDBPostRequest = (dbname) => {
                     const data = {
                         apiID: "${apiID}",
                         apiName: "${apiName}",
@@ -57,71 +57,132 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
                         dbName: dbname,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
-                      };
-                  
-                      return new Promise((resolve, reject) => {
-                          const options = {
-                              host: 'crudhub.onrender.com',
-                              path: '/api/deployAddCrudAPI',
-                              method: 'POST',
-                              headers: {
-                                  'Content-Type': 'application/json'
-                              }
-                          };
-                  
-                          const req = https.request(options, (res) => {
-                              let responseData = '';
-                              
-                              res.on('data', (chunk) => {
-                                  responseData += chunk;
-                              });
-                  
-                              res.on('end', () => {
-                                  resolve(responseData); // Resolve with the complete response data
-                              });
-                          });
-                  
-                          req.on('error', (e) => {
-                              reject(e.message);
-                          });
-                  
-                          req.write(JSON.stringify(data));
-                          req.end();
-                      });
-                  };
-                  
-                  exports.handler = async (event) => {
-                      const { dbname } = event.pathParameters || {};
-                      const finalResult = await doPostRequest(dbname)
-                          .then(responseData => {
-                              // console.log('Response data:', responseData);
-                              try {
-                                const obj = JSON.parse(responseData);
-                                if (obj.type === 'success') {
-                                  return { type: 'success', ...obj['0']['outputs'] }
-                                } else {
-                                  return { type: 'error', err: 'pulumi returned an error code' }
-                                }
-                              } catch (err) {
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: 'crudhub.onrender.com',
+                            path: '/api/deployAddCrudAPI',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const saveDynamoDBToLedger = (resource) => {
+                    const data = {
+                        resourceType: "dynamo-db",
+                        ...resource,
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${apiUrl}',
+                            path: '/ledger/create',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { dbname } = event.pathParameters || {};
+                    const createDynamoDBResult = await createDynamoDBPostRequest(dbname)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                dbName: { value: db_name },
+                                unique_db_name: { value: unique_dbname },
+                                } = obj['0']['outputs'];
+                                return { type: 'succes', resource: { db_name, unique_dbname, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
                                 return { type: 'error', err }
-                              }
-                          })
-                          .catch(err => {
-                              // console.error('Error:', err);
-                              // throw err; // Re-throw the error to be caught by the Lambda handler
-                              return { type: 'error', err }
-                          });
-                  
-                      return {
-                          finalResult,
-                      };
-                  };
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createDynamoDBResult.type === 'success') {
+                    const dynamoDBLedgerResult = await saveDynamoDBToLedger(createDynamoDBResult.resource)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            return { type: 'success', responseData }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                        return {
+                            dynamoDBLedgerResult,
+                            complete: true,
+                        }
+                    
+                    }
+                    return {
+                        createDynamoDBResult,
+                        complete: false,
+                    }
+                };
                 `),
             }),
             role: lam_role_arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
-            timeout: 60, 
+            timeout: 120, 
         }
     );
 
