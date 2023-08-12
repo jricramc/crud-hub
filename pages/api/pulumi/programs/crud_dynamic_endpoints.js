@@ -47,7 +47,18 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
+
                 const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
 
                 const createDynamoDBPostRequest = (dbname) => {
                     const data = {
@@ -91,14 +102,19 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
                 };
 
                 const saveDynamoDBToLedger = (resource) => {
-                    const data = {
+                    const data_ = {
                         resourceType: "dynamo-db",
                         ...resource,
+                    };
+                    
+                    const data = {
+                        id: RID(),
+                        name: JSON.stringify(data_)
                     };
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl.slice(0,-7)}',
+                            host: '${apiUrl.slice(8,-7)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -140,7 +156,7 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
                                 dbName: { value: db_name },
                                 unique_db_name: { value: unique_dbname },
                                 } = obj['0']['outputs'];
-                                return { type: 'succes', resource: { db_name, unique_dbname, date_created: new Date() } }
+                                return { type: 'success', resource: { db_name, unique_dbname, date_created: new Date() } }
                             } else {
                                 return { type: 'error', err: 'pulumi returned an error code' }
                             }
@@ -155,16 +171,16 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
                         });
                         
                     if (createDynamoDBResult.type === 'success') {
-                    const dynamoDBLedgerResult = await saveDynamoDBToLedger(createDynamoDBResult.resource)
-                        .then(responseData => {
-                            // console.log('Response data:', responseData);
-                            return { type: 'success', responseData }
-                        })
-                        .catch(err => {
-                            // console.error('Error:', err);
-                            // throw err; // Re-throw the error to be caught by the Lambda handler
-                            return { type: 'error', err }
-                        });
+                        const dynamoDBLedgerResult = await saveDynamoDBToLedger(createDynamoDBResult.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
                         
                         return {
                             dynamoDBLedgerResult,
