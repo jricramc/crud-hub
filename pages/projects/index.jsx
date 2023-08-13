@@ -58,7 +58,7 @@ const Projects = ({}) => {
         name: 'CORE API',
         baseUrl: '/ledger',
         type: 'CORE CRUD API',
-        created: new Date(),
+        created: p?.core?.date_created,
         links: [
             { method: 'get', endpoint: '/create/dynamodb/{dbname}', description: 'creates a dynamodb resource with the name {dbname} and deploys a CRUD API to interact with the dynamoDB created' },
             { method: 'get', endpoint: '/create/s3/{bucket-name}', description: 'creates a dynamodb resource with the name {bucket-name} and deploys a CRUD API to interact with the s3 bucket created' },
@@ -67,39 +67,46 @@ const Projects = ({}) => {
         ],
     }
 
-    const resources = [
-        {
-            name: 'ricky',
-            baseUrl: '/dynamodb/ricky',
-            type: 'DynamoDB',
-            created: new Date(),
-            links: [
-                { method: 'post', endpoint: '/create', description: 'creates an entry for  DynamoDB table' },
-                { method: 'post', endpoint: '/read', description: 'reads an entry from DynamoDB table' },
-                { method: 'post', endpoint: '/update', description: 'updates an entry from DynamoDB table' },
-                { method: 'post', endpoint: '/delete', description: 'deletes an entry from DynamoDB table' },
-            ],
-        },
-        {
-            name: 'my-first-s3',
-            baseUrl: '/s3/my-first-s3',
-            type: 'S3',
-            created: new Date(),
-            links: [
-                { method: 'post', endpoint: '/create', description: 'creates an entry for  DynamoDB table' },
-                { method: 'post', endpoint: '/read', description: 'reads an entry from DynamoDB table' },
-                { method: 'post', endpoint: '/update', description: 'updates an entry from DynamoDB table' },
-                { method: 'post', endpoint: '/delete', description: 'deletes an entry from DynamoDB table' },
-            ],
-        }
-    ];
+    const resourceObjToResourceUIObj = ({ resource_name, resource_type, db_name, unique_dbname, date_created }) => ({
+        name: db_name,
+        baseUrl: `/${resource_type}/${unique_dbname}`,
+        resourceName: resource_name,
+        type: resource_type,
+        created: date_created,
+        links: [
+            { method: 'post', endpoint: '/create', description: `creates an entry for ${resource_name}` },
+            { method: 'post', endpoint: '/read', description: `reads an entry from ${resource_name}` },
+            { method: 'post', endpoint: '/update', description: `updates an entry from ${resource_name}` },
+            { method: 'post', endpoint: '/delete', description: `deletes an entry from ${resource_name}` },
+        ],
+    });
 
-    const typeToImage = {
-        'CORE CRUD API': 'dynamodb',
-        'DynamoDB': 'dynamodb',
-        'S3': 's3',
-        'API Gateway': 'api-gateway',
-    }
+    // const resources = [
+    //     {
+    //         name: 'ricky',
+    //         baseUrl: '/dynamodb/ricky',
+    //         type: 'DynamoDB',
+    //         created: new Date(),
+    //         links: [
+    //             { method: 'post', endpoint: '/create', description: 'creates an entry for  DynamoDB table' },
+    //             { method: 'post', endpoint: '/read', description: 'reads an entry from DynamoDB table' },
+    //             { method: 'post', endpoint: '/update', description: 'updates an entry from DynamoDB table' },
+    //             { method: 'post', endpoint: '/delete', description: 'deletes an entry from DynamoDB table' },
+    //         ],
+    //     },
+    //     {
+    //         name: 'my-first-s3',
+    //         baseUrl: '/s3/my-first-s3',
+    //         type: 'S3',
+    //         created: new Date(),
+    //         links: [
+    //             { method: 'post', endpoint: '/create', description: 'creates an entry for  DynamoDB table' },
+    //             { method: 'post', endpoint: '/read', description: 'reads an entry from DynamoDB table' },
+    //             { method: 'post', endpoint: '/update', description: 'updates an entry from DynamoDB table' },
+    //             { method: 'post', endpoint: '/delete', description: 'deletes an entry from DynamoDB table' },
+    //         ],
+    //     }
+    // ];
 
     const transition = '0.5s';
 
@@ -109,7 +116,7 @@ const Projects = ({}) => {
             <div style={{ border: core ? '1px solid rgba(0, 0, 0, 0.05)' : 'none', borderRadius: 8, padding: '26px 0px', display: 'flex', flexDirection: 'column', background: core ? 'rgba(255, 255, 255, 0.2)' : 'white' }}>
                 <div style={{ padding: '0px 31px', height: 45, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <img
-                        src={`/images/aws-${typeToImage[resource.type]}.svg`}
+                        src={`/images/aws-${resource.type}.svg`}
                         alt={`aws ${resource.type} service icon`}
                         width={45} height={45}
                         style={{ borderRadius: 4 }}
@@ -171,9 +178,52 @@ const Projects = ({}) => {
 
     useEffect(() => {
         setP();
-        setTimeout(() => {
-            setP(true);
-        }, 4000);
+        const prj = projects?.find(({ id }) => selectedId === id);
+        console.log('prj: ', prj);
+        if (prj) {
+            const { url } = prj
+            apiRequest({ url: `${url}/ledger/read`, method: 'POST' })
+                .then((raw_items) => {
+                    const items = raw_items.map(({ name }) => {
+                        let obj = {};
+                        try {
+                            obj = JSON.parse(name);
+                        } catch (err) {
+                            obj = {};
+                        }
+                        return obj;
+                    });
+
+                    const p_obj = {
+                        core: {
+                            date_created: undefined,
+                        },
+                        resources: [],
+                    };
+
+                    const r = [];
+
+                    for (let i = 0; i < items.length; i += 1) {
+                        const { api_id, date_created, resourceType, db_name, unique_dbname } = items[i]
+
+                        if (api_id) {
+                            p_obj.core.date_created = date_created;
+                        } else if (resource_type === 'dynamodb') {
+                            r.push({ resource_name: 'DynamoDB', resource_type, db_name, unique_dbname, date_created })
+                        }
+                    }
+
+                    p_obj.resources = r.sort((a, b) => {
+                        // Turn your strings into dates, and then subtract them
+                        // to get a value that is either negative, positive, or zero.
+                        return b.date_created - a.date_created;
+                    })
+
+                    setP(p_obj);
+                }).catch((err) => {
+                    console.log('err: ', err)
+                })
+        }
 
     }, [selectedId]);
 
@@ -227,7 +277,7 @@ const Projects = ({}) => {
                 {p
                     ? <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', paddingBottom: 30 }}>
                         {resourceTable({ resource: coreResource, core: true })}
-                        {resources.map((r) => resourceTable({ resource: r, core: false }))}
+                        {p.resources.map(resourceObjToResourceUIObj).map((r) => resourceTable({ resource: r, core: false }))}
                     </div>
                     : <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', paddingBottom: '30vh' }}>
                         {selectedProject ? <Spinner animation="border" /> : <span style={{ color: 'rgba(0, 0, 0, 0.2)', fontSize: 14, marginTop: 8 }}>No Projects</span>}

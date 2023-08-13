@@ -46,6 +46,7 @@ const handler = async (req, res) => {
             db_resource_id,
             lam_role_arn,
             execution_arn,
+            date_created: new Date(),
           };
 
           const route = 'ledger/create';

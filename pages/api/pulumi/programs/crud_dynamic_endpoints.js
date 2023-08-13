@@ -103,7 +103,7 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
 
                 const saveDynamoDBToLedger = (resource) => {
                     const data_ = {
-                        resourceType: "dynamo-db",
+                        resource_type: "dynamodb",
                         ...resource,
                     };
                     
