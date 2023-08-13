@@ -21,18 +21,31 @@ const handler = async ({ rid }) => {
     // Define a policy to access DynamoDB
     const lam_policy = {
         Version: "2012-10-17",
-        Statement: [{
-            Effect: "Allow",
-            Action: [
-                "dynamodb:PutItem",     // Create
-                "dynamodb:GetItem",     // Read
-                "dynamodb:UpdateItem",  // Update
-                "dynamodb:DeleteItem",  // Delete
-                "dynamodb:Scan",        // Scan is often used to read all items
-                "dynamodb:Query",       // Query is often used with indexes
-            ],
-            Resource: "*",
-        }],
+        Statement: [
+            {
+                Effect: "Allow",
+                Action: [
+                    // DynamoDB actions
+                    "dynamodb:PutItem",     // Create
+                    "dynamodb:GetItem",     // Read
+                    "dynamodb:UpdateItem",  // Update
+                    "dynamodb:DeleteItem",  // Delete
+                    "dynamodb:Scan",        // Scan is often used to read all items
+                    "dynamodb:Query",       // Query is often used with indexes
+                ],
+                Resource: "*",
+            },
+            {
+                Effect: "Allow",
+                Action: [
+                    // CloudWatch Logs actions
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                ],
+                Resource: "*",
+            },
+        ],
     };
     
     // Create a role and attach our new policy
