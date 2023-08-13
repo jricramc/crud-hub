@@ -56,7 +56,7 @@ const Projects = ({}) => {
 
     const coreResource = {
         name: 'CORE API',
-        baseUrl: '/ledger',
+        baseUrl: '-',
         type: 'CORE CRUD API',
         created: p?.core?.date_created,
         links: [
@@ -110,13 +110,13 @@ const Projects = ({}) => {
 
     const transition = '0.5s';
 
-    const resourceTable = ({ resource, core}) => (
+    const resourceTable = ({ resource, core }) => (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '30px 44px 10px 44px' }}>
             <div style={{ color: '#AEAEAE', fontSize: 12, marginBottom: 6 }}><span style={{ fontSize: 14, fontWeight: 'bold', marginRight: 6 }}>{resource.type}</span> created on 07/28/2023</div>
             <div style={{ border: core ? '1px solid rgba(0, 0, 0, 0.05)' : 'none', borderRadius: 8, padding: '26px 0px', display: 'flex', flexDirection: 'column', background: core ? 'rgba(255, 255, 255, 0.2)' : 'white' }}>
                 <div style={{ padding: '0px 31px', height: 45, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <img
-                        src={`/images/aws-${resource.type}.svg`}
+                        src={`/images/aws-${core ? 'dynamodb' : resource.type}.svg`}
                         alt={`aws ${resource.type} service icon`}
                         width={45} height={45}
                         style={{ borderRadius: 4 }}
@@ -204,7 +204,7 @@ const Projects = ({}) => {
                     const r = [];
 
                     for (let i = 0; i < items.length; i += 1) {
-                        const { api_id, date_created, resourceType, db_name, unique_dbname } = items[i]
+                        const { api_id, date_created, resource_type, db_name, unique_dbname } = items[i]
 
                         if (api_id) {
                             p_obj.core.date_created = date_created;
@@ -219,6 +219,7 @@ const Projects = ({}) => {
                         return b.date_created - a.date_created;
                     })
 
+                    console.log('p_obj: ', p_obj);
                     setP(p_obj);
                 }).catch((err) => {
                     console.log('err: ', err)
