@@ -119,7 +119,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     const folderdbNameResource = new aws.apigateway.Resource(`folder-dbName-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: dbResourceId,
-        pathPart: dbName,
+        pathPart: unique_db_name,
     });
     
     const folderCreateResource = new aws.apigateway.Resource(`folder-dynamodb-resource-${unique_db_name}-${rid}`, {
