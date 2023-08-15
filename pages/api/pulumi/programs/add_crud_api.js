@@ -16,9 +16,9 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
 
     const table = new dynamodb.Table(`dynamodb-table-${unique_db_name}-${rid}`, {
         attributes: [
-            { name: "id", type: "S" },
+            { name: "_id", type: "S" },
         ],
-        hashKey: "id",
+        hashKey: "_id",
         billingMode: "PAY_PER_REQUEST",
     });
 
@@ -60,8 +60,6 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         policy: JSON.stringify(lam_policy)
     });
 
-
-
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs']
 
 
@@ -78,8 +76,10 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         },
     });
 
+
+
     
-    const readFunc = new aws.lambda.Function(`read-func-lambda-${unique_db_name}-${rid}`, {
+    const readAllFunc = new aws.lambda.Function(`read-all-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
         runtime: "nodejs14.x",
         handler: "read.readHandler",
@@ -90,7 +90,204 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
             },
         },
     });
-    
+
+    const readByGetItemFunc = new aws.lambda.Function(
+        `read-by-get-item-func-lambda-${unique_db_name}-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+                    const AWS = require('aws-sdk');
+                    const dynamoDB = new AWS.DynamoDB();
+                    
+                    exports.handler = async (event, context) => {
+                        try {
+                            const { params: params_ } = JSON.parse(event.body) || {};
+
+                            const params = {
+                                ...(params_ || {})
+                                TableName : process.env.TABLE_NAME,
+                            };
+
+                            // const params = {
+                            //     TableName: 'YourTableName', // Replace with your DynamoDB table name
+                            //     Key: {
+                            //         partitionKey: { S: 'yourPartitionKeyValue' }, // Replace with your partition key value
+                            //         sortKey: { S: 'yourSortKeyValue' }, // Replace with your sort key value (if applicable)
+                            //     },
+                            //     AttributesToGet: ['attribute1', 'attribute2'], // Optional: List of attributes to retrieve
+                            //     ConsistentRead: true, // Optional: Set to true for a strongly consistent read
+                            //     ProjectionExpression: 'attribute1, attribute2', // Optional: Projection expression for specific attributes
+                            //     ExpressionAttributeNames: { '#attrName': 'attribute1' }, // Optional: Attribute name placeholders
+                            // };
+                            
+                    
+                            const getItemResult = await dynamoDB.getItem(params).promise();
+                            
+                            // Process the getItemResult and do something with the data
+                            
+                            console.log('GetItem result:', JSON.stringify(getItemResult));
+                    
+                            const response = {
+                                statusCode: 200,
+                                body: JSON.stringify(getItemResult),
+                            };
+                    
+                            return response;
+                        } catch (error) {
+                            console.error('Error:', error);
+                            const response = {
+                                statusCode: 500,
+                                body: JSON.stringify({ err: error }),
+                            };
+                            return response;
+                        }
+                    };
+                                
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120,
+            environment: {
+                variables: {
+                    TABLE_NAME: table.name,
+                },
+            },
+        }
+    );
+
+    const readByScanFunc = new aws.lambda.Function(
+        `read-by-scan-func-lambda-${unique_db_name}-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+                    const AWS = require('aws-sdk');
+                    const dynamoDB = new AWS.DynamoDB();
+                    
+                    exports.handler = async (event, context) => {
+                        try {
+                            // Parse the request body
+                            const { params: params_ } = JSON.parse(event.body) || {};
+
+                            const params = {
+                                ...(params_ || {})
+                                TableName : process.env.TABLE_NAME,
+                            };
+
+                            // const params = {
+                            //     TableName: 'YourTableName', // Replace with your DynamoDB table name
+                            //     ProjectionExpression: 'attribute1, attribute2', // Optional: List of attributes to project into the scan result
+                            //     FilterExpression: 'attribute3 = :value', // Optional: Filtering expression to filter the scan result
+                            //     ExpressionAttributeValues: {
+                            //         ':value': { S: 'someValue' }, // Replace with the value for the filter expression
+                            //     },
+                            //     Limit: 10, // Optional: Limit the number of items returned in the scan result
+                            //     ExclusiveStartKey: {
+                            //         partitionKey: { S: 'partitionKeyValue' }, // Replace with your partition key value
+                            //         sortKey: { S: 'sortKeyValue' }, // Replace with your sort key value (if applicable)
+                            //     }, // Optional: Use for paginated scans
+                            // };
+                            
+                    
+                            const scanResult = await dynamoDB.scan(params).promise();
+                            
+                            // Process the scanResult and do something with the data
+                            
+                            console.log('Scan result:', JSON.stringify(scanResult));
+                    
+                            const response = {
+                                statusCode: 200,
+                                body: JSON.stringify(scanResult),
+                            };
+                    
+                            return response;
+                        } catch (error) {
+                            console.error('Error:', error);
+                            const response = {
+                                statusCode: 500,
+                                body: JSON.stringify({ err: error }),
+                            };
+                            return response;
+                        }
+                    };                
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120,
+            environment: {
+                variables: {
+                    TABLE_NAME: table.name,
+                },
+            },
+        }
+    );
+
+    const readByQueryFunc = new aws.lambda.Function(
+        `read-by-query-func-lambda-${unique_db_name}-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+                    const AWS = require('aws-sdk');
+                    const dynamoDB = new AWS.DynamoDB();
+                    
+                    exports.handler = async (event, context) => {
+                        try {
+                            // Parse the request body
+                            const { params: params_ } = JSON.parse(event.body) || {};
+
+                            const params = {
+                                ...(params_ || {})
+                                TableName : process.env.TABLE_NAME,
+                            };
+                            
+                            // const params = {
+                            //     TableName : process.env.TABLE_NAME,
+                            //     KeyConditionExpression: 'partitionKey = :pkValue',
+                            //     ExpressionAttributeValues: {
+                            //         ':pkValue': { S: 'yourPartitionKeyValue' }, // Replace with your partition key value
+                            //     },
+                            // };
+                    
+                            const queryResult = await dynamoDB.query(params).promise();
+                            
+                            // Process the queryResult and do something with the data
+                            
+                            console.log('Query result:', JSON.stringify(queryResult));
+                    
+                            const response = {
+                                statusCode: 200,
+                                body: JSON.stringify(queryResult),
+                            };
+                    
+                            return response;
+                        } catch (error) {
+                            console.error('Error:', error);
+                            const response = {
+                                statusCode: 500,
+                                body: JSON.stringify({ err: error }),
+                            };
+                            return response;
+                        }
+                    };
+                
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120,
+            environment: {
+                variables: {
+                    TABLE_NAME: table.name,
+                },
+            },
+        }
+    );
+
+
     const updateFunc = new aws.lambda.Function(`update-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
         runtime: "nodejs14.x",
@@ -116,12 +313,22 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     });
    
 
+    /*
+    **  RESOURCES
+    */
+
+    /*
+        /dynamodb/{unique_db_name}
+    */
     const folderdbNameResource = new aws.apigateway.Resource(`folder-dbName-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: dbResourceId,
         pathPart: unique_db_name,
     });
     
+    /*
+        /dynamodb/{unique_db_name}/create
+    */
     const folderCreateResource = new aws.apigateway.Resource(`folder-dynamodb-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
@@ -130,6 +337,9 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         dependsOn: [folderdbNameResource], // Make the integration dependent on the deleteMethod.
     });
 
+    /*
+        /dynamodb/{unique_db_name}/read
+    */
     const folderReadResource = new aws.apigateway.Resource(`folder-read-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
@@ -138,7 +348,9 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         dependsOn: [folderdbNameResource], // Make the integration dependent on the deleteMethod.
     });
 
-
+    /*
+        /dynamodb/{unique_db_name}/update
+    */
     const folderUpdateResource = new aws.apigateway.Resource(`folder-update-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
@@ -148,6 +360,9 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     });
 
 
+    /*
+        /dynamodb/{unique_db_name}/delete
+    */
     const folderDeleteResource = new aws.apigateway.Resource(`folder-delete-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
         parentId: folderdbNameResource.id,
@@ -157,6 +372,67 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     });
 
     
+    /*
+        /dynamodb/{unique_db_name}/read/all
+    */
+    const folderReadResourceAll = new aws.apigateway.Resource(`folder-read-resource-all-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        parentId: folderReadResource.id,
+        pathPart: "all",   
+    }, {
+        dependsOn: [folderReadResource], // Make the integration dependent on the deleteMethod.
+    });
+
+
+    /*
+        /dynamodb/{unique_db_name}/read/by
+    */
+    const folderReadResourceBy = new aws.apigateway.Resource(`folder-read-resource-by-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        parentId: folderReadResource.id,
+        pathPart: "by",   
+    }, {
+        dependsOn: [folderReadResource], // Make the integration dependent on the deleteMethod.
+    });
+
+    /*
+        /dynamodb/{unique_db_name}/read/by/get-item
+    */
+    const folderReadResourceByGetItem = new aws.apigateway.Resource(`folder-read-resource-by-get-item-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        parentId: folderReadResourceBy.id,
+        pathPart: "get-item",   
+    }, {
+        dependsOn: [folderReadResourceBy], // Make the integration dependent on the folderReadResourceBy.
+    });
+
+    /*
+        /dynamodb/{unique_db_name}/read/by/scan
+    */
+    const folderReadResourceByScan = new aws.apigateway.Resource(`folder-read-resource-by-scan-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        parentId: folderReadResourceBy.id,
+        pathPart: "scan",   
+    }, {
+        dependsOn: [folderReadResourceByScan], // Make the integration dependent on the folderReadResourceByScan.
+    });
+
+    /*
+        /dynamodb/{unique_db_name}/read/by/query
+    */
+    const folderReadResourceByQuery = new aws.apigateway.Resource(`folder-read-resource-by-query-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        parentId: folderReadResourceBy.id,
+        pathPart: "query",   
+    }, {
+        dependsOn: [folderReadResourceBy], // Make the integration dependent on the folderReadResourceBy.
+    });
+
+
+    /*
+    **  METHOD
+    */
+
     const createMethod = new aws.apigateway.Method(`create-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderCreateResource.id,
@@ -164,18 +440,48 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
-        dependsOn: [folderCreateResource], // Make the integration dependent on the deleteMethod.
+        dependsOn: [folderCreateResource], // Make the integration dependent on the create.
     });
      
 
-    const readMethod = new aws.apigateway.Method(`read-method-${unique_db_name}-${rid}`, {
+    const readAllMethod = new aws.apigateway.Method(`read-all-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
-        resourceId: folderReadResource.id,
+        resourceId: folderReadResourceAll.id,
+        httpMethod: "GET",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, {
+        dependsOn: [folderReadResourceAll], // Make the integration dependent on the readAll.
+    });
+
+    const readByGetItemMethod = new aws.apigateway.Method(`read-by-get-item-method-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        resourceId: folderReadResourceByGetItem.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
-        dependsOn: [folderReadResource], // Make the integration dependent on the deleteMethod.
+        dependsOn: [folderReadResourceByGetItem], // Make the integration dependent on the folderReadResourceByGetItem.
+    });
+
+    const readByScanMethod = new aws.apigateway.Method(`read-by-scan-method-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        resourceId: folderReadResourceByScan.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, {
+        dependsOn: [folderReadResourceByScan], // Make the integration dependent on the folderReadResourceByScan.
+    });
+
+    const readByQueryMethod = new aws.apigateway.Method(`read-by-query-method-${unique_db_name}-${rid}`, {
+        restApi: apiID,
+        resourceId: folderReadResourceByQuery.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, {
+        dependsOn: [folderReadResourceByQuery], // Make the integration dependent on the readByQuery.
     });
 
     const updateMethod = new aws.apigateway.Method(`update-method-${unique_db_name}-${rid}`, {
@@ -185,7 +491,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
-        dependsOn: [folderUpdateResource], // Make the integration dependent on the deleteMethod.
+        dependsOn: [folderUpdateResource], // Make the integration dependent on the update.
     });
 
     const deleteMethod = new aws.apigateway.Method(`delete-method-${unique_db_name}-${rid}`, {
@@ -195,8 +501,13 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
-        dependsOn: [folderDeleteResource], // Make the integration dependent on the deleteMethod.
+        dependsOn: [folderDeleteResource], // Make the integration dependent on the delete.
     });
+
+
+    /*
+    **  INTEGRATION
+    */
 
     const createIntegration = new aws.apigateway.Integration(`create-integration-${unique_db_name}-${rid}`, {
         httpMethod: createMethod.httpMethod,
@@ -206,20 +517,53 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         type: "AWS_PROXY",
         uri: createFunc.invokeArn,
     }, {
-        dependsOn: [createFunc, createMethod], // Make the integration dependent on the deleteMethod.
+        dependsOn: [createFunc, createMethod], // Make the integration dependent on the create.
     });
 
-    const readIntegration = new aws.apigateway.Integration(`read-integration-${unique_db_name}-${rid}`, {                            
-        httpMethod: readMethod.httpMethod,
+    const readAllIntegration = new aws.apigateway.Integration(`read-all-integration-${unique_db_name}-${rid}`, {                            
+        httpMethod: readAllMethod.httpMethod,
         integrationHttpMethod: "POST",
-        resourceId: folderReadResource.id,
+        resourceId: folderReadAllResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
-        uri: readFunc.invokeArn,
+        uri: readAllFunc.invokeArn,
     }, {
-        dependsOn: [readFunc, readMethod], // Make the integration dependent on the deleteMethod.
+        dependsOn: [readAllFunc, readAllMethod], // Make the integration dependent on the read.
     });
     
+    const readByGetItemIntegration = new aws.apigateway.Integration(`read-by-get-item-integration-${unique_db_name}-${rid}`, {                            
+        httpMethod: readByGetItemMethod.httpMethod,
+        integrationHttpMethod: "POST",
+        resourceId: folderReadResourceByGetItem.id,
+        restApi: apiID,
+        type: "AWS_PROXY",
+        uri: readByGetItemFunc.invokeArn,
+    }, {
+        dependsOn: [readByGetItemFunc, readByGetItemMethod], // Make the integration dependent on the read.
+    });
+
+    const readByScanIntegration = new aws.apigateway.Integration(`read-by-scan-integration-${unique_db_name}-${rid}`, {                            
+        httpMethod: readByScanMethod.httpMethod,
+        integrationHttpMethod: "POST",
+        resourceId: folderReadResourceByScan.id,
+        restApi: apiID,
+        type: "AWS_PROXY",
+        uri: readByScanFunc.invokeArn,
+    }, {
+        dependsOn: [readByScanFunc, readByScanMethod], // Make the integration dependent on the read.
+    });
+
+    const readByQueryIntegration = new aws.apigateway.Integration(`read-by-query-integration-${unique_db_name}-${rid}`, {                            
+        httpMethod: readByQueryMethod.httpMethod,
+        integrationHttpMethod: "POST",
+        resourceId: folderReadResourceByQuery.id,
+        restApi: apiID,
+        type: "AWS_PROXY",
+        uri: readByQueryFunc.invokeArn,
+    }, {
+        dependsOn: [readByQueryFunc, readByQueryMethod], // Make the integration dependent on the read.
+    });
+
     const updateIntegration = new aws.apigateway.Integration(`update-integration-${unique_db_name}-${rid}`, {
         httpMethod: updateMethod.httpMethod,
         integrationHttpMethod: "POST",
@@ -228,7 +572,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         type: "AWS_PROXY",
         uri: updateFunc.invokeArn,
     }, {
-        dependsOn: [updateFunc, updateMethod], // Make the integration dependent on the deleteMethod.
+        dependsOn: [updateFunc, updateMethod], // Make the integration dependent on the update.
     });
 
     const deleteIntegration = new aws.apigateway.Integration(`delete-integration-${unique_db_name}-${rid}`, {
@@ -239,8 +583,13 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         type: "AWS_PROXY",
         uri: deleteFunc.invokeArn,
     }, {
-        dependsOn: [deleteFunc, deleteMethod], // Make the integration dependent on the deleteMethod.
+        dependsOn: [deleteFunc, deleteMethod], // Make the integration dependent on the delete.
     });
+
+
+    /*
+    **  LAMBDA PERMISSIONS
+    */
 
     const createApiGatewayInvokePermission = new aws.lambda.Permission(`create-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
@@ -249,9 +598,30 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
-    const readApiGatewayInvokePermission = new aws.lambda.Permission(`read-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
+    const readAllApiGatewayInvokePermission = new aws.lambda.Permission(`read-all-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
-        function: readFunc.name,
+        function: readAllFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const readByGetItemApiGatewayInvokePermission = new aws.lambda.Permission(`read-by-get-item-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: readByGetItemFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const readByScanApiGatewayInvokePermission = new aws.lambda.Permission(`read-by-scan-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: readByScanFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const readByQueryApiGatewayInvokePermission = new aws.lambda.Permission(`read-by-query-api-gateway-invoke-permission-${unique_db_name}-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: readByQueryFunc.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
@@ -273,12 +643,17 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_db_name}-${rid}`, {
         restApi: apiID,
         stageName: "stage", // Uncomment this line if you want to specify a stage name.
-    }, {  dependsOn: [
-        createIntegration,
-        readIntegration,
-        updateIntegration,
-        deleteIntegration
-    ] });
+    }, { 
+        dependsOn: [
+            createIntegration,
+            readAllIntegration,
+            readByGetItemIntegration,
+            readByScanIntegration,
+            readByQueryIntegration,
+            updateIntegration,
+            deleteIntegration,
+        ]
+    });
     
     return { apiID, apiName, dbResourceId, dbName, unique_db_name };
 };
