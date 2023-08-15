@@ -9,31 +9,156 @@ import { RID } from "../../../../utils/utils";
 
 const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, lam_role_arn, executionArn, rid }) => {
 
+    /*
+    **  RESOURCES
+    */
+
+    /*
+        /create
+    */
     const folderCreateResource = new aws.apigateway.Resource(`folder-create-resource-${rid}`, {
         restApi: apiID,
         parentId: rootResourceId,
         pathPart: "create",
     });
-    
-    const folderDynamodbResource = new aws.apigateway.Resource(`folder-dynamodb-resource-${rid}`, {
+
+    /*
+        /create/service
+    */
+    const folderCreateServiceResource = new aws.apigateway.Resource(`folder-create-service-resource-${rid}`, {
         restApi: apiID,
         parentId: folderCreateResource.id,
+        pathPart: "service",
+    });
+    
+    /*
+        /create/service/db
+    */
+    const folderCreateServiceDBResource = new aws.apigateway.Resource(`folder-create-service-db-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceResource.id,
+        pathPart: "db",
+    });
+
+    /*
+        /create/service/db/dynamodb
+    */
+    const folderCreateServiceDBDynamoDBResource = new aws.apigateway.Resource(`folder-create-service-db-dynamodb-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceDBResource.id,
         pathPart: "dynamodb",
     });
 
-    const folderDBNameResource = new aws.apigateway.Resource(`folder-dbname-resource-${rid}`, {
+    /*
+        /create/service/db/dynamodb/{dbname}
+    */
+    const folderCreateServiceDBNameResource = new aws.apigateway.Resource(`folder-create-service-dbname-resource-${rid}`, {
         restApi: apiID,
-        parentId: folderDynamodbResource.id,
+        parentId: folderCreateServiceDBDynamoDBResource.id,
         pathPart: "{dbname}",
     });
-    
-    const method = new aws.apigateway.Method(`crud-dynamic-endpoints-get-method-${rid}`, {
+
+    /*
+        /create/service/db/s3
+    */
+    const folderCreateServiceDBS3Resource = new aws.apigateway.Resource(`folder-create-service-db-s3-resource-${rid}`, {
         restApi: apiID,
-        resourceId: folderDBNameResource.id,
+        parentId: folderCreateServiceDBResource.id,
+        pathPart: "s3",
+    });
+
+    /*
+        /create/service/db/dynamodb/{bucket-name}
+    */
+    const folderCreateServiceBucketNameResource = new aws.apigateway.Resource(`folder-create-service-bucket-name-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceDBS3Resource.id,
+        pathPart: "{bucket-name}",
+    });
+
+    /*
+        /create/service/payment
+    */
+    const folderCreateServicePaymentResource = new aws.apigateway.Resource(`folder-create-service-payment-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceResource.id,
+        pathPart: "payment",
+    });
+
+    /*
+        /create/service/payment/stripe
+    */
+    const folderCreateServicePaymentStripeResource = new aws.apigateway.Resource(`folder-create-service-payment-stripe-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServicePaymentResource.id,
+        pathPart: "stripe",
+    });
+
+    /*
+        /create/service/auth
+    */
+    const folderCreateServiceAuthResource = new aws.apigateway.Resource(`folder-create-service-auth-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceResource.id,
+        pathPart: "auth",
+    });
+
+    /*
+        /create/service/auth/google
+    */
+        const folderCreateServiceAuthGoogleResource = new aws.apigateway.Resource(`folder-create-service-auth-google-resource-${rid}`, {
+            restApi: apiID,
+            parentId: folderCreateServiceAuthResource.id,
+            pathPart: "google",
+        });
+
+    /*
+        /create/service/email
+    */
+    const folderCreateServiceEmailResource = new aws.apigateway.Resource(`folder-create-service-email-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceResource.id,
+        pathPart: "email",
+    });
+
+    /*
+        /create/service/email/sendgrid
+    */
+    const folderCreateServiceEmailSendgridResource = new aws.apigateway.Resource(`folder-create-service-email-sendgrid-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceEmailResource.id,
+        pathPart: "sendgrid",
+    });
+
+    /*
+    **  METHOD
+    */
+    
+    const methodCreateServiceDBName = new aws.apigateway.Method(`create-service-dbname-get-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceDBNameResource.id,
         httpMethod: "GET",
         authorization: "NONE",
         apiKeyRequired: false,
     });
+
+    const methodCreateServiceBucketName = new aws.apigateway.Method(`create-service-bucket-name-get-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceBucketNameResource.id,
+        httpMethod: "GET",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    });
+
+    // const methodCreateServicePaymentStripe = new aws.apigateway.Method(`create-service-payment-stripe-post-method-${rid}`, {
+    //     restApi: apiID,
+    //     resourceId: folderCreateServicePaymentStripeResource.id,
+    //     httpMethod: "POST",
+    //     authorization: "NONE",
+    //     apiKeyRequired: false,
+    // });
+
+
 
     // lambda test event
     // {
@@ -299,16 +424,32 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
     //     await pulumi.runtime.installPackage("node-fetch", { cwd: createDynamoDBCrudApiLambda.assetPath });
     // });
 
-    const integration = new aws.apigateway.Integration(`crud-dynamic-endpoints-integration-${rid}`, {
+    const integrationCreateServiceDBName = new aws.apigateway.Integration(`create-service-dbname-integration-${rid}`, {
         restApi: apiID,
-        resourceId: folderDBNameResource.id,
-        httpMethod: method.httpMethod,
+        resourceId: folderCreateServiceDBNameResource.id,
+        httpMethod: methodCreateServiceDBName.httpMethod,
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createDynamoDBCrudApiLambda.invokeArn,
     });
 
-    const createDynamoDBCrudApiGatewayInvokePermission = new aws.lambda.Permission(`create-dynamodb-crud-api-gateway-invoke-permission-${rid}`, {
+    const integrationCreateServiceBucketName = new aws.apigateway.Integration(`create-service-bucket-name-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceDBS3Resource.id,
+        httpMethod: methodCreateServiceBucketName.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createDynamoDBCrudApiLambda.invokeArn,
+    });
+
+    const createServiceDBNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-dbname-api-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createDynamoDBCrudApiLambda.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const createServiceBucketNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-bucket-name-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createDynamoDBCrudApiLambda.name,
         principal: 'apigateway.amazonaws.com',
@@ -318,7 +459,10 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
     const deployment = new aws.apigateway.Deployment(`crud-dynamic-endpoints-deployment-${rid}`, {
         restApi: apiID,
         stageName: "stage", // Uncomment this line if you want to specify a stage name.
-    }, { dependsOn: [method, integration] });
+    }, { dependsOn: [
+        methodCreateServiceDBName, integrationCreateServiceDBName,
+        methodCreateServiceBucketName, integrationCreateServiceBucketName,
+    ] });
     
     return { apiID, apiName, rootResourceId, dbResourceId, executionArn, rid };
 };
