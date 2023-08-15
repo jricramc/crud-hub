@@ -1067,7 +1067,7 @@ const handler = async ({
 
     const integrationCreateServiceBucketName = new aws.apigateway.Integration(`create-service-bucket-name-integration-${rid}`, {
         restApi: apiID,
-        resourceId: folderCreateServiceDBS3Resource.id,
+        resourceId: folderCreateServiceBucketNameResource.id,
         httpMethod: methodCreateServiceBucketName.httpMethod,
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
