@@ -138,13 +138,90 @@ const handler = async ({ rid }) => {
     const { api: { id: restApiId, name: apiName, rootResourceId, executionArn } } = api;
     
 
-    const folderMainDynamoDBResource = new aws.apigateway.Resource(`folder-Main-DynamoDB-Resource-${rid}`, {
+    /*
+    ** ROOT RESOURCES
+    */
+
+    /*
+        /db
+    */
+    const folderMainDBResource = new aws.apigateway.Resource(`folder-Main-DB-Resource-${rid}`, {
         restApi: restApiId,
         parentId: rootResourceId,
+        pathPart: "db",
+    });
+    
+    /*
+        /db/dynamodb
+    */
+    const folderMainDynamoDBResource = new aws.apigateway.Resource(`folder-Main-DynamoDB-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: folderMainDBResource.id,
         pathPart: "dynamodb",
     });
 
-    
+    /*
+        /db/s3
+    */
+    const folderMainS3Resource = new aws.apigateway.Resource(`folder-Main-S3-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: folderMainDBResource.id,
+        pathPart: "s3",
+    });
+
+    /*
+        /payment
+    */
+    const folderMainPaymentResource = new aws.apigateway.Resource(`folder-Main-Payment-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: rootResourceId,
+        pathPart: "payment",
+    });
+
+    /*
+        /payment/stripe
+    */
+    const folderMainStripeResource = new aws.apigateway.Resource(`folder-Main-Stripe-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: folderMainPaymentResource.id,
+        pathPart: "stripe",
+    });
+
+    /*
+        /auth
+    */
+    const folderMainAuthResource = new aws.apigateway.Resource(`folder-Main-Auth-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: rootResourceId,
+        pathPart: "auth",
+    });
+
+    /*
+        /auth/google
+    */
+    const folderMainGoogleResource = new aws.apigateway.Resource(`folder-Main-Google-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: folderMainAuthResource.id,
+        pathPart: "google",
+    });
+
+    /*
+        /email
+    */
+    const folderMainEmailResource = new aws.apigateway.Resource(`folder-Main-Email-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: rootResourceId,
+        pathPart: "email",
+    });
+
+    /*
+        /auth/sengrid
+    */
+    const folderMainSendGridResource = new aws.apigateway.Resource(`folder-Main-SendGrid-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: folderMainEmailResource.id,
+        pathPart: "sendgrid",
+    });
 
     return {
         url: api.url,
@@ -153,6 +230,10 @@ const handler = async ({ rid }) => {
         apiName,
         rootResourceId,
         dbResourceId: folderMainDynamoDBResource.id,
+        s3ResourceId: folderMainS3Resource.id,
+        stripeResourceId: folderMainStripeResource.id,
+        googleResourceId: folderMainGoogleResource.id,
+        sendgridResourceId: folderMainSendGridResource.id,
         lam_role,
         executionArn,
         rid,

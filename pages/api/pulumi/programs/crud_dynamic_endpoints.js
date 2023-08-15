@@ -7,7 +7,11 @@ import * as iam from "@pulumi/aws/iam";
 import fetch from "node-fetch"
 import { RID } from "../../../../utils/utils";
 
-const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, lam_role_arn, executionArn, rid }) => {
+const handler = async ({
+    apiID, apiUrl, apiName,
+    rootResourceId, dbResourceId, s3ResourceId, stripeResourceId, googleResourceId, sendgridResourceId,
+    lam_role_arn, executionArn, rid
+}) => {
 
     /*
     **  RESOURCES
@@ -95,6 +99,15 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
     });
 
     /*
+        /create/service/payment/stripe/{name}
+    */
+    const folderCreateServicePaymentStripeNameResource = new aws.apigateway.Resource(`folder-create-service-payment-stripe-name-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServicePaymentStripeResource.id,
+        pathPart: "{name}",
+    });
+
+    /*
         /create/service/auth
     */
     const folderCreateServiceAuthResource = new aws.apigateway.Resource(`folder-create-service-auth-resource-${rid}`, {
@@ -106,11 +119,20 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
     /*
         /create/service/auth/google
     */
-        const folderCreateServiceAuthGoogleResource = new aws.apigateway.Resource(`folder-create-service-auth-google-resource-${rid}`, {
-            restApi: apiID,
-            parentId: folderCreateServiceAuthResource.id,
-            pathPart: "google",
-        });
+    const folderCreateServiceAuthGoogleResource = new aws.apigateway.Resource(`folder-create-service-auth-google-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceAuthResource.id,
+        pathPart: "google",
+    });
+
+    /*
+        /create/service/auth/google/{oauth-name}
+    */
+    const folderCreateServiceOAuthNameResource = new aws.apigateway.Resource(`folder-create-service-oauth-name-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceAuthGoogleResource.id,
+        pathPart: "{oauth-name}",
+    });
 
     /*
         /create/service/email
@@ -124,10 +146,19 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
     /*
         /create/service/email/sendgrid
     */
-    const folderCreateServiceEmailSendgridResource = new aws.apigateway.Resource(`folder-create-service-email-sendgrid-resource-${rid}`, {
+    const folderCreateServiceEmailSendGridResource = new aws.apigateway.Resource(`folder-create-service-email-sendgrid-resource-${rid}`, {
         restApi: apiID,
         parentId: folderCreateServiceEmailResource.id,
         pathPart: "sendgrid",
+    });
+
+    /*
+        /create/service/email/sendgrid/{name}
+    */
+    const folderCreateServiceEmailSendGridNameResource = new aws.apigateway.Resource(`folder-create-service-email-sendgrid-name-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceEmailSendGridResource.id,
+        pathPart: "{name}",
     });
 
     /*
@@ -150,15 +181,35 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         apiKeyRequired: false,
     });
 
-    // const methodCreateServicePaymentStripe = new aws.apigateway.Method(`create-service-payment-stripe-post-method-${rid}`, {
-    //     restApi: apiID,
-    //     resourceId: folderCreateServicePaymentStripeResource.id,
-    //     httpMethod: "POST",
-    //     authorization: "NONE",
-    //     apiKeyRequired: false,
-    // });
+    const methodCreateServiceOAuthName = new aws.apigateway.Method(`create-service-oauth-name-post-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceOAuthNameResource.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    });
+
+    const methodCreateServicePaymentStripeName = new aws.apigateway.Method(`create-service-payment-stripe-name-post-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServicePaymentStripeNameResource.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    });
+
+    const methodCreateServiceEmailSendGridName = new aws.apigateway.Method(`create-service-email-sendgrid-name-post-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceEmailSendGridNameResource.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    });
 
 
+
+    /*
+    **  LAMBDAS
+    */
 
     // lambda test event
     // {
@@ -228,7 +279,7 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
 
                 const saveDynamoDBToLedger = (resource) => {
                     const data_ = {
-                        resource_type: "dynamodb",
+                        resource_type: "db/dynamodb",
                         ...resource,
                     };
                     
@@ -327,102 +378,678 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         }
     );
 
-    // const createDynamoDBCrudApiLambda = new aws.lambda.Function(
-    //     `create-dynamodb-crud-api-lambda-${rid}`,
-    //     {
-    //         code: new pulumi.asset.AssetArchive({
-    //             "index.js": new pulumi.asset.StringAsset(`
-    //                 const axios = require('axios');
-
-    //                 exports.handler = async (event) => {
-    //                     const { dbname } = event.pathParameters || {}; // Extract the value of the "dbname" variable from the event
-                    
-    //                     const body = {
-    //                         apiID: "${apiID}",
-    //                         apiName: "${apiName}",
-    //                         dbResourceId: "${dbResourceId}",
-    //                         dbName: dbname,
-    //                         rid: "${rid}",
-    //                         executionArn: "${executionArn}",
-    //                     };
-                    
-    //                     try {
-    //                         const response1 = await axios({
-    //                             url: 'https://crudhub.onrender.com/api/deployAddCrudAPI',
-    //                             method: 'POST',
-    //                             headers: {
-    //                                 'Access-Control-Allow-Origin': '*',
-    //                                 'Content-Type': 'application/json',
-    //                             },
-    //                             data: JSON.stringify(body),
-    //                         });
-                    
-    //                         console.log('Response 1:', response1.data);
-
-    //                         // need to make another request to the ledger to save the fact that we successfully created a new dynamodb resource for this API
-    //                         try {
-
-    //                             const response2 = await axios({
-    //                                 url: 'https://${apiUrl}/ledger/create',
-    //                                 method: 'POST',
-    //                                 headers: {
-    //                                     'Access-Control-Allow-Origin': '*',
-    //                                     'Content-Type': 'application/json',
-    //                                 },
-    //                                 data: JSON.stringify({
-    //                                     id: '${RID()}',
-    //                                     name: 'dynamodb-' + dbname,
-    //                                 }),
-    //                             });
-
-    //                             return {
-    //                                 statusCode: response.status,
-    //                                 body: JSON.stringify(response.data),
-    //                             };
-
-    //                         } catch (error) {
-    //                             console.error('Error stage 2:', error);
-                    
-    //                             return {
-    //                                 statusCode: error.response ? error.response.status : 500,
-    //                                 body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
-    //                             };
-    //                         }
-                    
-    //                     } catch (error) {
-    //                         console.error('Error stage 1:', error);
-                    
-    //                         return {
-    //                             statusCode: error.response ? error.response.status : 500,
-    //                             body: JSON.stringify(error.response ? error.response.data : 'Internal Server Error'),
-    //                         };
-    //                     }
-    //                 };
-    //             `),
-    //             'package.json': new pulumi.asset.StringAsset(`
-    //             {
-    //                 "name": "create-dynamodb-resource-lambda-axios",
-    //                 "version": "1.0.0",
-    //                 "description": "lambda function that creates a dynamodb resource crud api and then adds the data to the ledger using axios post request.",
-    //                 "main": "index.js",
-    //                 "dependencies": {
-    //                     "axios": "^0.21.1"
-    //                 }
-    //             }
-    //             `),
-    //         }),
-    //         role: lam_role_arn,
-    //         handler: "index.handler",
-    //         runtime: "nodejs14.x",
-    //         timeout: 10, 
+    // lambda test event
+    // {
+    //     "pathParameters": {
+    //         "bucket-name": "ricky6666"
     //     }
-    // );
-    
+    // }
 
-    // // Install node-fetch as a dependency
-    // createDynamoDBCrudApiLambda.provider.on("beforeRun", async () => {
-    //     await pulumi.runtime.installPackage("node-fetch", { cwd: createDynamoDBCrudApiLambda.assetPath });
-    // });
+    const createS3CrudApiLambda = new aws.lambda.Function(
+        `create-s3-crud-api-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+                const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
+
+                const createS3PostRequest = (bucketName) => {
+                    const data = {
+                        apiID: "${apiID}",
+                        apiName: "${apiName}",
+                        s3ResourceId: "${s3ResourceId}",
+                        dbName: bucketName,
+                        rid: "${rid}",
+                        executionArn: "${executionArn}",
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: 'webhubmvp.onrender.com',
+                            path: '/api/deployAddCrudAPI',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const saveS3ToLedger = (resource) => {
+                    const data_ = {
+                        resource_type: "db/s3",
+                        ...resource,
+                    };
+                    
+                    const data = {
+                        id: RID(),
+                        name: JSON.stringify(data_)
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${apiUrl.slice(8,-7)}',
+                            path: '/stage/ledger/create',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { 'bucket-name': bucketName } = event.pathParameters || {};
+                    const createS3Result = await createS3PostRequest(bucketName)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                dbName: { value: db_name },
+                                unique_db_name: { value: unique_dbname },
+                                } = obj['0']['outputs'];
+                                return { type: 'success', resource: { db_name, unique_dbname, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
+                                return { type: 'error', err }
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createBucketNameResult.type === 'success') {
+                        const s3LedgerResult = await saveS3ToLedger(createS3Result.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
+                        
+                        return {
+                            s3LedgerResult,
+                            complete: true,
+                        }
+                    
+                    }
+                    return {
+                        createS3Result,
+                        complete: false,
+                    }
+                };
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120, 
+        }
+    );
+
+    // lambda test event
+    // {
+    //     "pathParameters": {
+    //         "oauth-name": "ricky6666"
+    //     }
+    // }
+
+    const createServiceAuthGoogleLambda = new aws.lambda.Function(
+        `create-service-auth-google-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+                const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
+
+                const createGoogleAuthPostRequest = (oauthName) => {
+                    const data = {
+                        apiID: "${apiID}",
+                        apiName: "${apiName}",
+                        googleResourceId: "${googleResourceId}",
+                        oauthName: googleAuthName,
+                        rid: "${rid}",
+                        executionArn: "${executionArn}",
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: 'webhubmvp.onrender.com',
+                            path: '/api/deployAddCrudAPI',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const saveGoogleAuthToLedger = (resource) => {
+                    const data_ = {
+                        resource_type: "auth/google",
+                        ...resource,
+                    };
+                    
+                    const data = {
+                        id: RID(),
+                        name: JSON.stringify(data_)
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${apiUrl.slice(8,-7)}',
+                            path: '/stage/ledger/create',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { 'oauth-name': oauthName } = event.pathParameters || {};
+                    const createGoogleAuthResult = await createGoogleAuthPostRequest(oauthName)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                dbName: { value: db_name },
+                                unique_db_name: { value: unique_dbname },
+                                } = obj['0']['outputs'];
+                                return { type: 'success', resource: { oauth_name, unique_oauth_name: undefined, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
+                                return { type: 'error', err }
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createGoogleAuthResult.type === 'success') {
+                        const googleAuthLedgerResult = await saveGoogleAuthToLedger(createGoogleAuthResult.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
+                        
+                        return {
+                            googleAuthLedgerResult,
+                            complete: true,
+                        }
+                    
+                    }
+                    return {
+                        createGoogleAuthResult,
+                        complete: false,
+                    }
+                };
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120, 
+        }
+    );
+
+    // lambda test event
+    // {
+    //     "pathParameters": {
+    //         "name": "ricky6666"
+    //     }
+    // }
+
+    const createServicePaymentStripeLambda = new aws.lambda.Function(
+        `create-service-payment-stripe-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+                const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
+
+                const createPaymentStripePostRequest = (name) => {
+                    const data = {
+                        apiID: "${apiID}",
+                        apiName: "${apiName}",
+                        stripeResourceId: "${stripeResourceId}",
+                        emailName: name,
+                        rid: "${rid}",
+                        executionArn: "${executionArn}",
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: 'webhubmvp.onrender.com',
+                            path: '/api/deployAddCrudAPI',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const savePaymentStripeToLedger = (resource) => {
+                    const data_ = {
+                        resource_type: "payment/stripe",
+                        ...resource,
+                    };
+                    
+                    const data = {
+                        id: RID(),
+                        name: JSON.stringify(data_)
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${apiUrl.slice(8,-7)}',
+                            path: '/stage/ledger/create',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { name } = event.pathParameters || {};
+                    const createPaymentStripeResult = await createPaymentStripePostRequest(name)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                dbName: { value: db_name },
+                                unique_db_name: { value: unique_dbname },
+                                } = obj['0']['outputs'];
+                                return { type: 'success', resource: { oauth_name, unique_oauth_name: undefined, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
+                                return { type: 'error', err }
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createPaymentStripeResult.type === 'success') {
+                        const paymentStripeToLedgerResult = await savePaymentStripeToLedger(createPaymentStripeResult.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
+                        
+                        return {
+                            paymentStripeToLedgerResult,
+                            complete: true,
+                        }
+                    
+                    }
+                    return {
+                        createPaymentStripeResult,
+                        complete: false,
+                    }
+                };
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120, 
+        }
+    );
+
+    // lambda test event
+    // {
+    //     "pathParameters": {
+    //         "name": "ricky6666"
+    //     }
+    // }
+
+    const createServiceEmailSendGridLambda = new aws.lambda.Function(
+        `create-service-email-sendgrid-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+                const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
+
+                const createEmailSendGridPostRequest = (name) => {
+                    const data = {
+                        apiID: "${apiID}",
+                        apiName: "${apiName}",
+                        sendgridResourceId: "${sendgridResourceId}",
+                        emailName: name,
+                        rid: "${rid}",
+                        executionArn: "${executionArn}",
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: 'webhubmvp.onrender.com',
+                            path: '/api/deployAddCrudAPI',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const saveEmailSendGridToLedger = (resource) => {
+                    const data_ = {
+                        resource_type: "email/sendgrid",
+                        ...resource,
+                    };
+                    
+                    const data = {
+                        id: RID(),
+                        name: JSON.stringify(data_)
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${apiUrl.slice(8,-7)}',
+                            path: '/stage/ledger/create',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { name } = event.pathParameters || {};
+                    const createEmailSendGridResult = await createEmailSendGridPostRequest(name)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                dbName: { value: db_name },
+                                unique_db_name: { value: unique_dbname },
+                                } = obj['0']['outputs'];
+                                return { type: 'success', resource: { oauth_name, unique_oauth_name: undefined, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
+                                return { type: 'error', err }
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createEmailSendGridResult.type === 'success') {
+                        const emailSendGridToLedgerResult = await saveEmailSendGridToLedger(createEmailSendGridResult.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
+                        
+                        return {
+                            emailSendGridToLedgerResult,
+                            complete: true,
+                        }
+                    
+                    }
+                    return {
+                        createEmailSendGridResult,
+                        complete: false,
+                    }
+                };
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120, 
+        }
+    );
+
+
+    /*
+    **  INTEGRATIONS
+    */
 
     const integrationCreateServiceDBName = new aws.apigateway.Integration(`create-service-dbname-integration-${rid}`, {
         restApi: apiID,
@@ -439,8 +1066,40 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         httpMethod: methodCreateServiceBucketName.httpMethod,
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
-        uri: createDynamoDBCrudApiLambda.invokeArn,
+        uri: createS3CrudApiLambda.invokeArn,
     });
+
+    const integrationCreateServiceOAuthName = new aws.apigateway.Integration(`create-service-oauth-name-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceOAuthNameResource.id,
+        httpMethod: methodCreateServiceOAuthName.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createServiceAuthGoogleLambda.invokeArn,
+    });
+
+    const integrationCreateServicePaymentStripeName = new aws.apigateway.Integration(`create-service-payment-stripe-name-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServicePaymentStripeNameResource.id,
+        httpMethod: methodCreateServicePaymentStripeName.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createServicePaymentStripeLambda.invokeArn,
+    });
+
+    const integrationCreateServiceEmailSendGridName = new aws.apigateway.Integration(`create-service-email-sendgrid-name-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceEmailSendGridNameResource.id,
+        httpMethod: methodCreateServiceEmailSendGridName.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createServiceEmailSendGridLambda.invokeArn,
+    });
+
+
+    /*
+    **  LAMBDA PERMISSIONS
+    */
 
     const createServiceDBNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-dbname-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
@@ -456,12 +1115,46 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
+    const createServiceAuthGoogleApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-auth-google-api-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createServiceAuthGoogleLambda.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const createServicePaymentStripeApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-payment-stripe-api-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createServicePaymentStripeLambda.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const createServiceEmailSendGridApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-email-sendgrid-api-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createServiceEmailSendGridLambda.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+
+    /*
+    **  DEPLOYMENT
+    */
+
     const deployment = new aws.apigateway.Deployment(`crud-dynamic-endpoints-deployment-${rid}`, {
         restApi: apiID,
         stageName: "stage", // Uncomment this line if you want to specify a stage name.
     }, { dependsOn: [
+        // create/service/db/dynamodb/{dbname}
         methodCreateServiceDBName, integrationCreateServiceDBName,
+        // create/service/db/s3/{bucket-name}
         methodCreateServiceBucketName, integrationCreateServiceBucketName,
+        // create/service/auth/google/{oauth-name}
+        methodCreateServiceOAuthName, integrationCreateServiceOAuthName,
+        // create/service/payment/stripe/{name}
+        methodCreateServicePaymentStripeName, integrationCreateServicePaymentStripeName,
+        // create/service/email/sendgrid/{name}
+        methodCreateServiceEmailSendGridName, integrationCreateServiceEmailSendGridName,
     ] });
     
     return { apiID, apiName, rootResourceId, dbResourceId, executionArn, rid };
