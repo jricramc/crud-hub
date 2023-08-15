@@ -10,6 +10,16 @@ import { RID } from "../../../../utils/utils";
 
 const handler = async ({ rid }) => {
 
+    const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs']
+     
+    let layer = new aws.lambda.LayerVersion("stripe-lambda-layer", {
+        compatibleRuntimes: ['nodejs18.x'],
+        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "stripe-layer1.zip")), // Direct reference to the ZIP file
+        layerName: "stripe-layer",
+        description: "A layer for stripe integration",
+    });
+
+
     const table = new dynamodb.Table(`ledger-table-${rid}`, {
         attributes: [
             { name: "id", type: "S" },
@@ -71,7 +81,6 @@ const handler = async ({ rid }) => {
 
 
 
-    const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs']
 
 
     // Define a new Lambda function
@@ -237,6 +246,7 @@ const handler = async ({ rid }) => {
         lam_role,
         executionArn,
         rid,
+        stripeLayerArn: layer.arn
     };
 };
 

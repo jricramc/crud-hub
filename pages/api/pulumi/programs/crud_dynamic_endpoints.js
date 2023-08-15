@@ -15,7 +15,7 @@ const _webhub_host = publicRuntimeConfig.WEBHUB_HOST || publicRuntimeConfig.NEXT
 const handler = async ({
     apiID, apiUrl, apiName,
     rootResourceId, dbResourceId, s3ResourceId, stripeResourceId, googleResourceId, sendgridResourceId,
-    lam_role_arn, executionArn, rid
+    lam_role_arn, executionArn, rid, stripeLayerArn
 }) => {
 
     /*
@@ -742,20 +742,22 @@ const handler = async ({
                     return rid;
                 };
 
-                const createPaymentStripePostRequest = (name) => {
+                const createPaymentStripePostRequest = (name, stripeApiSecret) => {
                     const data = {
                         apiID: "${apiID}",
                         apiName: "${apiName}",
                         stripeResourceId: "${stripeResourceId}",
-                        emailName: name,
+                        stripeName: name,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
+                        stripeApiSecret: stripeApiSecret,
+                        stripeLayerArn: "${stripeLayerArn}"
                     };
 
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${_webhub_host}',
-                            path: '/api/deployAddCrudAPI',
+                            path: '/api/deployStripeAPI',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -828,7 +830,9 @@ const handler = async ({
 
                 exports.handler = async (event) => {
                     const { name } = event.pathParameters || {};
-                    const createPaymentStripeResult = await createPaymentStripePostRequest(name)
+                    // Parse the request body
+                    const { stripeApiSecret } = JSON.parse(event.body) || {};
+                    const createPaymentStripeResult = await createPaymentStripePostRequest(name, stripeApiSecret)
                         .then(responseData => {
                             // console.log('Response data:', responseData);
                             try {
@@ -879,7 +883,7 @@ const handler = async ({
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs18.x",
             timeout: 120, 
         }
     );

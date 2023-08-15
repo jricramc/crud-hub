@@ -38,6 +38,7 @@ const handler = async (req, res) => {
                 sendgridResourceId: { value: sendgrid_resource_id },
                 lam_role: { value: { arn: lam_role_arn }},
                 executionArn: { value: execution_arn },
+                stripeLayerArn: { value: stripe_layer_arn}
               }
             } = upRes1;
 
@@ -53,6 +54,7 @@ const handler = async (req, res) => {
             google_resource_id,
             lam_role_arn,
             execution_arn,
+            stripe_layer_arn,
             date_created: new Date(),
           };
 
@@ -114,6 +116,7 @@ const handler = async (req, res) => {
                   lam_role_arn,
                   executionArn: execution_arn,
                   rid,
+                  stripeLayerArn: stripe_layer_arn
                 })
               });
 
