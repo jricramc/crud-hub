@@ -7,6 +7,11 @@ import * as iam from "@pulumi/aws/iam";
 import fetch from "node-fetch"
 import { RID } from "../../../../utils/utils";
 
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+const _webhub_host = publicRuntimeConfig.WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL;
+
 const handler = async ({
     apiID, apiUrl, apiName,
     rootResourceId, dbResourceId, s3ResourceId, stripeResourceId, googleResourceId, sendgridResourceId,
@@ -248,7 +253,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: 'webhubmvp.onrender.com',
+                            host: '${_webhub_host}',
                             path: '/api/deployAddCrudAPI',
                             method: 'POST',
                             headers: {
@@ -415,7 +420,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: 'webhubmvp.onrender.com',
+                            host: '${_webhub_host}',
                             path: '/api/deployAddCrudAPI',
                             method: 'POST',
                             headers: {
@@ -582,7 +587,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: 'webhubmvp.onrender.com',
+                            host: '${_webhub_host}',
                             path: '/api/deployAddCrudAPI',
                             method: 'POST',
                             headers: {
@@ -749,7 +754,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: 'webhubmvp.onrender.com',
+                            host: '${_webhub_host}',
                             path: '/api/deployAddCrudAPI',
                             method: 'POST',
                             headers: {
@@ -916,7 +921,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: 'webhubmvp.onrender.com',
+                            host: '${_webhub_host}',
                             path: '/api/deployAddCrudAPI',
                             method: 'POST',
                             headers: {
