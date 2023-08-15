@@ -197,7 +197,7 @@ const handler = async ({ apiID, apiUrl, apiName, rootResourceId, dbResourceId, l
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: 'crudhub.onrender.com',
+                            host: 'webhubmvp.onrender.com',
                             path: '/api/deployAddCrudAPI',
                             method: 'POST',
                             headers: {
