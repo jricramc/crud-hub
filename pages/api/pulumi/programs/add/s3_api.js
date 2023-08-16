@@ -19,24 +19,39 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         bucket: unique_bucket_name,
     });
 
-    // Create a role and attach our new policy
-    const lamRole = new aws.iam.Role(`role-${unique_bucket_name}-lambda-${rid}`, {
+    // Create IAM Role for Lambda
+    const lambdaRole = new aws.iam.Role("lambdaRole", {
         assumeRolePolicy: JSON.stringify({
             Version: "2012-10-17",
-            Statement: [
-                {
-                    Action: "sts:AssumeRole",
-                    Principal: {
-                        Service: "lambda.amazonaws.com",
-                    },
-                    Effect: "Allow",
+            Statement: [{
+                Action: "sts:AssumeRole",
+                Effect: "Allow",
+                Principal: {
+                    Service: "lambda.amazonaws.com",
                 },
-            ],
+            }],
         }),
     });
 
+    // Attach necessary policies to the Lambda role
+    const lambdaExecutionPolicy = new aws.iam.Policy("lambdaExecutionPolicy", {
+        policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Effect: "Allow",
+                Action: "lambda:InvokeFunction",
+                Resource: "arn:aws:lambda:REGION:ACCOUNT_ID:function:YOUR_LAMBDA_FUNCTION_NAME",
+            }],
+        }),
+    });
+
+    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment("lambdaRolePolicyAttachment", {
+        policyArn: lambdaExecutionPolicy.arn,
+        role: lambdaRole.name,
+    });
+
     // Define an S3 policy to grant access to the bucket
-    const s3AccessPolicy = new aws.iam.Policy(`s3-access-policy-${unique_bucket_name}-${rid}`, {
+    const s3AccessPolicy = new aws.iam.Policy("s3-access-policy", {
         policy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [
@@ -47,17 +62,16 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                         "s3:PutObject",
                     ],
                     Resource: [
-                        `arn:aws:s3:::${unique_bucket_name}/*`,
+                        `arn:aws:s3:::YOUR_UNIQUE_BUCKET_NAME/*`,
                     ],
                 },
             ],
         }),
     });
 
-    // Attach the S3 policy to the Lambda role
-    const s3PolicyAttachment = new aws.iam.RolePolicyAttachment(`s3-policy-attachment-${unique_bucket_name}-${rid}`, {
+    const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment("s3-access-policy-attachment", {
         policyArn: s3AccessPolicy.arn,
-        role: lamRole,
+        roles: [lambdaRole],
     });
 
     // const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
