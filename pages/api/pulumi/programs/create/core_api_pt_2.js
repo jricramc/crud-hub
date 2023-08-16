@@ -249,6 +249,7 @@ const handler = async ({
                         dbName: dbname,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
+                        lam_role_arn: "${lam_role_arn}",
                     };
 
                     return new Promise((resolve, reject) => {
@@ -416,6 +417,7 @@ const handler = async ({
                         bucketName: bucketName,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
+                        lam_role_arn: "${lam_role_arn}",
                     };
 
                     return new Promise((resolve, reject) => {
@@ -582,6 +584,7 @@ const handler = async ({
                         oauthName: googleAuthName,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
+                        lam_role_arn: "${lam_role_arn}",
                     };
 
                     return new Promise((resolve, reject) => {
@@ -750,7 +753,8 @@ const handler = async ({
                         rid: "${rid}",
                         executionArn: "${executionArn}",
                         stripeApiSecret: stripeApiSecret,
-                        stripeLayerArn: "${stripeLayerArn}"
+                        stripeLayerArn: "${stripeLayerArn}",
+                        lam_role_arn: "${lam_role_arn}",
                     };
 
                     return new Promise((resolve, reject) => {
@@ -920,6 +924,7 @@ const handler = async ({
                         emailName: name,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
+                        lam_role_arn: "${lam_role_arn}",
                     };
 
                     return new Promise((resolve, reject) => {

@@ -5,14 +5,14 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   const { method, body } = req;
 
-  const { apiID, apiName, s3ResourceId, bucketName, rid, executionArn } = body;
+  const { apiID, apiName, s3ResourceId, bucketName, rid, executionArn, lam_role_arn } = body;
   const stackName = `deploy-s3-api-apiID-${apiID}-${RID()}`;
   try {
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_s3_api({ apiID, apiName, s3ResourceId, bucketName, rid, executionArn }),
+            program: async () =>  await add_s3_api({ apiID, apiName, s3ResourceId, bucketName, rid, executionArn, lam_role_arn }),
         });
 
         await stack.workspace.installPlugin("aws", "v4.0.0");

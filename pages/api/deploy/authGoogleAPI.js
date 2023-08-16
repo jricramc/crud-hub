@@ -6,7 +6,13 @@ const handler = async (req, res) => {
   const { method, body, headers } = req;
   // const b = body.apiID ? body : JSON.parse(body);
   
-  const { apiID, apiName, stripeResourceId, stripeName, rid, executionArn, stripeApiSecret, stripeLayerArn } = body;
+  const {
+    apiID, apiName,
+    stripeResourceId, stripeName,
+    rid, executionArn,
+    stripeApiSecret, stripeLayerArn,
+    lam_role_arn
+  } = body;
   const stackName = `addstripeapi-stripeResourceId-${stripeResourceId}-apiID-${apiID}-${RID()}`;
   try {
 
@@ -14,7 +20,13 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_stripe_api({ apiID, apiName, stripeResourceId, stripeName, rid, executionArn, stripeApiSecret, stripe_layer_arn }),
+            program: async () =>  await add_stripe_api({
+              apiID, apiName,
+              stripeResourceId, stripeName,
+              rid, executionArn,
+              stripeApiSecret, stripe_layer_arn,
+              lam_role_arn,
+            }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
