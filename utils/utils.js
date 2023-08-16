@@ -2,7 +2,7 @@ import unfetch from 'unfetch';
 
 
 const deployCRUDAPI = async ({ name, email, rid }) => {
-  const url = '/api/deployCRUDAPI';
+  const url = '/api/deploy/coreAPI';
   const res = await unfetch(url, {
       method: 'POST',
       body: JSON.stringify({ name, email, rid }),
