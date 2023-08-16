@@ -517,7 +517,7 @@ const handler = async ({
                             return { type: 'error', err }
                         });
                         
-                    if (createBucketNameResult.type === 'success') {
+                    if (createS3Result.type === 'success') {
                         const s3LedgerResult = await saveS3ToLedger(createS3Result.resource)
                             .then(responseData => {
                                 // console.log('Response data:', responseData);
