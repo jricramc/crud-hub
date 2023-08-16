@@ -413,7 +413,7 @@ const handler = async ({
                         apiID: "${apiID}",
                         apiName: "${apiName}",
                         s3ResourceId: "${s3ResourceId}",
-                        dbName: bucketName,
+                        bucketName: bucketName,
                         rid: "${rid}",
                         executionArn: "${executionArn}",
                     };
@@ -421,7 +421,7 @@ const handler = async ({
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${_webhub_host}',
-                            path: '/api/deploy/dynamoDBAPI',
+                            path: '/api/deploy/s3API',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'

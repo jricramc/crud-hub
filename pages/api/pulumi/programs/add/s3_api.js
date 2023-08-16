@@ -134,6 +134,90 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
             },
         }
     );
+
+    const s3CreatePathFunc = new aws.lambda.Function(
+        `s3-create-path-func-lambda-${unique_db_name}-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+                    const AWS = require('aws-sdk');
+
+                    exports.handler = async (event, context) => {
+                        // Initialize AWS SDK
+                        const s3 = new AWS.S3();
+
+                        // Specify the bucket name
+                        const bucketName = process.env.BUCKET_NAME
+                    
+                        // Read the bucket name from the event body
+                        let { files } = event.body;
+
+                        // Parse event.body if it's not an object
+                        if (typeof event.body === 'string') {
+                            try {
+                                const parsedBody = JSON.parse(event.body);
+                                files = parsedBody.files;
+                            } catch (error) {
+                                console.error('Error parsing event body:', error);
+                                return {
+                                    statusCode: 400,
+                                    body: JSON.stringify('Invalid event body'),
+                                };
+                            }
+                        }
+                    
+                        // Retrieve the path variable from pathParameters
+                        const { path } = event.pathParameters;
+                    
+                        try {
+                            // Create the path in the S3 bucket
+                            const createPathParams = {
+                                Bucket: bucketName,
+                                Key: path,
+                            };
+                    
+                            await s3.putObject(createPathParams).promise();
+                    
+                            // Save file data if provided
+                            if (files) {
+                                for (const file of files) {
+                                    const saveFileParams = {
+                                        Bucket: bucketName,
+                                        Key: path + '/' + file.name,
+                                        Body: file.data,
+                                    };
+                                    await s3.putObject(saveFileParams).promise();
+                                }
+                            }
+                    
+                            console.log('Path and files created successfully');
+                    
+                            return {
+                                statusCode: 200,
+                                body: JSON.stringify({ type: 'success' }),
+                            };
+                        } catch (error) {
+                            console.error('Error:', error);
+                    
+                            return {
+                                statusCode: 500,
+                                body: JSON.stringify({ type: 'error', message: 'Error creating path and saving files to S3' }),
+                            };
+                        }
+                    }; 
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 30,
+            environment: {
+                variables: {
+                    BUCKET_NAME: unique_bucket_name,
+                },
+            },
+        }
+    );
    
 
     /*
@@ -177,18 +261,21 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
 
     /*
-    **  METHOD
+        /db/s3/{unique_bucket_name}/create
     */
 
-    // const createMethod = new aws.apigateway.Method(`create-method-${unique_bucket_name}-${rid}`, {
-    //     restApi: apiID,
-    //     resourceId: folderCreateResource.id,
-    //     httpMethod: "POST",
-    //     authorization: "NONE",
-    //     apiKeyRequired: false,
-    // }, {
-    //     dependsOn: [folderCreateResource], // Make the integration dependent on the create.
-    // });
+    const folderCreatePathResource = new aws.apigateway.Resource(`folder-bucket-name-create-path-resource-${unique_bucket_name}-${rid}`, {
+        restApi: apiID,
+        parentId: folderBucketNameResource.id,
+        pathPart: "{path+}",
+    }, {
+        dependsOn: [folderBucketNameResource],
+    });
+
+
+    /*
+    **  METHOD
+    */
 
     const s3GetStructureMethod = new aws.apigateway.Method(`s3-get-structure-${unique_bucket_name}-${rid}`, {
         restApi: apiID,
@@ -197,24 +284,24 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
-        dependsOn: [folderCreateResource], // Make the integration dependent on the create.
+        dependsOn: [folderCreateResource],
+    });
+
+
+    const s3CreatePathStructureMethod = new aws.apigateway.Method(`s3-create-path-${unique_bucket_name}-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreatePathResource.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, {
+        dependsOn: [folderCreatePathResource],
     });
 
 
     /*
     **  INTEGRATION
     */
-
-    // const createIntegration = new aws.apigateway.Integration(`create-integration-${unique_bucket_name}-${rid}`, {
-    //     httpMethod: createMethod.httpMethod,
-    //     integrationHttpMethod: "POST",
-    //     resourceId: folderCreateResource.id,
-    //     restApi: apiID,
-    //     type: "AWS_PROXY",
-    //     uri: createFunc.invokeArn,
-    // }, {
-    //     dependsOn: [createFunc, createMethod], // Make the integration dependent on the create.
-    // });
 
     const s3GetStructureIntegration = new aws.apigateway.Integration(`s3-get-structure-integration-${unique_bucket_name}-${rid}`, {
         httpMethod: s3GetStructureMethod.httpMethod,
@@ -226,6 +313,18 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
     }, {
         dependsOn: [s3GetStructureFunc, s3GetStructureMethod],
     });
+
+    const s3CreatePathStructureIntegration = new aws.apigateway.Integration(`s3-create-path-integration-${unique_bucket_name}-${rid}`, {
+        httpMethod: s3CreatePathStructureMethod.httpMethod,
+        integrationHttpMethod: "POST",
+        resourceId: folderCreatePathResource.id,
+        restApi: apiID,
+        type: "AWS_PROXY",
+        uri: s3CreatePathFunc.invokeArn,
+    }, {
+        dependsOn: [s3CreatePathFunc, s3CreatePathStructureMethod],
+    });
+    
 
 
     /*
@@ -239,12 +338,20 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
+    const s3CreatePathApiGatewayInvokePermission = new aws.lambda.Permission(`s3-create-path-api-gateway-invoke-permission-${unique_bucket_name}-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: s3CreatePathFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
     const deployment = new aws.apigateway.Deployment(`s3-api-deployment-${unique_bucket_name}-${rid}`, {
         restApi: apiID,
         stageName: "stage", // Uncomment this line if you want to specify a stage name.
     }, { 
         dependsOn: [
             s3GetStructureIntegration,
+            s3CreatePathStructureIntegration,
         ]
     });
     
