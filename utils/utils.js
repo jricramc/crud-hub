@@ -57,6 +57,14 @@ const RID = (l = 8) => {
     return rid;
 };
 
+const removeProtocolPrefix = (url) => {
+    // Use regular expression to match http:// or https:// at the beginning of the string
+    const protocolRegex = /^(https?:\/\/)/i;
+    
+    // Replace the matched protocol with an empty string
+    return url.replace(protocolRegex, '');
+}
 
-export { deployCRUDAPI, RID, apiRequest, getUserProjects }
+
+export { deployCRUDAPI, RID, apiRequest, getUserProjects, removeProtocolPrefix }
 
