@@ -43,7 +43,7 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
                         charge_id: charge.id
                     }, 200);
                 } catch (error) {
-                    return response('Payment failed: ${error.message}', 400);
+                    return response(error.message,  400);
                 }
             };
             
