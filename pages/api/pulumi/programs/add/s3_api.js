@@ -12,7 +12,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
 
     const r_id = RID(6);
-    const unique_bucket_name = `${bucketName}-${r_id}`;
+    const unique_bucket_name = `${bucketName}-${r_id}`.toLocaleLowerCase();
 
     // Create an S3 bucket
     const bucket = new aws.s3.Bucket(`s3-bucket-${unique_bucket_name}-${rid}`, {
