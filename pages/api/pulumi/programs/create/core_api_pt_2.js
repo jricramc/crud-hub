@@ -1085,6 +1085,7 @@ const handler = async ({
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createDynamoDBCrudApiLambda.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
     const integrationCreateServiceBucketName = new aws.apigateway.Integration(`create-service-bucket-name-integration-${rid}`, {
@@ -1094,6 +1095,7 @@ const handler = async ({
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createS3CrudApiLambda.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
     const integrationCreateServiceOAuthName = new aws.apigateway.Integration(`create-service-oauth-name-integration-${rid}`, {
@@ -1103,6 +1105,7 @@ const handler = async ({
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createServiceAuthGoogleLambda.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
     const integrationCreateServicePaymentStripeName = new aws.apigateway.Integration(`create-service-payment-stripe-name-integration-${rid}`, {
@@ -1112,6 +1115,7 @@ const handler = async ({
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createServicePaymentStripeLambda.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
     const integrationCreateServiceEmailSendGridName = new aws.apigateway.Integration(`create-service-email-sendgrid-name-integration-${rid}`, {
@@ -1121,6 +1125,7 @@ const handler = async ({
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createServiceEmailSendGridLambda.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
 
