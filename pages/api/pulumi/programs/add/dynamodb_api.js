@@ -12,7 +12,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
 
     const r_id = RID(6);
-    const unique_db_name = `${dbName}_${r_id}`;
+    const unique_db_name = `${dbName}-${r_id}`;
 
     const table = new dynamodb.Table(`dynamodb-table-${unique_db_name}-${rid}`, {
         attributes: [

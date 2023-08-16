@@ -501,10 +501,9 @@ const handler = async ({
                             const obj = JSON.parse(responseData);
                             if (obj.type === 'success') {
                                 const {
-                                dbName: { value: db_name },
-                                unique_db_name: { value: unique_dbname },
+                                    unique_bucket_name: { value: unique_bucketName },
                                 } = obj['0']['outputs'];
-                                return { type: 'success', resource: { db_name, unique_dbname, date_created: new Date() } }
+                                return { type: 'success', resource: { bucketName, uniqueBucketName: unique_bucketName, date_created: new Date() } }
                             } else {
                                 return { type: 'error', err: 'pulumi returned an error code' }
                             }
