@@ -7,7 +7,7 @@ import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
-const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executionArn, lam_role_arn }) => {
+const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executionArn }) => {
 
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
 
@@ -20,7 +20,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
     });
 
     // Create IAM Role for Lambda
-    const lambdaRole = new aws.iam.Role("lambdaRole", {
+    const lam_role = new aws.iam.Role("lambdaRole", {
         assumeRolePolicy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [{
@@ -137,7 +137,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                             
                 `),
             }),
-            role: lam_role_arn,
+            role: lam_role.arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
             timeout: 30,
@@ -221,7 +221,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                     }; 
                 `),
             }),
-            role: lam_role_arn,
+            role: lam_role.arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
             timeout: 30,
