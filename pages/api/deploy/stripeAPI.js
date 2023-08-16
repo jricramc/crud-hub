@@ -14,7 +14,7 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_stripe_api({ apiID, apiName, stripeResourceId, stripeName, rid, executionArn, stripeApiSecret, stripe_layer_arn }),
+            program: async () =>  await add_stripe_api({ apiID, apiName, stripeResourceId, stripeName, rid, executionArn, stripeApiSecret, stripeLayerArn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
