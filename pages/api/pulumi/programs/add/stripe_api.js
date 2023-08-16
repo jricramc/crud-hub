@@ -161,7 +161,9 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
         action: 'lambda:InvokeFunction',
         function: stripeApiLambda.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`  
+    },{
+        dependsOn: [stripeApiLambda],
     });
 
 
