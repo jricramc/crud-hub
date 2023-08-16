@@ -13,6 +13,43 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
     const unique_stripe_name = `${stripeName}-${r_id}`;
 
     // const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs']
+    const lam_policy = {
+        Version: "2012-10-17",
+        Statement: [{
+            Effect: "Allow",
+            Action: [
+                "dynamodb:PutItem",     // Create
+                "dynamodb:GetItem",     // Read
+                "dynamodb:UpdateItem",  // Update
+                "dynamodb:DeleteItem",  // Delete
+                "dynamodb:Scan",        // Scan is often used to read all items
+                "dynamodb:Query",       // Query is often used with indexes
+                "apigateway:InvokeApi", // Invoke the API endpoint
+            ],
+            Resource: "*",
+        }],
+    };
+    
+    // Create a role and attach our new policy
+    const lam_role = new iam.Role(`role-${unique_stripe_name}-${rid}`, {
+        assumeRolePolicy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+                {
+                    Action: "sts:AssumeRole",
+                    Principal: {
+                        Service: "lambda.amazonaws.com",
+                    },
+                    Effect: "Allow",
+                },
+            ],
+        }),
+    });
+
+    new iam.RolePolicy(`policy-${unique_stripe_name}-${rid}`, {
+        role: lam_role.id,
+        policy: JSON.stringify(lam_policy)
+    });
 
     const stripeApiLambda = new aws.lambda.Function(`stripe-api-function-${r_id}`, {
         code: new pulumi.asset.AssetArchive({
@@ -59,6 +96,7 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
         }),
         runtime: "nodejs18.x",
         handler: "handler.handler",
+        role: lam_role.arn,
         environment: {
             variables: {
                 STRIPE_SECRET_KEY: stripeApiSecret,
