@@ -62,7 +62,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
     // const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
     
-    // const deleteFunc = new aws.lambda.Function(`delete-func-lambda-${unique_db_name}-${rid}`, {
+    // const deleteFunc = new aws.lambda.Function(`delete-func-lambda-${unique_bucket_name}-${rid}`, {
     //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
     //     runtime: "nodejs14.x",
     //     handler: "delete.deleteHandler",
@@ -76,7 +76,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
 
     const s3GetStructureFunc = new aws.lambda.Function(
-        `s3-get-structure-func-lambda-${unique_db_name}-${rid}`,
+        `s3-get-structure-func-lambda-${unique_bucket_name}-${rid}`,
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
@@ -136,7 +136,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
     );
 
     const s3CreatePathFunc = new aws.lambda.Function(
-        `s3-create-path-func-lambda-${unique_db_name}-${rid}`,
+        `s3-create-path-func-lambda-${unique_bucket_name}-${rid}`,
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
