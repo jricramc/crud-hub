@@ -47,7 +47,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
     const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment("lambdaRolePolicyAttachment", {
         policyArn: lambdaExecutionPolicy.arn,
-        role: lambdaRole.name,
+        role: lam_role.name,
     });
 
     // Define an S3 policy to grant access to the bucket
@@ -71,7 +71,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
     const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment("s3-access-policy-attachment", {
         policyArn: s3AccessPolicy.arn,
-        roles: [lambdaRole],
+        roles: [lam_role],
     });
 
     // const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
