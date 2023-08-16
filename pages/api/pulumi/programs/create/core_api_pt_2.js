@@ -5,12 +5,12 @@ import * as apigateway from "@pulumi/aws-apigateway";
 import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import fetch from "node-fetch"
-import { RID, removeProtocolPrefix } from "../../../../../utils/utils";
+import { RID, extractDomain } from "../../../../../utils/utils";
 
 import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
-const _webhub_host = removeProtocolPrefix(publicRuntimeConfig.WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
+const _webhub_host = extractDomain(publicRuntimeConfig.WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
 
 const handler = async ({
     apiID, apiUrl, apiName,
@@ -296,7 +296,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
+                            host: '${extractDomain(apiUrl)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -471,7 +471,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
+                            host: '${extractDomain(apiUrl)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -645,7 +645,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
+                            host: '${extractDomain(apiUrl)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -815,7 +815,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
+                            host: '${extractDomain(apiUrl)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -985,7 +985,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
+                            host: '${extractDomain(apiUrl)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
