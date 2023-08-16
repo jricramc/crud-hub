@@ -125,7 +125,7 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
                 STRIPE_SECRET_KEY: stripeApiSecret,
             },
         },
-        layers: "arn:aws:lambda:us-east-2:442052175141:layer:stripe-layer:1", // Add the Stripe layer to your Lambda function
+        layers: ["arn:aws:lambda:us-east-2:442052175141:layer:stripe-layer:1"], // Add the Stripe layer to your Lambda function
     });
 
 
