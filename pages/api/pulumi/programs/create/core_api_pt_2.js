@@ -296,7 +296,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl.slice(8,-7)}',
+                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -464,7 +464,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl.slice(8,-7)}',
+                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -631,7 +631,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl.slice(8,-7)}',
+                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -801,7 +801,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl.slice(8,-7)}',
+                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
@@ -971,7 +971,7 @@ const handler = async ({
 
                     return new Promise((resolve, reject) => {
                         const options = {
-                            host: '${apiUrl.slice(8,-7)}',
+                            host: '${removeProtocolPrefix(apiUrl).slice(0,-7)}',
                             path: '/stage/ledger/create',
                             method: 'POST',
                             headers: {
