@@ -130,7 +130,7 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
 
 
 
-    const folderdbNameResource = new aws.apigateway.Resource(`folder-stripe-resource-${unique_stripe_name}-${r_id}`, {
+    const folderstripeNameResource = new aws.apigateway.Resource(`folder-stripe-resource-${unique_stripe_name}-${r_id}`, {
         restApi: apiID,
         parentId: stripeResourceId,
         pathPart: unique_stripe_name,
@@ -138,18 +138,18 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
 
     const createMethod = new aws.apigateway.Method(`create-method-${unique_stripe_name}-${r_id}`, {
         restApi: apiID,
-        resourceId: folderdbNameResource.id,
+        resourceId: folderstripeNameResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
-        dependsOn: [folderdbNameResource], // Make the integration dependent on the create.
+        dependsOn: [folderstripeNameResource], // Make the integration dependent on the create.
     });
 
     const createIntegration = new aws.apigateway.Integration(`create-integration-${unique_stripe_name}-${r_id}`, {
         httpMethod: createMethod.httpMethod,
         integrationHttpMethod: "POST",
-        resourceId: folderdbNameResource.id,
+        resourceId: folderstripeNameResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: stripeApiLambda.invokeArn,
@@ -161,7 +161,9 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
         action: 'lambda:InvokeFunction',
         function: stripeApiLambda.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`  
+    },{
+        dependsOn: [stripeApiLambda],
     });
 
 
@@ -169,7 +171,7 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
         restApi: apiID,
         stageName: "stage", // Uncomment this line if you want to specify a stage name.
     }, { 
-        dependsOn: [ createIntegration ]
+        dependsOn: [ createMethod, createIntegration ]
     });
 
     return { apiID, apiName, stripeResourceId, stripeName, unique_stripe_name };
