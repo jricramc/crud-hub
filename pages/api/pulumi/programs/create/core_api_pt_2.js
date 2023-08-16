@@ -409,6 +409,13 @@ const handler = async ({
                     return rid;
                 };
 
+                const response = ({ body, status }) => {
+                    return {
+                        statusCode: status,
+                        body: JSON.stringify({ body }),
+                    };
+                }
+
                 const createS3PostRequest = (bucketName) => {
                     const data = {
                         apiID: "${apiID}",
@@ -531,16 +538,23 @@ const handler = async ({
                                 return { type: 'error', err }
                             });
                         
-                        return {
-                            s3LedgerResult,
-                            complete: true,
-                        }
+                        return response({
+                            body: {
+                                s3LedgerResult,
+                                complete: true,
+                            },
+                            status: 200,
+                        });
                     
                     }
-                    return {
-                        createS3Result,
-                        complete: false,
-                    }
+                    
+                    return response({
+                        body: {
+                            createS3Result,
+                            complete: false,
+                        },
+                        status: 409,
+                    });
                 };
                 `),
             }),
@@ -1123,7 +1137,7 @@ const handler = async ({
 
     const createServiceBucketNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-bucket-name-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
-        function: createDynamoDBCrudApiLambda.name,
+        function: createS3CrudApiLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
