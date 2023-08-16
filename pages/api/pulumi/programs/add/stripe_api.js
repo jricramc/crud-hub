@@ -60,11 +60,12 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
                     return response("Missing payment data", 400);
                 }
             
-                const body = JSON.parse(event.body);
+                // Parse the URL-encoded data
+                const body = parseUrlEncoded(event.body);
                 const { amount, currency = "usd", token } = body;
             
                 if (!amount || !token) {
-                    return response("Invalid payment data", 400);
+                    return response("Invalid payment data", 400 );
                 }
             
                 try {
@@ -80,9 +81,30 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
                         charge_id: charge.id
                     }, 200);
                 } catch (error) {
-                    return response(error.message,  400);
+                    return response(error.message, 400);
                 }
             };
+            
+            function parseUrlEncoded(encoded) {
+                const decodedString = Buffer.from(encoded, 'base64').toString('utf8');
+                        
+                const inputString = decodedString
+                
+                    // Splitting by '&' to get key-value pairs
+                const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                        
+                        // Convert 2D array to object
+                const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                    obj[key] = value;
+                    return obj;
+                }, {});
+                        
+                        // Loop through the object and decode URL encodings
+                for (let key in resultObject) {
+                        resultObject[key] = decodeURIComponent(resultObject[key]);
+                }
+                return resultObject;
+            }
             
             function response(message, status) {
                 return {
@@ -92,17 +114,18 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
                     })
                 };
             }
+            
             `),
         }),
         runtime: "nodejs18.x",
-        handler: "handler.handler",
+        handler: "index.handler",
         role: lam_role.arn,
         environment: {
             variables: {
                 STRIPE_SECRET_KEY: stripeApiSecret,
             },
         },
-        layers: [stripe_layer_arn]  // Add the Stripe layer to your Lambda function
+        layers: "arn:aws:lambda:us-east-2:442052175141:layer:stripe-layer:1", // Add the Stripe layer to your Lambda function
     });
 
 
