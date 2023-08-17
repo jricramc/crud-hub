@@ -55,67 +55,65 @@ const handler = async ({ apiID, apiName, stripeResourceId, stripeName, rid, exec
         code: new pulumi.asset.AssetArchive({
             "index.js": new pulumi.asset.StringAsset(`const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-            exports.handler = async (event) => {
-                if (!event.body) {
-                    return response("Missing payment data", 400);
-                }
+exports.handler = async (event) => {
+if (!event.body) {
+    return response("Missing payment data", 400);
+}
+        
+// Parse the URL-encoded data
+const body = parseUrlEncoded(event.body);
+const { amount, currency = "usd", token } = body;
+        
+if (!amount || !token) {
+    return response("Invalid payment data", 400 );
+}
+        
+try {
+    const charge = await stripe.charges.create({
+            amount: amount,
+            currency: currency,
+            source: token,
+            description: "Payment via Lambda & Stripe"
+        });
+
+        return response({
+            message: 'Payment successful!',
+            charge_id: charge.id
+        }, 200);
+    } catch (error) {
+        return response(error.message, 400);
+    }
+};
+
+function parseUrlEncoded(encoded) {
+    const decodedString = Buffer.from(encoded, 'base64').toString('utf8');
             
-                // Parse the URL-encoded data
-                const body = parseUrlEncoded(event.body);
-                const { amount, currency = "usd", token } = body;
+    const inputString = decodedString
+    
+        // Splitting by '&' to get key-value pairs
+    const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
             
-                if (!amount || !token) {
-                    return response("Invalid payment data", 400 );
-                }
+            // Convert 2D array to object
+    const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+    }, {});
             
-                try {
-                    const charge = await stripe.charges.create({
-                        amount: amount,
-                        currency: currency,
-                        source: token,
-                        description: "Payment via Lambda & Stripe"
-                    });
-            
-                    return response({
-                        message: 'Payment successful!',
-                        charge_id: charge.id
-                    }, 200);
-                } catch (error) {
-                    return response(error.message, 400);
-                }
-            };
-            
-            function parseUrlEncoded(encoded) {
-                const decodedString = Buffer.from(encoded, 'base64').toString('utf8');
-                        
-                const inputString = decodedString
-                
-                    // Splitting by '&' to get key-value pairs
-                const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
-                        
-                        // Convert 2D array to object
-                const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
-                    obj[key] = value;
-                    return obj;
-                }, {});
-                        
-                        // Loop through the object and decode URL encodings
-                for (let key in resultObject) {
-                        resultObject[key] = decodeURIComponent(resultObject[key]);
-                }
-                return resultObject;
-            }
-            
-            function response(message, status) {
-                return {
-                    statusCode: status,
-                    body: JSON.stringify({
-                        message: message
-                    })
-                };
-            }
-            
-            `),
+            // Loop through the object and decode URL encodings
+    for (let key in resultObject) {
+            resultObject[key] = decodeURIComponent(resultObject[key]);
+    }
+    return resultObject;
+}
+
+function response(message, status) {
+    return {
+        statusCode: status,
+        body: JSON.stringify({
+            message: message
+        })
+    };
+}`),
         }),
         runtime: "nodejs18.x",
         handler: "index.handler",
