@@ -241,7 +241,7 @@ const Projects = ({}) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                    <span>CrudHUB</span>
+                    <span>WebHUB</span>
                 </div>
                 <div style={{ flex: 1, width: '100%', overflow: 'scroll' }}>
                     <div

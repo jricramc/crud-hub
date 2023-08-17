@@ -61,7 +61,7 @@ export default function Home() {
 
 				{/* <!-- Header --> */}
 					<header id="header" className="alt">
-						<h1><a href="#">CrudHUB</a></h1>
+						<h1><a href="#">WebHUB</a></h1>
 						{/* <nav id="nav">
 							<ul>
 								<li className="special">
@@ -83,7 +83,7 @@ export default function Home() {
 				{/* <!-- Banner --> */}
 					<section id="banner">
 						<div className="inner">
-							<h2>CrudHUB</h2>
+							<h2>WebHUB</h2>
                             <p>Develope, deploy, and<br /> manage your APIs effortlessly</p>
                             {/* <p>Your one stop shop to build and manage your APIs</p> */}
 							{/* <p>Automating development, deployment, and management of APIs</p> */}
@@ -106,7 +106,7 @@ export default function Home() {
 								<h2>
                                 Build and manage fully functional hosted APIs for free Powered by AWS
                                 </h2>
-								<p>CrudHUB offers web developers a <span style={{ textDecoration: 'underline' }}>online sandbox</span> to develop, test, and deploy CRUD APIs with zero code required. As a developer you are able to leverage the power of our <span style={{ textDecoration: 'underline' }}>out of the box integrations</span> with AWS services like DynamoDB, API Gateway, and Lambda to create dynamic and complex CRUD APIs effortlessly.  </p>
+								<p>WebHUB offers web developers a <span style={{ textDecoration: 'underline' }}>online sandbox</span> to develop, test, and deploy CRUD APIs with zero code required. As a developer you are able to leverage the power of our <span style={{ textDecoration: 'underline' }}>out of the box integrations</span> with AWS services like DynamoDB, API Gateway, and Lambda to create dynamic and complex CRUD APIs effortlessly.  </p>
 							</header>
 							{/* <ul className="icons major">
 								<li><span className="icon fa-gem major style1"><span className="label">Lorem</span></span></li>
@@ -129,14 +129,14 @@ export default function Home() {
 							<div className="image"><img src="images/pic02.jpg" alt="" /></div><div className="content">
 								<h2>Automatic Documentation<br />
 								and data management out of the box</h2>
-								<p>All data passing through a CrudHUB API endpoint is compressed and summarized into a secure ledger that records your API data story. This serves as a <span style={{ textDecoration: 'underline' }}>single source of truth</span> from which we dynamically build your API documentation from.</p>
+								<p>All data passing through a WebHUB API endpoint is compressed and summarized into a secure ledger that records your API data story. This serves as a <span style={{ textDecoration: 'underline' }}>single source of truth</span> from which we dynamically build your API documentation from.</p>
 							</div>
 						</section>
 						<section className="spotlight">
 							<div className="image"><img src="images/pic03.jpg" alt="" /></div><div className="content">
 								<h2>Free Hosting and access<br />
 								to expensive third party services</h2>
-								<p>CrudHUB builds developers an online sandbox to access enterprise level AWS servics with no strings attached.</p>
+								<p>WebHUB builds developers an online sandbox to access enterprise level AWS servics with no strings attached.</p>
 							</div>
 						</section>
 					</section>
@@ -206,7 +206,7 @@ export default function Home() {
 							<li><a href="#" className="icon solid fa-envelope"><span className="label">Email</span></a></li>
 						</ul>
 						<ul className="copyright">
-							<li>&copy; CRUDHUB</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							<li>&copy; WEBHUB</li><li>MIT Affiliated</li>
 						</ul>
 					</footer>
 

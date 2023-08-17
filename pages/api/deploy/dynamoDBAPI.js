@@ -6,7 +6,7 @@ const handler = async (req, res) => {
   const { method, body, headers } = req;
   // const b = body.apiID ? body : JSON.parse(body);
   const { apiID, apiName, dbResourceId, dbName, rid, executionArn, lam_role_arn } = body;
-  const stackName = `addcrudapi-dbResourceId-${dbResourceId}-apiID-${apiID}-${RID()}`;
+  const stackName = `add-dynamodb-api-dbResourceId-${dbResourceId}-apiID-${apiID}-${RID()}`;
   try {
     
     const pulumiAccessToken = headers.pulumi_access_token;
