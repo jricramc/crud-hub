@@ -134,24 +134,24 @@ const handler = async (req, res) => {
                 })
               }).catch((err) => {
                 console.log('err_4: ', err);
-                res.status(409).json({ err })
+                res.status(409).json({ err, lvl: 'err_4' })
               });
             }).catch((err) => {
 
               console.log('err_3: ', err);
-              res.status(409).json({ err })
+              res.status(409).json({ err, lvl: 'err_3' })
 
             });
           }).catch((err) => {
 
             console.log('err_2: ', err);
-            res.status(409).json({ err })
+            res.status(409).json({ err, lvl: 'err_2' })
 
           });
         }).catch((err) => {
 
           console.log('err_1: ', err);
-          res.status(409).json({ err })
+          res.status(409).json({ err, lvl: 'err_1' })
 
         });
     } else res.status(405).end(`Method ${method} Not Allowed`);
