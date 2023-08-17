@@ -9,8 +9,6 @@ import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
 const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executionArn }) => {
 
-    // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
-
     const r_id = RID(6);
     const unique_bucket_name = `${bucketName}-${r_id}`.toLocaleLowerCase();
 
@@ -20,7 +18,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
     });
 
     // Create IAM Role for Lambda
-    const lam_role = new aws.iam.Role("lambdaRole", {
+    const lam_role = new aws.iam.Role(`lambda-role-${unique_bucket_name}-${rid}`, {
         assumeRolePolicy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [{
@@ -33,25 +31,29 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         }),
     });
 
+    const { region, accountId } = extractRegionAndAccountIdFromExecutionArn(executionArn);
+
+    const s3GetStructureFuncLambdaName = `s3-get-structure-func-lambda-${unique_bucket_name}-${rid}`
+
     // Attach necessary policies to the Lambda role
-    const lambdaExecutionPolicy = new aws.iam.Policy("lambdaExecutionPolicy", {
+    const lambdaExecutionPolicy = new aws.iam.Policy(`s3-api-lambda-execution-policy-${unique_bucket_name}-${rid}`, {
         policy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [{
                 Effect: "Allow",
                 Action: "lambda:InvokeFunction",
-                Resource: "arn:aws:lambda:REGION:ACCOUNT_ID:function:YOUR_LAMBDA_FUNCTION_NAME",
+                Resource: `arn:aws:lambda:${region}:${accountId}:function:${s3GetStructureFuncLambdaName}`,
             }],
         }),
     });
 
-    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment("lambdaRolePolicyAttachment", {
+    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lambda-role-policy-attachment-${unique_bucket_name}-${rid}`, {
         policyArn: lambdaExecutionPolicy.arn,
         role: lam_role.name,
     });
 
     // Define an S3 policy to grant access to the bucket
-    const s3AccessPolicy = new aws.iam.Policy("s3-access-policy", {
+    const s3AccessPolicy = new aws.iam.Policy(`s3-access-policy-${unique_bucket_name}-${rid}`, {
         policy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [
@@ -62,35 +64,20 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                         "s3:PutObject",
                     ],
                     Resource: [
-                        `arn:aws:s3:::YOUR_UNIQUE_BUCKET_NAME/*`,
+                        `arn:aws:s3:::${unique_bucket_name}/*`,
                     ],
                 },
             ],
         }),
     });
 
-    const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment("s3-access-policy-attachment", {
+    const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment(`s3-access-policy-attachment-${unique_bucket_name}-${rid}`, {
         policyArn: s3AccessPolicy.arn,
         roles: [lam_role],
     });
 
-    // const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
-    
-    // const deleteFunc = new aws.lambda.Function(`delete-func-lambda-${unique_bucket_name}-${rid}`, {
-    //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
-    //     runtime: "nodejs14.x",
-    //     handler: "delete.deleteHandler",
-    //     role: lam_role.arn,
-    //     environment: {
-    //         variables: {
-    //             TABLE_NAME: table.name,
-    //         },
-    //     },
-    // });
-
-
     const s3GetStructureFunc = new aws.lambda.Function(
-        `s3-get-structure-func-lambda-${unique_bucket_name}-${rid}`,
+        s3GetStructureFuncLambdaName,
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`

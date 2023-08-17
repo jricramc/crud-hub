@@ -65,8 +65,16 @@ const extractDomain = (url) => {
     const domain = url.split('/')[0];
     
     return domain;
-  }
+}
+
+const extractRegionAndAccountIdFromExecutionArn = (inputString) => {
+    const components = inputString.split(":");
+    const region = components[3];
+    const accountId = components[4];
+    
+    return { region, accountId };
+}
 
 
-export { deployCRUDAPI, RID, apiRequest, getUserProjects, extractDomain }
+export { deployCRUDAPI, RID, apiRequest, getUserProjects, extractDomain, extractRegionAndAccountIdFromExecutionArn }
 
