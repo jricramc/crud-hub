@@ -7,8 +7,6 @@ const handler = async (req, res) => {
 
     const { url, method: m, data } = body;
 
-    console.log('body: ', body);
-
     if (method === 'POST') {
       const response = await axios({
         url,
