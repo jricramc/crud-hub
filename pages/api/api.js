@@ -2,10 +2,12 @@ import axios from 'axios';
 
 const handler = async (req, res) => {
   try {
-    // const url = 'https://ihi0f9ogvg.execute-api.us-west-2.amazonaws.com/default/webhub-generate-code';
+    
     const { method, body } = req;
 
     const { url, method: m, data } = body;
+
+    console.log('body: ', body);
 
     if (method === 'POST') {
       const response = await axios({

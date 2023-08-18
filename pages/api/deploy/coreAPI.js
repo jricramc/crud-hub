@@ -93,7 +93,7 @@ const handler = async (req, res) => {
             }
 
             await axios({
-              url: _webhub_db_url,
+              url: `${_webhub_db_url}/stage/dynamodb/webhubprojects/create`,
               method: 'POST',
               headers: {
                 'Access-Control-Allow-Origin': '*',

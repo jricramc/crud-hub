@@ -10,10 +10,10 @@ import styles from './index.module.scss';
 import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
-const _webhub_db_url = publicRuntimeConfig.WEBHUB_DB_URL;
 
 const Projects = ({}) => {
 
+    const _webhub_db_url = publicRuntimeConfig.WEBHUB_DB_URL;
     const { data: session } = useSession({ required: true });
     const session_email = session?.user?.email;
 
@@ -152,7 +152,7 @@ const Projects = ({}) => {
 
         if (session_email && projects === undefined) {
             console.log('getting user projects')
-            apiRequest({ url: _webhub_db_url, method: 'POST' })
+            apiRequest({ url: `${_webhub_db_url}/stage/dynamodb/webhubprojects/read`, method: 'POST' })
                 .then((prjcts) => {
                     const projs = prjcts.map(({ name }) => {
                         let obj = {};
