@@ -414,7 +414,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         parentId: folderReadResourceBy.id,
         pathPart: "scan",   
     }, {
-        dependsOn: [folderReadResourceByScan], // Make the integration dependent on the folderReadResourceByScan.
+        dependsOn: [folderReadResourceBy], // Make the integration dependent on the folderReadResourceBy.
     });
 
     /*
