@@ -642,7 +642,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
 
     const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_db_name}-${rid}`, {
         restApi: apiID,
-        stageName: "stage", // Uncomment this line if you want to specify a stage name.
+        stageName: "v3", // Uncomment this line if you want to specify a stage name.
     }, { 
         dependsOn: [
             createIntegration,

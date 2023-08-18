@@ -262,7 +262,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
 
     /*
-        /db/s3/{unique_bucket_name}/create
+        /db/s3/{unique_bucket_name}/create/{path+}
     */
 
     const folderCreatePathResource = new aws.apigateway.Resource(`folder-bucket-name-create-path-resource-${unique_bucket_name}-${rid}`, {

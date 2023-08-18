@@ -12,7 +12,7 @@ const deployCRUDAPI = async ({ name, email, rid }) => {
   });
   if (res.status === 200) {
       return Promise.resolve(res.json());
-  } return Promise.reject(`error ${res.status} received from server`);
+  } return Promise.reject({ msg: `error ${res.status} received from server`, res: res.json() });
 };
 
 const getUserProjects = async ({ email }) => {
