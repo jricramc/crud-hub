@@ -7,6 +7,11 @@ import { BoxArrowRight } from 'react-bootstrap-icons';
 import { RID, apiRequest, deployCRUDAPI, getUserProjects } from '../../utils/utils';
 import styles from './index.module.scss';
 
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+const _webhub_db_url = publicRuntimeConfig.WEBHUB_DB_URL;
+
 const Projects = ({}) => {
 
     const { data: session } = useSession({ required: true });
@@ -147,8 +152,7 @@ const Projects = ({}) => {
 
         if (session_email && projects === undefined) {
             console.log('getting user projects')
-            const url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/read';
-            apiRequest({ url, method: 'POST' })
+            apiRequest({ url: _webhub_db_url, method: 'POST' })
                 .then((prjcts) => {
                     const projs = prjcts.map(({ name }) => {
                         let obj = {};

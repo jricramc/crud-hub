@@ -4,6 +4,11 @@ import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1'
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+const _webhub_db_url = publicRuntimeConfig.WEBHUB_DB_URL;
+
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
@@ -87,10 +92,8 @@ const handler = async (req, res) => {
               name: JSON.stringify(db_data_),
             }
 
-            const webhub_db_url= 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com/stage/dynamodb/webhubprojects/create';
-
             await axios({
-              url: webhub_db_url,
+              url: _webhub_db_url,
               method: 'POST',
               headers: {
                 'Access-Control-Allow-Origin': '*',
