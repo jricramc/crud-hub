@@ -1,9 +1,9 @@
 import unfetch from 'unfetch';
 
-import getConfig from 'next/config';
+// import getConfig from 'next/config';
 
-const { publicRuntimeConfig } = getConfig();
-const _webhub_db_url = publicRuntimeConfig.WEBHUB_DB_URL;
+// const { publicRuntimeConfig } = getConfig();
+const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
 
 const deployCRUDAPI = async ({ name, email, rid }) => {
   const url = '/api/deploy/coreAPI';

@@ -136,6 +136,7 @@ const handler = async ({ rid }) => {
 
     // Create a new Rest API Gateway using awsx.
     const api = new apigateway.RestAPI(`ledger-crud-api-${rid}`, {
+        stageName: "v3",
         routes: [
             { path: "/ledger/create", method: "POST", eventHandler: createFunc },
             { path: "/ledger/read", method: "POST", eventHandler: readFunc },
