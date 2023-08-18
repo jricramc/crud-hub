@@ -297,7 +297,7 @@ const handler = async ({
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${extractDomain(apiUrl)}',
-                            path: '/stage/ledger/create',
+                            path: '/v3/ledger/create',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -472,7 +472,7 @@ const handler = async ({
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${extractDomain(apiUrl)}',
-                            path: '/stage/ledger/create',
+                            path: '/v3/ledger/create',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -646,7 +646,7 @@ const handler = async ({
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${extractDomain(apiUrl)}',
-                            path: '/stage/ledger/create',
+                            path: '/v3/ledger/create',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -816,7 +816,7 @@ const handler = async ({
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${extractDomain(apiUrl)}',
-                            path: '/stage/ledger/create',
+                            path: '/v3/ledger/create',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -986,7 +986,7 @@ const handler = async ({
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${extractDomain(apiUrl)}',
-                            path: '/stage/ledger/create',
+                            path: '/v3/ledger/create',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -1175,7 +1175,7 @@ const handler = async ({
 
     const deployment = new aws.apigateway.Deployment(`crud-dynamic-endpoints-deployment-${rid}`, {
         restApi: apiID,
-        stageName: "stage", // Uncomment this line if you want to specify a stage name.
+        stageName: "v3", // Uncomment this line if you want to specify a stage name.
     }, { dependsOn: [
         // create/service/db/dynamodb/{dbname}
         methodCreateServiceDBName, integrationCreateServiceDBName,

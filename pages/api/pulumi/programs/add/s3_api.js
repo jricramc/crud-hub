@@ -33,10 +33,10 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
     const { region, accountId } = extractRegionAndAccountIdFromExecutionArn(executionArn);
 
-    const s3GetStructureFuncLambdaName = `s3-get-structure-func-lambda-${unique_bucket_name}-${rid}`
+    const s3GetStructureFuncLambdaName = `s3-struc-func-lambda-${unique_bucket_name}-${rid}`
 
     // Attach necessary policies to the Lambda role
-    const lambdaExecutionPolicy = new aws.iam.Policy(`s3-api-lambda-execution-policy-${unique_bucket_name}-${rid}`, {
+    const lambdaExecutionPolicy = new aws.iam.Policy(`s3-api-lambda-exec-policy-${unique_bucket_name}-${rid}`, {
         policy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [{
@@ -47,7 +47,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         }),
     });
 
-    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lambda-role-policy-attachment-${unique_bucket_name}-${rid}`, {
+    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lam-rle-policy-attchmnt-${unique_bucket_name}-${rid}`, {
         policyArn: lambdaExecutionPolicy.arn,
         role: lam_role.name,
     });
@@ -348,7 +348,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
     const deployment = new aws.apigateway.Deployment(`s3-api-deployment-${unique_bucket_name}-${rid}`, {
         restApi: apiID,
-        stageName: "stage", // Uncomment this line if you want to specify a stage name.
+        stageName: "v3", // Uncomment this line if you want to specify a stage name.
     }, { 
         dependsOn: [
             s3GetStructureIntegration,

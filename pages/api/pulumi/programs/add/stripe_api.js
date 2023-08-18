@@ -167,7 +167,7 @@ function response(message, status) {
 
     const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_stripe_name}-${r_id}`, {
         restApi: apiID,
-        stageName: "stage", // Uncomment this line if you want to specify a stage name.
+        stageName: "v3", // Uncomment this line if you want to specify a stage name.
     }, { 
         dependsOn: [ createMethod, createIntegration ]
     });
