@@ -8,16 +8,10 @@ const handler = async (req, res) => {
   const { apiID, apiName, dbResourceId, dbName, rid, executionArn, lam_role_arn } = body;
   const stackName = `add-dynamodb-api-dbResourceId-${dbResourceId}-apiID-${apiID}-${RID()}`;
   try {
-    
-    const pulumiAccessToken = headers.pulumi_access_token;
-    console.log('pulumiAccessToken: ', pulumiAccessToken)
-    // process.env.PULUMI_ACCESS_TOKEN = pulumiAccessToken;
-
-
-    console.log('body: ', body)
-    console.log('stackName: ', stackName);
-    console.log('dbname', dbName)
-    console.log("puLUMI_ACCESS_TOKEN: ", process.env.PULUMI_ACCESS_TOKEN)
+    // console.log('body: ', body)
+    // console.log('stackName: ', stackName);
+    // console.log('dbname', dbName)
+    // console.log("puLUMI_ACCESS_TOKEN: ", process.env.PULUMI_ACCESS_TOKEN)
 
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({

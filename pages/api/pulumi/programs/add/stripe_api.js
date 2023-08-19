@@ -59,9 +59,10 @@ exports.handler = async (event) => {
 if (!event.body) {
     return response("Missing payment data", 400);
 }
-        
+ 
+// Parse the body data: usually URL - encoded data
 // Parse the URL-encoded data
-const body = parseUrlEncoded(event.body);
+const body = parseBody(event.body);
 const { amount, currency = "usd", token } = body;
         
 if (!amount || !token) {
@@ -85,26 +86,38 @@ try {
     }
 };
 
-function parseUrlEncoded(encoded) {
-    const decodedString = Buffer.from(encoded, 'base64').toString('utf8');
-            
-    const inputString = decodedString
-    
-        // Splitting by '&' to get key-value pairs
-    const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
-            
-            // Convert 2D array to object
-    const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
-        obj[key] = value;
-        return obj;
-    }, {});
-            
-            // Loop through the object and decode URL encodings
-    for (let key in resultObject) {
-            resultObject[key] = decodeURIComponent(resultObject[key]);
+const parseBody = (body) => {
+    if (!body) {
+        return
     }
-    return resultObject;
-}
+
+    const type = typeof(body);
+    if (type === 'object') {
+        return body;
+    }
+
+    try {
+        // stringified JSON
+        return JSON.parse(body)
+    } catch (err) {
+
+        // url encoded
+        const decodedString = Buffer.from(body, 'base64').toString('utf8');
+            
+        const inputString = decodedString
+        
+        // Splitting by '&' to get key-value pairs
+        const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                
+        // Convert 2D array to object and decode each URL encoding value 
+        const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+            obj[key] = decodeURIComponent(value);
+            return obj;
+        }, {});
+
+        return resultObject;
+    }
+};
 
 function response(message, status) {
     return {

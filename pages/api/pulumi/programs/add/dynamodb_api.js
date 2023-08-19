@@ -98,10 +98,43 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
                 "index.js": new pulumi.asset.StringAsset(`
                     const AWS = require('aws-sdk');
                     const dynamoDB = new AWS.DynamoDB();
+
+                    const parseBody = (body) => {
+                        if (!body) {
+                            return
+                        }
+                    
+                        const type = typeof(body);
+                        if (type === 'object') {
+                            return body;
+                        }
+                    
+                        try {
+                            // stringified JSON
+                            return JSON.parse(body)
+                        } catch (err) {
+                    
+                            // url encoded
+                            const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                                
+                            const inputString = decodedString
+                            
+                            // Splitting by '&' to get key-value pairs
+                            const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                                    
+                            // Convert 2D array to object and decode each URL encoding value 
+                            const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                                obj[key] = decodeURIComponent(value);
+                                return obj;
+                            }, {});
+                    
+                            return resultObject;
+                        }
+                    };
                     
                     exports.handler = async (event, context) => {
                         try {
-                            const { params: params_ } = JSON.parse(event.body) || {};
+                            const { params: params_ } = parseBody(event.body) || {};
 
                             const params = {
                                 ...(params_ || {})
@@ -164,11 +197,44 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
                 "index.js": new pulumi.asset.StringAsset(`
                     const AWS = require('aws-sdk');
                     const dynamoDB = new AWS.DynamoDB();
+
+                    const parseBody = (body) => {
+                        if (!body) {
+                            return
+                        }
+                    
+                        const type = typeof(body);
+                        if (type === 'object') {
+                            return body;
+                        }
+                    
+                        try {
+                            // stringified JSON
+                            return JSON.parse(body)
+                        } catch (err) {
+                    
+                            // url encoded
+                            const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                                
+                            const inputString = decodedString
+                            
+                            // Splitting by '&' to get key-value pairs
+                            const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                                    
+                            // Convert 2D array to object and decode each URL encoding value 
+                            const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                                obj[key] = decodeURIComponent(value);
+                                return obj;
+                            }, {});
+                    
+                            return resultObject;
+                        }
+                    };
                     
                     exports.handler = async (event, context) => {
                         try {
                             // Parse the request body
-                            const { params: params_ } = JSON.parse(event.body) || {};
+                            const { params: params_ } = parseBody(event.body) || {};
 
                             const params = {
                                 ...(params_ || {})
@@ -232,11 +298,44 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
                 "index.js": new pulumi.asset.StringAsset(`
                     const AWS = require('aws-sdk');
                     const dynamoDB = new AWS.DynamoDB();
+
+                    const parseBody = (body) => {
+                        if (!body) {
+                            return
+                        }
+                    
+                        const type = typeof(body);
+                        if (type === 'object') {
+                            return body;
+                        }
+                    
+                        try {
+                            // stringified JSON
+                            return JSON.parse(body)
+                        } catch (err) {
+                    
+                            // url encoded
+                            const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                                
+                            const inputString = decodedString
+                            
+                            // Splitting by '&' to get key-value pairs
+                            const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                                    
+                            // Convert 2D array to object and decode each URL encoding value 
+                            const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                                obj[key] = decodeURIComponent(value);
+                                return obj;
+                            }, {});
+                    
+                            return resultObject;
+                        }
+                    };
                     
                     exports.handler = async (event, context) => {
                         try {
                             // Parse the request body
-                            const { params: params_ } = JSON.parse(event.body) || {};
+                            const { params: params_ } = parseBody(event.body) || {};
 
                             const params = {
                                 ...(params_ || {})

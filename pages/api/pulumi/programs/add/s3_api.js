@@ -61,7 +61,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                     "Effect": "Allow",
                     Action: [
                         "s3:ListBucket",
-                        "s3:GetObject",
+                        "s3:GetBucketLocation"
                     ],
                     Resource: [
                         `arn:aws:s3:::${unique_bucket_name}`,
@@ -70,7 +70,8 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                 {
                     "Effect": "Allow",
                     Action: [
-                        "s3:GetObject",
+                        "s3:PutObject",
+                        "s3:GetObject"
                     ],
                     Resource: [
                         `arn:aws:s3:::${unique_bucket_name}/*`,
@@ -152,6 +153,39 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                 "index.js": new pulumi.asset.StringAsset(`
                     const AWS = require('aws-sdk');
 
+                    const parseBody = (body) => {
+                        if (!body) {
+                            return
+                        }
+                    
+                        const type = typeof(body);
+                        if (type === 'object') {
+                            return body;
+                        }
+                    
+                        try {
+                            // stringified JSON
+                            return JSON.parse(body)
+                        } catch (err) {
+                    
+                            // url encoded
+                            const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                                
+                            const inputString = decodedString
+                            
+                            // Splitting by '&' to get key-value pairs
+                            const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                                    
+                            // Convert 2D array to object and decode each URL encoding value 
+                            const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                                obj[key] = decodeURIComponent(value);
+                                return obj;
+                            }, {});
+                    
+                            return resultObject;
+                        }
+                    };
+                    
                     exports.handler = async (event, context) => {
                         // Initialize AWS SDK
                         const s3 = new AWS.S3();
@@ -160,21 +194,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                         const bucketName = process.env.BUCKET_NAME
                     
                         // Read the bucket name from the event body
-                        let { files } = event.body || {};
-
-                        // Parse event.body if it's not an object
-                        if (typeof event.body === 'string') {
-                            try {
-                                const parsedBody = JSON.parse(event.body);
-                                files = parsedBody.files;
-                            } catch (error) {
-                                console.error('Error parsing event body:', error);
-                                return {
-                                    statusCode: 400,
-                                    body: JSON.stringify('Invalid event body'),
-                                };
-                            }
-                        }
+                        let { files } = parseBody(event.body) || {};
                     
                         // Retrieve the path variable from pathParameters
                         const { path } = event.pathParameters;

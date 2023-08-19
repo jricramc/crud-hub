@@ -844,11 +844,43 @@ const handler = async ({
                     });
                 };
 
+                const parseBody = (body) => {
+                    if (!body) {
+                        return
+                    }
+                
+                    const type = typeof(body);
+                    if (type === 'object') {
+                        return body;
+                    }
+                
+                    try {
+                        // stringified JSON
+                        return JSON.parse(body)
+                    } catch (err) {
+                
+                        // url encoded
+                        const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                            
+                        const inputString = decodedString
+                        
+                        // Splitting by '&' to get key-value pairs
+                        const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                                
+                        // Convert 2D array to object and decode each URL encoding value 
+                        const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                            obj[key] = decodeURIComponent(value);
+                            return obj;
+                        }, {});
+                
+                        return resultObject;
+                    }
+                };
 
                 exports.handler = async (event) => {
                     const { name } = event.pathParameters || {};
                     // Parse the request body
-                    const { stripeApiSecret } = JSON.parse(event.body) || {};
+                    const { stripeApiSecret } = parseBody(event.body) || {};
                     const createPaymentStripeResult = await createPaymentStripePostRequest(name, stripeApiSecret)
                         .then(responseData => {
                             // console.log('Response data:', responseData);
