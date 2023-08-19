@@ -58,10 +58,19 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
             Version: "2012-10-17",
             Statement: [
                 {
-                    Effect: "Allow",
+                    "Effect": "Allow",
+                    Action: [
+                        "s3:ListBucket",
+                        "s3:GetObject",
+                    ],
+                    Resource: [
+                        `arn:aws:s3:::${unique_bucket_name}`,
+                    ],
+                },
+                {
+                    "Effect": "Allow",
                     Action: [
                         "s3:GetObject",
-                        "s3:PutObject",
                     ],
                     Resource: [
                         `arn:aws:s3:::${unique_bucket_name}/*`,
@@ -267,10 +276,10 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
 
     const folderCreatePathResource = new aws.apigateway.Resource(`folder-bucket-name-create-path-resource-${unique_bucket_name}-${rid}`, {
         restApi: apiID,
-        parentId: folderBucketNameResource.id,
+        parentId: folderCreateResource.id,
         pathPart: "{path+}",
     }, {
-        dependsOn: [folderBucketNameResource],
+        dependsOn: [folderCreateResource],
     });
 
 
