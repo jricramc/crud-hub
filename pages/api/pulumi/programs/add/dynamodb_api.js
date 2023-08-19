@@ -586,7 +586,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     const updateMethod = new aws.apigateway.Method(`update-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderUpdateResource.id,
-        httpMethod: "POST",
+        httpMethod: "PUT",
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
@@ -596,7 +596,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     const deleteMethod = new aws.apigateway.Method(`delete-method-${unique_db_name}-${rid}`, {
         restApi: apiID,
         resourceId: folderDeleteResource.id,
-        httpMethod: "POST",
+        httpMethod: "DELETE",
         authorization: "NONE",
         apiKeyRequired: false,
     }, {
