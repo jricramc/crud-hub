@@ -523,7 +523,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     const readAllIntegration = new aws.apigateway.Integration(`read-all-integration-${unique_db_name}-${rid}`, {                            
         httpMethod: readAllMethod.httpMethod,
         integrationHttpMethod: "POST",
-        resourceId: folderReadAllResource.id,
+        resourceId: folderReadResourceAll.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: readAllFunc.invokeArn,

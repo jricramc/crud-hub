@@ -160,7 +160,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
                         const bucketName = process.env.BUCKET_NAME
                     
                         // Read the bucket name from the event body
-                        let { files } = event.body;
+                        let { files } = event.body || {};
 
                         // Parse event.body if it's not an object
                         if (typeof event.body === 'string') {
