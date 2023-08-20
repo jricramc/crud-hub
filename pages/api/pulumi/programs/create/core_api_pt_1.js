@@ -312,20 +312,20 @@ const handler = async ({ rid }) => {
     /*
         /email
     */
-    const folderMainEmailResource = new aws.apigateway.Resource(`folder-Main-Email-Resource-${rid}`, {
-        restApi: restApiId,
-        parentId: rootResourceId,
-        pathPart: "email",
-    });
+    // const folderMainEmailResource = new aws.apigateway.Resource(`folder-Main-Email-Resource-${rid}`, {
+    //     restApi: restApiId,
+    //     parentId: rootResourceId,
+    //     pathPart: "email",
+    // });
 
-    /*
-        /auth/sengrid
-    */
-    const folderMainSendGridResource = new aws.apigateway.Resource(`folder-Main-SendGrid-Resource-${rid}`, {
-        restApi: restApiId,
-        parentId: folderMainEmailResource.id,
-        pathPart: "sendgrid",
-    });
+    // /*
+    //     /email/sengrid
+    // */
+    // const folderMainSendGridResource = new aws.apigateway.Resource(`folder-Main-SendGrid-Resource-${rid}`, {
+    //     restApi: restApiId,
+    //     parentId: folderMainEmailResource.id,
+    //     pathPart: "sendgrid",
+    // });
 
     return {
         url: api.url,
