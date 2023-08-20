@@ -337,7 +337,7 @@ const handler = async ({ rid }) => {
         s3ResourceId: folderMainS3Resource.id,
         stripeResourceId: folderMainStripeResource.id,
         googleResourceId: folderMainGoogleResource.id,
-        sendgridResourceId: folderMainSendGridResource.id,
+        sendgridResourceId: null, // folderMainSendGridResource.id,
         lam_role,
         executionArn,
         rid,
