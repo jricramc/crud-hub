@@ -28,6 +28,85 @@ const handler = async ({ rid }) => {
         billingMode: "PAY_PER_REQUEST",
     });
 
+    // Create an S3 bucket
+    const ledger_s3_bucket_name = `ledger-s3-bucket-${rid}`;
+    const bucket = new aws.s3.Bucket(ledger_s3_bucket_name, {
+        bucket: ledger_s3_bucket_name,
+    });
+
+    // Create IAM Role for Lambda
+    const lam_s3_role = new aws.iam.Role(`ledger-s3-lambda-role-${rid}`, {
+        assumeRolePolicy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Action: "sts:AssumeRole",
+                Effect: "Allow",
+                Principal: {
+                    Service: "lambda.amazonaws.com",
+                },
+            }],
+        }),
+    });
+
+    const { region, accountId } =  {
+        region: 'us-east-2',
+        accountId: '442052175141',
+    }; // extractRegionAndAccountIdFromExecutionArn(executionArn);
+
+    const generateMintlifyDocsLambdaName = `ledger-mintlify-docs-function-${rid}`;
+
+    // Attach necessary policies to the Lambda role
+    const lambdaExecutionPolicy = new aws.iam.Policy(`ledger-s3-lambda-exec-policy-${rid}`, {
+        policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [{
+                Effect: "Allow",
+                Action: "lambda:InvokeFunction",
+                Resource: `arn:aws:lambda:${region}:${accountId}:function:${generateMintlifyDocsLambdaName}`,
+            }],
+        }),
+    });
+
+    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`ledger-lam-rle-policy-attchmnt-${rid}`, {
+        policyArn: lambdaExecutionPolicy.arn,
+        role: lam_s3_role.name,
+    });
+
+    // Define an S3 policy to grant access to the bucket
+    const s3AccessPolicy = new aws.iam.Policy(`ledger-s3-access-policy-${rid}`, {
+        policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+                {
+                    "Effect": "Allow",
+                    Action: [
+                        "s3:ListBucket",
+                        "s3:GetBucketLocation"
+                    ],
+                    Resource: [
+                        `arn:aws:s3:::${ledger_s3_bucket_name}`,
+                    ],
+                },
+                {
+                    "Effect": "Allow",
+                    Action: [
+                        "s3:PutObject",
+                        "s3:GetObject"
+                    ],
+                    Resource: [
+                        `arn:aws:s3:::${ledger_s3_bucket_name}/*`,
+                    ],
+                },
+            ],
+        }),
+    });
+
+    const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment(`ledger-s3-access-policy-attachment-${rid}`, {
+        policyArn: s3AccessPolicy.arn,
+        roles: [lam_s3_role],
+    });
+
+
     // Define a policy to access DynamoDB
     const lam_policy = {
         Version: "2012-10-17",
@@ -133,6 +212,20 @@ const handler = async ({ rid }) => {
         },
     });
 
+    const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
+        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mintlify.zip")),
+        runtime: "nodejs14.x",
+        handler: "mintlify.handler",
+        role: lam_s3_role.arn,
+        environment: {
+            variables: {
+                TABLE_NAME: table.name,
+                BUCKET_NAME: ledger_s3_bucket_name,
+            },
+        },
+        layers: ["arn:aws:lambda:us-east-2:442052175141:layer:archive-layer:1"], // Add the Archive layer to your Lambda function
+    });
+
 
     // Create a new Rest API Gateway using awsx.
     const api = new apigateway.RestAPI(`ledger-crud-api-${rid}`, {
@@ -142,6 +235,7 @@ const handler = async ({ rid }) => {
             { path: "/ledger/read", method: "POST", eventHandler: readFunc },
             { path: "/ledger/update", method: "POST", eventHandler: updateFunc },
             { path: "/ledger/delete", method: "POST", eventHandler: deleteFunc },
+            { path: "/ledger/generate/mintlify-docs", method: "POST", eventHandler: generateMintlifyDocsFunc },
         ],
     });
 
