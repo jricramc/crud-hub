@@ -29,7 +29,7 @@ const handler = async ({ rid }) => {
     });
 
     // Create an S3 bucket
-    const ledger_s3_bucket_name = `ledger-s3-bucket-${rid}`;
+    const ledger_s3_bucket_name = `ledger-s3-bucket-${rid}`.toLocaleLowerCase();
     const bucket = new aws.s3.Bucket(ledger_s3_bucket_name, {
         bucket: ledger_s3_bucket_name,
     });
