@@ -1,4 +1,4 @@
-name: js-test
+name: MVP-3.3
 runtime:
   name: nodejs
   options:
