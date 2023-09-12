@@ -14,7 +14,7 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { name, email, rid } = body;
 
-    const projectName = 'js-test';
+    const projectName = 'crud-test';
     const stackName = `stack-${rid}`;
    
     if (method === 'POST') {
