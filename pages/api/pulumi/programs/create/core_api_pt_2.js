@@ -30,7 +30,7 @@ const handler = async ({
         parentId: rootResourceId,
         pathPart: "create",
     });
-
+ 
     /*
         /create/service
     */
@@ -49,6 +49,9 @@ const handler = async ({
         pathPart: "db",
     });
 
+    /*
+        /create/service/lambda
+    */
     const folderCreateServiceLambdaResource = new aws.apigateway.Resource(`folder-create-service-lambda-resource-${rid}`, {
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
@@ -71,6 +74,15 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBDynamoDBResource.id,
         pathPart: "{dbname}",
+    });
+
+    /*
+        /create/service/db/dynamodb/{dbname}
+    */
+    const folderCreateServicelambdaNameResource = new aws.apigateway.Resource(`folder-create-service-lambdaName-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceLambdaResource.id,
+        pathPart: "{lambdaName}",
     });
 
     /*
@@ -186,7 +198,7 @@ const handler = async ({
 
     const methodCreateServiceLambda = new aws.apigateway.Method(`create-service-lambda-post-method-${rid}`, {
         restApi: apiID,
-        resourceId: folderCreateServiceLambdaResource.id,
+        resourceId: folderCreateServicelambdaNameResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
