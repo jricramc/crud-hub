@@ -1308,9 +1308,9 @@ exports.handler = async (event) => {
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
-    const integrationCreateServiceLambda = new aws.apigateway.Integration(`create-service-Lambda-integration-${rid}`, {
+    const integrationCreateServiceLambda = new aws.apigateway.Integration(`create-service-lambda-integration-${rid}`, {
         restApi: apiID,
-        resourceId: folderCreateServiceLambdaResource.id,
+        resourceId: folderCreateServicelambdaNameResource.id,
         httpMethod: methodCreateServiceLambda.httpMethod,
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
