@@ -5,7 +5,8 @@ import * as apigateway from "@pulumi/aws-apigateway";
 import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
-import fs from 'fs';
+import * as fs from "fs";
+import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
 const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code }) => {
@@ -45,10 +46,24 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
     });
 
     // Create the Lambda function with the provided user code
+    const tmpFilePath = `/tmp/${RID()}.js`;
+    fs.writeFileSync(tmpFilePath, code);
+
+    // Zip the file
+    const tmpZipPath = `${tmpFilePath}.zip`;
+    const output = fs.createWriteStream(tmpZipPath);
+    const archive = archiver('zip');
+    archive.pipe(output);
+    archive.file(tmpFilePath, { name: 'index.js' });
+    await new Promise((resolve, reject) => {
+        output.on('close', resolve);
+        archive.on('error', reject);
+        archive.finalize();
+    });
+
+    // Use the zipped file for the Lambda function
     const lambdaFunc = new aws.lambda.Function(`user-func-lambda-${unique_lambda_name}-${rid}`, {
-        code: new pulumi.asset.AssetArchive({
-            'index.js': new pulumi.asset.StringAsset(code),
-        }),
+        code: new pulumi.asset.FileArchive(tmpZipPath),  // Use FileArchive for the zipped code
         runtime: "nodejs18.x",
         handler: "index.handler",
         role: lam_role.arn,
@@ -73,13 +88,16 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
     const lambdaIntegration = new aws.apigateway.Integration(`lambda-integration-${unique_lambda_name}-${rid}`, {
         httpMethod: lambdaMethod.httpMethod,
         integrationHttpMethod: "POST",
-        resourceId: folderCreateResource.id,
+        resourceId: lambdaFunctionResource.id,
         restApi: apiID,
         type: "AWS_PROXY",
         uri: lambdaFunc.invokeArn,
     }, {
         dependsOn: [lambdaFunc, lambdaMethod], // Make the integration dependent on the create.
     });
+
+    fs.unlinkSync(tmpFilePath);
+    fs.unlinkSync(tmpZipPath);
 
     return { apiID, apiName, lambdaResourceId, lambdaName, unique_lambda_name };
 
