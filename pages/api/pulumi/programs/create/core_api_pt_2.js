@@ -14,7 +14,7 @@ const _webhub_host = extractDomain(publicRuntimeConfig.WEBHUB_HOST || publicRunt
 
 const handler = async ({
     apiID, apiUrl, apiName,
-    rootResourceId, dbResourceId, s3ResourceId, stripeResourceId, googleResourceId, sendgridResourceId,
+    rootResourceId, dbResourceId, lambdaResourceId, s3ResourceId, stripeResourceId, googleResourceId, sendgridResourceId,
     lam_role_arn, executionArn, rid, stripeLayerArn
 }) => {
 
@@ -47,6 +47,12 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "db",
+    });
+
+    const folderCreateServiceLambdaResource = new aws.apigateway.Resource(`folder-create-service-lambda-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceResource.id,
+        pathPart: "lambda",
     });
 
     /*
@@ -174,6 +180,14 @@ const handler = async ({
         restApi: apiID,
         resourceId: folderCreateServiceDBNameResource.id,
         httpMethod: "GET",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    });
+
+    const methodCreateServiceLambda = new aws.apigateway.Method(`create-service-lambda-post-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceLambdaResource.id,
+        httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
     });
@@ -380,6 +394,168 @@ const handler = async ({
             role: lam_role_arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
+            timeout: 120, 
+        }
+    );
+
+    const createLambdaCrudApiLambda = new aws.lambda.Function(
+        `create-lambda-crud-api-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+const https = require('https');
+                
+const RID = (l = 8) => {
+    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let rid = '';
+    for (let i = 0; i < l; i += 1) {
+        const r = Math.random() * c.length;
+        rid += c.substring(r, r + 1);
+    }
+    return rid;
+};
+
+const createLambdaPostRequest = (lambdaName, code) => {
+    const data = {
+        apiID: "${apiID}",
+        apiName: "${apiName}",
+        lambdaResourceId: "${lambdaResourceId}",
+        lambdaName: lambdaName,
+        code:code,
+        rid: "${rid}",
+        executionArn: "${executionArn}",
+        lam_role_arn: "${lam_role_arn}",
+    };
+
+    return new Promise((resolve, reject) => {
+        const options = {
+            host: '${_webhub_host}',
+            path: '/api/deploy/dynamoDBAPI',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let responseData = '';
+            
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+
+            res.on('end', () => {
+                resolve(responseData); // Resolve with the complete response data
+            });
+        });
+
+        req.on('error', (e) => {
+            reject(e.message);
+        });
+
+        req.write(JSON.stringify(data));
+        req.end();
+    });
+};
+
+const savelambdaToLedger = (resource) => {
+    const data_ = {
+        resource_type: "lambda",
+        ...resource,
+    };
+    
+    const data = {
+        id: RID(),
+        name: JSON.stringify(data_)
+    };
+
+    return new Promise((resolve, reject) => {
+        const options = {
+            host: '${extractDomain(apiUrl)}',
+            path: '/v3/ledger/create',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let responseData = '';
+            
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+
+            res.on('end', () => {
+                resolve(responseData); // Resolve with the complete response data
+            });
+        });
+
+        req.on('error', (e) => {
+            reject(e.message);
+        });
+
+        req.write(JSON.stringify(data));
+        req.end();
+    });
+};
+
+
+exports.handler = async (event) => {
+    const { dbname } = event.pathParameters || {};
+    const createLambdaResult = await createLambdaPostRequest(dbname)
+        .then(responseData => {
+            // console.log('Response data:', responseData);
+            try {
+            const obj = JSON.parse(responseData);
+            if (obj.type === 'success') {
+                const {
+                lambdaName: { value: lambdaName },
+                unique_lambda_name: { value: unique_lambda_name },
+                } = obj['0']['outputs'];
+                return { type: 'success', resource: { lambdaName, unique_lambda_name, date_created: new Date() } }
+            } else {
+                return { type: 'error', err: 'pulumi returned an error code' }
+            }
+            } catch (err) {
+                return { type: 'error', err }
+            }
+        })
+        .catch(err => {
+            // console.error('Error:', err);
+            // throw err; // Re-throw the error to be caught by the Lambda handler
+            return { type: 'error', err }
+        });
+        
+    if (createLambdaResult.type === 'success') {
+        const lambdaLedgerResult = await savelambdaToLedger(createLambdaResult.resource)
+            .then(responseData => {
+                // console.log('Response data:', responseData);
+                return { type: 'success', responseData }
+            })
+            .catch(err => {
+                // console.error('Error:', err);
+                // throw err; // Re-throw the error to be caught by the Lambda handler
+                return { type: 'error', err }
+            });
+        
+        return {
+            lambdaLedgerResult,
+            complete: true,
+        }
+    
+    }
+    return {
+        createLambdaResult,
+        complete: false,
+    }
+};
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs18.x",
             timeout: 120, 
         }
     );
@@ -1120,6 +1296,16 @@ const handler = async ({
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     });
 
+    const integrationCreateServiceLambda = new aws.apigateway.Integration(`create-service-Lambda-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceLambdaResource.id,
+        httpMethod: methodCreateServiceLambda.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createLambdaCrudApiLambda.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
+    });
+
     const integrationCreateServiceBucketName = new aws.apigateway.Integration(`create-service-bucket-name-integration-${rid}`, {
         restApi: apiID,
         resourceId: folderCreateServiceBucketNameResource.id,
@@ -1172,6 +1358,13 @@ const handler = async ({
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
+    const createServiceLambdaApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-lambda-api-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createLambdaCrudApiLambda.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
     const createServiceBucketNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-bucket-name-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createS3CrudApiLambda.name,
@@ -1219,6 +1412,8 @@ const handler = async ({
         methodCreateServicePaymentStripeName, integrationCreateServicePaymentStripeName,
         // create/service/email/sendgrid/{name}
         methodCreateServiceEmailSendGridName, integrationCreateServiceEmailSendGridName,
+        // create/service/lambda/{name}
+        methodCreateServiceLambda, integrationCreateServiceLambda,
     ] });
     
     return { apiID, apiName, rootResourceId, dbResourceId, executionArn, rid };

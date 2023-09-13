@@ -16,9 +16,9 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
 
     const table = new dynamodb.Table(`dynamodb-table-${unique_db_name}-${rid}`, {
         attributes: [
-            { name: "_id", type: "S" },
+            { name: "id", type: "S" },
         ],
-        hashKey: "_id",
+        hashKey: "id",
         billingMode: "PAY_PER_REQUEST",
     });
 
@@ -96,85 +96,105 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
-                    const AWS = require('aws-sdk');
-                    const dynamoDB = new AWS.DynamoDB();
-
-                    const parseBody = (body) => {
-                        if (!body) {
-                            return
-                        }
+                const AWS = require('aws-sdk');
+                const dynamoDB = new AWS.DynamoDB.DocumentClient();
+                
+                const isBase64 = (str) => {
+                    try {
+                        // Check if decoded string is the same as the original string. 
+                        // If so, it's likely not a valid base64 encoded string.
+                        return Buffer.from(str, 'base64').toString('base64') === str;
+                    } catch (e) {
+                        return false;
+                    }
+                };
+                
+                
+                const parseBody = (body) => {
+                    if (!body) {
+                        return
+                    }
+                
+                    const type = typeof(body);
+                    if (type === 'object') {
+                        return body;
+                    }
                     
-                        const type = typeof(body);
-                        if (type === 'object') {
-                            return body;
-                        }
-                    
-                        try {
-                            // stringified JSON
-                            return JSON.parse(body)
-                        } catch (err) {
-                    
-                            // url encoded
-                            const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                
+                    try {
+                        if (isBase64(body)) {
+                            const decodedBase64 = Buffer.from(body, 'base64').toString('utf8');
+                            return JSON.parse(decodedBase64);
+                         }
+                        // stringified JSON
+                        return JSON.parse(body)
+                    } catch (err) {
+                         
+                        
+                
+                        // url encoded
+                        const decodedString = Buffer.from(body, 'base64').toString('utf8');
+                            
+                        const inputString = decodedString
+                        
+                        // Splitting by '&' to get key-value pairs
+                        const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
                                 
-                            const inputString = decodedString
-                            
-                            // Splitting by '&' to get key-value pairs
-                            const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
-                                    
-                            // Convert 2D array to object and decode each URL encoding value 
-                            const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
-                                obj[key] = decodeURIComponent(value);
-                                return obj;
-                            }, {});
-                    
-                            return resultObject;
+                        // Convert 2D array to object and decode each URL encoding value 
+                        const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+                            obj[key] = decodeURIComponent(value);
+                            return obj;
+                        }, {});
+                
+                        return resultObject;
+                    }
+                };
+                
+                exports.handler = async (event) => {
+                    try {
+                        // Parse the event body
+                        const parsedBody = parseBody(event.body);
+                
+                        // Get the id from the parsed body or from the path parameters.
+                        const id = parsedBody.id || event.pathParameters.id;
+                
+                        if (!id) {
+                            return {
+                                statusCode: 400,
+                                body: JSON.stringify({ error: "User id is required" }),
+                            };
                         }
-                    };
-                    
-                    exports.handler = async (event, context) => {
-                        try {
-                            const { params: params_ } = parseBody(event.body) || {};
-
-                            const params = {
-                                ...(params_ || {})
-                                TableName : process.env.TABLE_NAME,
+                
+                        const params = {
+                            TableName: process.env.TABLE_NAME,  // Ensure you set this environment variable in your Lambda configuration
+                            Key: {
+                                id: id  // Assuming id is the primary key (partition key) in your table
+                            }
+                        };
+                
+                        const result = await dynamoDB.get(params).promise();
+                
+                        if (!result.Item) {
+                            return {
+                                statusCode: 404,
+                                body: JSON.stringify({ error: "User not found" }),
                             };
-
-                            // const params = {
-                            //     TableName: 'YourTableName', // Replace with your DynamoDB table name
-                            //     Key: {
-                            //         partitionKey: { S: 'yourPartitionKeyValue' }, // Replace with your partition key value
-                            //         sortKey: { S: 'yourSortKeyValue' }, // Replace with your sort key value (if applicable)
-                            //     },
-                            //     AttributesToGet: ['attribute1', 'attribute2'], // Optional: List of attributes to retrieve
-                            //     ConsistentRead: true, // Optional: Set to true for a strongly consistent read
-                            //     ProjectionExpression: 'attribute1, attribute2', // Optional: Projection expression for specific attributes
-                            //     ExpressionAttributeNames: { '#attrName': 'attribute1' }, // Optional: Attribute name placeholders
-                            // };
-                            
-                    
-                            const getItemResult = await dynamoDB.getItem(params).promise();
-                            
-                            // Process the getItemResult and do something with the data
-                            
-                            console.log('GetItem result:', JSON.stringify(getItemResult));
-                    
-                            const response = {
-                                statusCode: 200,
-                                body: JSON.stringify(getItemResult),
-                            };
-                    
-                            return response;
-                        } catch (error) {
-                            console.error('Error:', error);
-                            const response = {
-                                statusCode: 500,
-                                body: JSON.stringify({ err: error }),
-                            };
-                            return response;
                         }
-                    };
+                
+                        return {
+                            statusCode: 200,
+                            body: JSON.stringify(result.Item),
+                        };
+                
+                    } catch (error) {
+                        console.error("Error:", error);
+                        return {
+                            statusCode: 500,
+                            body: JSON.stringify({ error: "Internal Server Error" }),
+                        };
+                    }
+                };
+                
                                 
                 `),
             }),

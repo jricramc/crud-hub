@@ -273,6 +273,12 @@ const handler = async ({ rid }) => {
         pathPart: "s3",
     });
 
+    const folderMainLambdaResource = new aws.apigateway.Resource(`folder-Lambda-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: rootResourceId,
+        pathPart: "lambda",
+    });
+
     /*
         /payment
     */
@@ -333,6 +339,7 @@ const handler = async ({ rid }) => {
         apiID: restApiId,
         apiName,
         rootResourceId,
+        lambdaResourceId: folderMainLambdaResource.id,
         dbResourceId: folderMainDynamoDBResource.id,
         s3ResourceId: folderMainS3Resource.id,
         stripeResourceId: folderMainStripeResource.id,
