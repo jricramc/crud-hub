@@ -9,7 +9,7 @@ import * as fs from "fs";
 import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code }) => {
+const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code, executionArn }) => {
 
     const r_id = RID(6);
     const unique_lambda_name = `${lambdaName}-${r_id}`;
@@ -82,8 +82,14 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
         dependsOn: [lambdaFunc, lambdaMethod], // Make the integration dependent on the create.
     });
 
-    fs.unlinkSync(tmpFilePath);
-    fs.unlinkSync(tmpZipPath);
+    /* Lambda Permission */
+    const createLambdaInvokePermission = new aws.lambda.Permission(`create-lambda-invoke-permission-${unique_db_name}-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: lambdaFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
 
     return { apiID, apiName, lambdaResourceId, lambdaName, unique_lambda_name };
 
