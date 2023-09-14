@@ -5,7 +5,7 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   const { method, body, headers } = req;
   // const b = body.apiID ? body : JSON.parse(body);
-  const { apiID, apiName,lambdaResourceId, lambdaName, rid, code} = body;
+  const { apiID, apiName,lambdaResourceId, lambdaName, rid, code, executionArn} = body;
   const stackName = `add-lambda-api--${lambdaResourceId}-apiID-${apiID}-${RID()}`;
   try {
     // console.log('body: ', body)
@@ -17,7 +17,7 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_lambda_api({  apiID, apiName,lambdaResourceId, lambdaName, rid, code, executionArn}),
+            program: async () =>  await add_lambda_api({ apiID, apiName, lambdaResourceId, lambdaName, rid, code, executionArn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
