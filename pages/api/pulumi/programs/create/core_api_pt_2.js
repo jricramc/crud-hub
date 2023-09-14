@@ -417,6 +417,58 @@ const handler = async ({
                 "index.js": new pulumi.asset.StringAsset(`
 
 const https = require('https');
+
+const isBase64 = (str) => {
+    try {
+        // Check if decoded string is the same as the original string. 
+        // If so, it's likely not a valid base64 encoded string.
+        return Buffer.from(str, 'base64').toString('base64') === str;
+    } catch (e) {
+        return false;
+    }
+};
+
+
+const parseBody = (body) => {
+    if (!body) {
+        return
+    }
+
+    const type = typeof(body);
+    if (type === 'object') {
+        return body;
+    }
+    
+
+    try {
+        if (isBase64(body)) {
+            const decodedBase64 = Buffer.from(body, 'base64').toString('utf8');
+            return JSON.parse(decodedBase64);
+            }
+        // stringified JSON
+        return JSON.parse(body)
+    } catch (err) {
+            
+        
+
+        // url encoded
+        const decodedString = Buffer.from(body, 'base64').toString('utf8');
+            
+        const inputString = decodedString
+        
+        // Splitting by '&' to get key-value pairs
+        const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
+                
+        // Convert 2D array to object and decode each URL encoding value 
+        const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
+            obj[key] = decodeURIComponent(value);
+            return obj;
+        }, {});
+
+        return resultObject;
+    }
+};
+                
                 
 const RID = (l = 8) => {
     const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -443,7 +495,7 @@ const createLambdaPostRequest = (lambdaName, code) => {
     return new Promise((resolve, reject) => {
         const options = {
             host: '${_webhub_host}',
-            path: '/api/deploy/dynamoDBAPI',
+            path: '/api/deploy/lambdaAPI',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -515,8 +567,13 @@ const savelambdaToLedger = (resource) => {
 
 
 exports.handler = async (event) => {
-    const { dbname } = event.pathParameters || {};
-    const createLambdaResult = await createLambdaPostRequest(dbname)
+    const { lambdaName } = event.pathParameters || {};
+    
+    const bodyObj = parseBody(event.body);
+    
+    const code=  bodyObj.code
+
+    const createLambdaResult = await createLambdaPostRequest(lambdaName, code)
         .then(responseData => {
             // console.log('Response data:', responseData);
             try {

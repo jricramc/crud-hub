@@ -45,25 +45,11 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
         policy: JSON.stringify(lam_policy)
     });
 
-    // Create the Lambda function with the provided user code
-    const tmpFilePath = `/tmp/${RID()}.js`;
-    fs.writeFileSync(tmpFilePath, code);
-
-    // Zip the file
-    const tmpZipPath = `${tmpFilePath}.zip`;
-    const output = fs.createWriteStream(tmpZipPath);
-    const archive = archiver('zip');
-    archive.pipe(output);
-    archive.file(tmpFilePath, { name: 'index.js' });
-    await new Promise((resolve, reject) => {
-        output.on('close', resolve);
-        archive.on('error', reject);
-        archive.finalize();
-    });
-
-    // Use the zipped file for the Lambda function
     const lambdaFunc = new aws.lambda.Function(`user-func-lambda-${unique_lambda_name}-${rid}`, {
-        code: new pulumi.asset.FileArchive(tmpZipPath),  // Use FileArchive for the zipped code
+        code: new pulumi.asset.AssetArchive({
+            "index.js": new pulumi.asset.StringAsset(code)
+
+    }),  // Use FileArchive for the zipped code
         runtime: "nodejs18.x",
         handler: "index.handler",
         role: lam_role.arn,
