@@ -83,11 +83,20 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
     });
 
     /* Lambda Permission */
-    const createLambdaInvokePermission = new aws.lambda.Permission(`create-lambda-invoke-permission-${unique_db_name}-${rid}`, {
+    const createLambdaInvokePermission = new aws.lambda.Permission(`create-lambda-invoke-permission-${unique_lambda_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: lambdaFunc.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_lambda_name}-${rid}`, {
+        restApi: apiID,
+        stageName: "v3", // Uncomment this line if you want to specify a stage name.
+    }, { 
+        dependsOn: [
+            lambdaIntegration
+        ]
     });
 
 
