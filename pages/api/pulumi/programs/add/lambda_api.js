@@ -45,9 +45,26 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
         policy: JSON.stringify(lam_policy)
     });
 
-    const lambdaFunc = new aws.lambda.Function(`user-func-lambda-${unique_lambda_name}-${rid}`, {
+    const lambdaRunFunc = new aws.lambda.Function(`run-func-lambda-${unique_lambda_name}-${rid}`, {
         code: new pulumi.asset.AssetArchive({
             "index.js": new pulumi.asset.StringAsset(code)
+
+    }),  // Use FileArchive for the zipped code
+        runtime: "nodejs18.x",
+        handler: "index.handler",
+        role: lam_role.arn,
+    });
+
+    const lambdaReadFunc = new aws.lambda.Function(`read-func-lambda-${unique_lambda_name}-${rid}`, {
+        code: new pulumi.asset.AssetArchive({
+            "index.js": new pulumi.asset.StringAsset(`
+                exports.handler = async (event, context) => {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ message: "${code}" }),
+                };
+            };
+            `)
 
     }),  // Use FileArchive for the zipped code
         runtime: "nodejs18.x",
@@ -61,9 +78,21 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
         pathPart: unique_lambda_name,
     });
 
-    const lambdaMethod = new aws.apigateway.Method(`lambda-method-${unique_lambda_name}-${rid}`, {
+    const lambdaRunResourcefolder = new aws.apigateway.Resource(`folder-run-lambda-${unique_lambda_name}-${rid}`, {
         restApi: apiID,
-        resourceId: lambdaFunctionResource.id,
+        parentId: lambdaFunctionResource.id,
+        pathPart: "run",
+    });
+
+    const lambdaReadResourcefolder = new aws.apigateway.Resource(`folder-read-lambda-${unique_lambda_name}-${rid}`, {
+        restApi: apiID,
+        parentId: lambdaFunctionResource.id,
+        pathPart: "read",
+    });
+
+    const lambdaRunMethod = new aws.apigateway.Method(`lambda-run-method-${unique_lambda_name}-${rid}`, {
+        restApi: apiID,
+        resourceId: lambdaRunResourcefolder.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
@@ -71,21 +100,52 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
         dependsOn: [lambdaFunctionResource], // Make the integration dependent on the create.
     });
 
-    const lambdaIntegration = new aws.apigateway.Integration(`lambda-integration-${unique_lambda_name}-${rid}`, {
-        httpMethod: lambdaMethod.httpMethod,
+    const lambdaReadMethod = new aws.apigateway.Method(`lambda-read-method-${unique_lambda_name}-${rid}`, {
+        restApi: apiID,
+        resourceId: lambdaReadResourcefolder.id,
+        httpMethod: "GET",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, {
+        dependsOn: [lambdaFunctionResource], // Make the integration dependent on the create.
+    });
+
+
+
+
+    const lambdaRunIntegration = new aws.apigateway.Integration(`lambda-run-integration-${unique_lambda_name}-${rid}`, {
+        httpMethod: lambdaRunMethod.httpMethod,
         integrationHttpMethod: "POST",
-        resourceId: lambdaFunctionResource.id,
+        resourceId: lambdaRunResourcefolder.id,
         restApi: apiID,
         type: "AWS_PROXY",
-        uri: lambdaFunc.invokeArn,
+        uri: lambdaRunFunc.invokeArn,
     }, {
-        dependsOn: [lambdaFunc, lambdaMethod], // Make the integration dependent on the create.
+        dependsOn: [lambdaRunFunc, lambdaRunMethod], // Make the integration dependent on the create.
+    });
+
+    const lambdaReadIntegration = new aws.apigateway.Integration(`lambda-read-integration-${unique_lambda_name}-${rid}`, {
+        httpMethod: lambdaReadMethod.httpMethod,
+        integrationHttpMethod: "GET",
+        resourceId: lambdaReadResourcefolder.id,
+        restApi: apiID,
+        type: "AWS_PROXY",
+        uri: lambdaReadFunc.invokeArn,
+    }, {
+        dependsOn: [lambdaReadFunc, lambdaReadMethod], // Make the integration dependent on the create.
     });
 
     /* Lambda Permission */
     const createLambdaInvokePermission = new aws.lambda.Permission(`create-lambda-invoke-permission-${unique_lambda_name}-${rid}`, {
         action: 'lambda:InvokeFunction',
-        function: lambdaFunc.name,
+        function: lambdaRunFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    });
+
+    const readLambdaInvokePermission = new aws.lambda.Permission(`read-lambda-invoke-permission-${unique_lambda_name}-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: lambdaReadFunc.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
@@ -95,7 +155,8 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
         stageName: "v3", // Uncomment this line if you want to specify a stage name.
     }, { 
         dependsOn: [
-            lambdaIntegration
+            lambdaRunIntegration,
+            lambdaReadIntegration
         ]
     });
 
