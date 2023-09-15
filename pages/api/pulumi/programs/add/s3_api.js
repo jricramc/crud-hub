@@ -151,90 +151,79 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
-                    const AWS = require('aws-sdk');
-
-                    const parseBody = (body) => {
-                        if (!body) {
-                            return
-                        }
-                    
-                        const type = typeof(body);
-                        if (type === 'object') {
-                            return body;
-                        }
-                    
-                        try {
-                            // stringified JSON
-                            return JSON.parse(body)
-                        } catch (err) {
-                    
-                            // url encoded
-                            const decodedString = Buffer.from(body, 'base64').toString('utf8');
-                                
-                            const inputString = decodedString
-                            
-                            // Splitting by '&' to get key-value pairs
-                            const keyValuePairs = inputString.split('&').map(pair => pair.split('='));
-                                    
-                            // Convert 2D array to object and decode each URL encoding value 
-                            const resultObject = keyValuePairs.reduce((obj, [key, value]) => {
-                                obj[key] = decodeURIComponent(value);
-                                return obj;
-                            }, {});
-                    
-                            return resultObject;
-                        }
-                    };
-                    
-                    exports.handler = async (event, context) => {
-                        // Initialize AWS SDK
-                        const s3 = new AWS.S3();
-
-                        // Specify the bucket name
-                        const bucketName = process.env.BUCKET_NAME
-                    
-                        // Read the bucket name from the event body
-                        let { files } = parseBody(event.body) || {};
-                    
-                        // Retrieve the path variable from pathParameters
-                        const { path } = event.pathParameters;
-                    
-                        try {
-                            // Create the path in the S3 bucket
-                            const createPathParams = {
+                const AWS = require('aws-sdk');
+                const s3 = new AWS.S3();
+                
+                exports.handler = async (event, context) => {
+                    const bucketName = process.env.BUCKET_NAME;
+                
+                    if (event.httpMethod !== 'POST' || !event.body) {
+                        return {
+                            statusCode: 400,
+                            body: JSON.stringify({ message: 'Invalid input' }),
+                        };
+                    }
+                
+                    const { path } = event.pathParameters;
+                    const bodyBuffer = Buffer.from(event.body, 'base64');
+                    const boundary = getBoundary(event.headers['content-type'] || event.headers['Content-Type']);
+                
+                    if (!boundary) {
+                        return {
+                            statusCode: 400,
+                            body: JSON.stringify({ message: 'Cannot find boundary' }),
+                        };
+                    }
+                
+                    const parts = bodyBuffer.toString().split(boundary).filter(part => part.includes('filename'));
+                
+                    const files = parts.map(part => {
+                        const match = part.match(/filename="(.+)"\r\n([\s\S]*)Content-Type: (.+\/.+)\r\n\r\n([\s\S]*)$/);
+                        if (!match) return null;
+                
+                        const [_, filename, , mimetype, data] = match;
+                        return {
+                            name: filename,
+                            data: Buffer.from(data, 'binary'),
+                            mimetype: mimetype.trim(),
+                        };
+                    }).filter(Boolean);
+                
+                    try {
+                        const createPathParams = {
+                            Bucket: bucketName,
+                            Key: path.endsWith('/') ? path : path + '/',
+                        };
+                        await s3.putObject(createPathParams).promise();
+                
+                        for (const file of files) {
+                            const saveFileParams = {
                                 Bucket: bucketName,
-                                Key: path,
+                                Key: (path ? (path.endsWith('/') ? path : path + '/') : '') + file.name,
+                                Body: file.data,
+                                ContentType: file.mimetype,
                             };
-                    
-                            await s3.putObject(createPathParams).promise();
-                    
-                            // Save file data if provided
-                            if (files) {
-                                for (const file of files) {
-                                    const saveFileParams = {
-                                        Bucket: bucketName,
-                                        Key: path + '/' + file.name,
-                                        Body: file.data,
-                                    };
-                                    await s3.putObject(saveFileParams).promise();
-                                }
-                            }
-                    
-                            console.log('Path and files created successfully');
-                    
-                            return {
-                                statusCode: 200,
-                                body: JSON.stringify({ type: 'success' }),
-                            };
-                        } catch (error) {
-                            console.error('Error:', error);
-                    
-                            return {
-                                statusCode: 500,
-                                body: JSON.stringify({ type: 'error', message: 'Error creating path and saving files to S3' }),
-                            };
+                            await s3.putObject(saveFileParams).promise();
                         }
-                    }; 
+                
+                        return {
+                            statusCode: 200,
+                            body: JSON.stringify({ type: 'success' }),
+                        };
+                    } catch (error) {
+                        return {
+                            statusCode: 500,
+                            body: JSON.stringify({ type: 'error', message: 'Error creating path and saving files to S3' }),
+                        };
+                    }
+                };
+                
+                function getBoundary(contentType) {
+                    const match = contentType.match(/boundary=(.+)$/);
+                    if (!match) return null;
+                    return \`--\${match[1]}\`;
+                }
+                 
                 `),
             }),
             role: lam_role.arn,
