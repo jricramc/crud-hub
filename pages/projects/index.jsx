@@ -14,8 +14,8 @@ import styles from './index.module.scss';
 const Projects = ({}) => {
 
     const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
-    const { data: session } = useSession({ required: true });
-    const session_email = session?.user?.email;
+    // const { data: session } = useSession({ required: true });
+    // const session_email = session?.user?.email;
 
     const [selectedId, setSelectedId] = useState();
     const [projects, setProjects] = useState();
@@ -23,6 +23,42 @@ const Projects = ({}) => {
     const selectedProject = (projects || []).find(({ id }) => id === selectedId);
 
     const sP = selectedProject || { name: '...', url: '-'};
+
+    const urlStatusStates = {
+        none: {
+            valid: false,
+            msg: 'No URL',
+            variant: 'secondary',
+            style: {},
+        },
+        invalid: {
+            valid: false,
+            msg: 'Invalid URL',
+            variant: 'warning',
+            style: {},
+        },
+        loading: {
+            valid: true,
+            msg: 'Loading...',
+            variant: 'secondary',
+            style: {},
+        },
+        success: {
+            valid: true,
+            msg: 'URL Loaded!',
+            variant: 'success',
+            style: {},
+        },
+        error: {
+            valid: false,
+            msg: 'Error loading',
+            variant: 'danger',
+            style: {},
+        },
+    }
+
+    const [apiURLValue, setApiURLValue] = useState();
+    const [URLStatus, setURLStatus] = useState('none');
 
     const [p, setP] = useState();
 
@@ -34,28 +70,28 @@ const Projects = ({}) => {
     const [name, setName] = useState('');
 
     const handleSubmit = async () => {
-        setDeploymentStatus('deploying');
-        const n = (name?.length || name) ? name : 'Untitled';
-        const rid = RID()
-        await deployCRUDAPI({ email: session?.user?.email, name: n, rid })
-            .then((response) => {
-                console.log('response: ', response);
-                const { upRes: { data: { r_id, api_url } } } = response;
-                setDeploymentStatus('success');
-                setSelectedId(r_id);
-                setProjects((prevState) => [...prevState, {
-                    id: r_id,
-                    name: n,
-                    url: api_url,
-                }]);
-            })
-            .catch((err) => {
-                console.log('err: ', err)
-                setDeploymentStatus('error');
-            });
+    //     setDeploymentStatus('deploying');
+    //     const n = (name?.length || name) ? name : 'Untitled';
+    //     const rid = RID()
+    //     await deployCRUDAPI({ email: session?.user?.email, name: n, rid })
+    //         .then((response) => {
+    //             console.log('response: ', response);
+    //             const { upRes: { data: { r_id, api_url } } } = response;
+    //             setDeploymentStatus('success');
+    //             setSelectedId(r_id);
+    //             setProjects((prevState) => [...prevState, {
+    //                 id: r_id,
+    //                 name: n,
+    //                 url: api_url,
+    //             }]);
+    //         })
+    //         .catch((err) => {
+    //             console.log('err: ', err)
+    //             setDeploymentStatus('error');
+    //         });
     };
 
-    console.log('session: ', session);
+    // console.log('session: ', session);
     const connectionStatus = 'verified';
 
 
@@ -148,44 +184,107 @@ const Projects = ({}) => {
         </div>
     );
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (session_email && projects === undefined) {
-            console.log('getting user projects')
-            apiRequest({ url: `${_webhub_db_url}/stage/dynamodb/webhubprojects/read`, method: 'POST' })
-                .then((prjcts) => {
-                    const projs = prjcts.map(({ name }) => {
-                        let obj = {};
-                        try {
-                            obj = JSON.parse(name);
-                        } catch (err) {
-                            obj = {};
-                        }
-                        return {id: obj.rid, ...obj };
-                    });
+    //     if (session_email && projects === undefined) {
+    //         console.log('getting user projects')
+    //         apiRequest({ url: `${_webhub_db_url}/stage/dynamodb/webhubprojects/read`, method: 'POST' })
+    //             .then((prjcts) => {
+    //                 const projs = prjcts.map(({ name }) => {
+    //                     let obj = {};
+    //                     try {
+    //                         obj = JSON.parse(name);
+    //                     } catch (err) {
+    //                         obj = {};
+    //                     }
+    //                     return {id: obj.rid, ...obj };
+    //                 });
 
-                    console.log('projs: ', projs);
+    //                 console.log('projs: ', projs);
 
-                    const user_projects = projs.filter(({ email }) => email === session_email);
-                    console.log('user_projects: ', user_projects);
-                    if (user_projects.length === 0) {
-                        setShow(true);
-                    }
-                    setProjects(user_projects);
-                }).catch((err) => {
-                    console.log('err: ', err)
-                })
+    //                 const user_projects = projs.filter(({ email }) => email === session_email);
+    //                 console.log('user_projects: ', user_projects);
+    //                 if (user_projects.length === 0) {
+    //                     setShow(true);
+    //                 }
+    //                 setProjects(user_projects);
+    //             }).catch((err) => {
+    //                 console.log('err: ', err)
+    //             })
 
-        }
+    //     }
 
-    }, [session]);
+    // }, [session]);
+
+    // useEffect(() => {
+    //     setP();
+    //     const prj = projects?.find(({ id }) => selectedId === id);
+    //     console.log('prj: ', prj);
+    //     if (prj) {
+    //         const { url } = prj
+    //         apiRequest({ url: `${url}/ledger/read`, method: 'POST' })
+    //             .then((raw_items) => {
+    //                 const items = raw_items.map(({ name }) => {
+    //                     let obj = {};
+    //                     try {
+    //                         obj = JSON.parse(name);
+    //                     } catch (err) {
+    //                         obj = {};
+    //                     }
+    //                     return obj;
+    //                 });
+
+    //                 const p_obj = {
+    //                     core: {
+    //                         date_created: undefined,
+    //                     },
+    //                     resources: [],
+    //                 };
+
+    //                 const r = [];
+
+    //                 for (let i = 0; i < items.length; i += 1) {
+    //                     const { api_id, date_created, resource_type, db_name, unique_dbname } = items[i]
+
+    //                     if (api_id) {
+    //                         p_obj.core.date_created = date_created;
+    //                     } else if (resource_type === 'dynamodb') {
+    //                         r.push({ resource_name: 'DynamoDB', resource_type, db_name, unique_dbname, date_created })
+    //                     }
+    //                 }
+
+    //                 p_obj.resources = r.sort((a, b) => {
+    //                     // Turn your strings into dates, and then subtract them
+    //                     // to get a value that is either negative, positive, or zero.
+    //                     return b.date_created - a.date_created;
+    //                 })
+
+    //                 console.log('p_obj: ', p_obj);
+    //                 setP(p_obj);
+    //             }).catch((err) => {
+    //                 console.log('err: ', err)
+    //             })
+    //     }
+
+    // }, [selectedId]);
 
     useEffect(() => {
         setP();
-        const prj = projects?.find(({ id }) => selectedId === id);
-        console.log('prj: ', prj);
-        if (prj) {
-            const { url } = prj
+        let urlStatusKey = 'invalid'
+
+        if (!apiURLValue?.length) {
+            urlStatusKey = 'none'
+        } else if(apiURLValue.includes('https://') && apiURLValue.includes('execute-api.us-east-2.amazonaws.com')) {
+            urlStatusKey = 'loading'
+        } else {
+            urlStatusKey = 'invalid'
+        }
+
+        setURLStatus(urlStatusKey);
+
+        const url = apiURLValue;
+        if (urlStatusStates[urlStatusKey].valid) {
+
             apiRequest({ url: `${url}/ledger/read`, method: 'POST' })
                 .then((raw_items) => {
                     const items = raw_items.map(({ name }) => {
@@ -225,17 +324,19 @@ const Projects = ({}) => {
 
                     console.log('p_obj: ', p_obj);
                     setP(p_obj);
+                    setURLStatus('success');
                 }).catch((err) => {
                     console.log('err: ', err)
+                    setURLStatus('error');
                 })
         }
 
-    }, [selectedId]);
+    }, [apiURLValue]);
 
     return (
     <>
         <div className={styles.container}>
-            <div className={`${styles.sideBar} z-depth-3-box-shadow`}>
+            {/* <div className={`${styles.sideBar} z-depth-3-box-shadow`}>
                 <div style={{
                     display: 'flex',
                     height: 80,
@@ -273,11 +374,19 @@ const Projects = ({}) => {
                     </div>
                     <Button variant="dark" style={{ color: '#AAABAD' }} onClick={async () => await signOut({ callbackUrl: "/api/auth/logout", })}>Logout</Button>
                 </div>
-            </div>
+            </div> */}
             <div className={styles.chatContainer}>
                 <div style={{ width: '100%', height: 112, background: 'white', display: 'flex', flexDirection: 'column', padding: '0px 44px', borderBottom: '1px solid rgba(0, 0, 0, 0.05)' }}>
-                    <div style={{ color: 'black', fontWeight: 'bold', fontSize: 32, marginTop: 20 }}>{sP.name}</div>
-                    <div style={{ color: '#7D7D7D', fontSize: 14  }}>{sP.url}</div>
+                    <div style={{ color: 'black', fontWeight: 'bold', fontSize: 32, marginTop: 20 }}>Webhub API Kit</div>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%'  }}>
+                        <Button variant={urlStatusStates[URLStatus].variant} size="sm" style={{ marginRight: 5 }}>{urlStatusStates[URLStatus].msg}</Button>
+                        <input
+                            style={{ color: '#7D7D7D', fontSize: 14, width: '100%', maxWidth: 500, height: 28, borderRadius: 2, border: '1px solid grey'  }}
+                            placeholder="Place your API URL here"
+                            value={apiURLValue}
+                            onChange={(ev) => setApiURLValue(ev.target.value)}
+                        />
+                    </div>
                 </div>
                 {p
                     ? <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', paddingBottom: 30 }}>
