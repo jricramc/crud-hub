@@ -94,73 +94,76 @@ const Projects = ({}) => {
     // console.log('session: ', session);
     const connectionStatus = 'verified';
 
+    console.log('p: ', p)
 
     const coreResource = {
         name: 'CORE API',
-        baseUrl: '-',
+        baseUrl: '/create/service',
         type: 'CORE CRUD API',
         created: p?.core?.date_created,
         links: [
-            { method: 'get', endpoint: '/create/dynamodb/{dbname}', description: 'creates a dynamodb resource with the name {dbname} and deploys a CRUD API to interact with the dynamoDB created' },
-            { method: 'get', endpoint: '/create/s3/{bucket-name}', description: 'creates a dynamodb resource with the name {bucket-name} and deploys a CRUD API to interact with the s3 bucket created' },
-            { method: 'get', endpoint: '/delete/dynamodb/{dbname}', description: 'deletes a dynamodb resource with the name {dbname} if one exists along with the CRUD API...' },
-            { method: 'get', endpoint: '/delete/s3/{bucket-name}', description: 'deletes a s3 bucket  resource with the name {bucket-name} if one exists along with the CRUD API...' },
+            { method: 'get', endpoint: '/dynamodb/{dbname}', description: 'creates a dynamodb resource with the name {dbname} and deploys a CRUD API to interact with the dynamoDB created' },
+            { method: 'get', endpoint: '/s3/{bucket-name}', description: 'creates a dynamodb resource with the name {bucket-name} and deploys a CRUD API to interact with the s3 bucket created' },
+            { method: 'post', endpoint: '/lambda/{lambda-name}', description: 'creates a lambda resource with the name {name} and deploys an API (web-hook) to interact with your resource' },
+            { method: 'post', endpoint: '/payment/stripe/{integration-name}', description: 'Creates a Stripe Payment Integration API for business transactions' },
+            { method: 'post', endpoint: '/auth/google/{integration-name}', description: 'Coming Soon! Creates a Google OAuth Integration API for user sign-in' },
+            // { method: 'get', endpoint: '/delete/dynamodb/{dbname}', description: 'deletes a dynamodb resource with the name {dbname} if one exists along with the CRUD API...' },
+            // { method: 'get', endpoint: '/delete/s3/{bucket-name}', description: 'deletes a s3 bucket  resource with the name {bucket-name} if one exists along with the CRUD API...' },
         ],
     }
 
-    const resourceObjToResourceUIObj = ({ resource_name, resource_type, db_name, unique_dbname, date_created }) => ({
-        name: db_name,
-        baseUrl: `/${resource_type}/${unique_dbname}`,
-        resourceName: resource_name,
-        type: resource_type,
-        created: date_created,
-        links: [
+    const resourceLinks = (resource_name, resource_type) => ({
+        'db/dynamodb': [
             { method: 'post', endpoint: '/create', description: `creates an entry for ${resource_name}` },
             { method: 'post', endpoint: '/read', description: `reads an entry from ${resource_name}` },
             { method: 'post', endpoint: '/update', description: `updates an entry from ${resource_name}` },
             { method: 'post', endpoint: '/delete', description: `deletes an entry from ${resource_name}` },
         ],
-    });
+        'db/s3': [
+            { method: 'get', endpoint: '/structure', description: 'returns the folder / file structure of your S3 Bucket' },
+            { method: 'post', endpoint: '/create/{path+}', description: 'upload files and folders to your S3 Bucket at a specific location in your S3 Bucket denoted by {path+}'},
+        ],
+        'lambda': [
+            { method: 'post', endpoint: '/', description: 'execute your business logic running on the lambda'},
+        ],
+    }[resource_type]);
 
-    // const resources = [
-    //     {
-    //         name: 'ricky',
-    //         baseUrl: '/dynamodb/ricky',
-    //         type: 'DynamoDB',
-    //         created: new Date(),
-    //         links: [
-    //             { method: 'post', endpoint: '/create', description: 'creates an entry for  DynamoDB table' },
-    //             { method: 'post', endpoint: '/read', description: 'reads an entry from DynamoDB table' },
-    //             { method: 'post', endpoint: '/update', description: 'updates an entry from DynamoDB table' },
-    //             { method: 'post', endpoint: '/delete', description: 'deletes an entry from DynamoDB table' },
-    //         ],
-    //     },
-    //     {
-    //         name: 'my-first-s3',
-    //         baseUrl: '/s3/my-first-s3',
-    //         type: 'S3',
-    //         created: new Date(),
-    //         links: [
-    //             { method: 'post', endpoint: '/create', description: 'creates an entry for  DynamoDB table' },
-    //             { method: 'post', endpoint: '/read', description: 'reads an entry from DynamoDB table' },
-    //             { method: 'post', endpoint: '/update', description: 'updates an entry from DynamoDB table' },
-    //             { method: 'post', endpoint: '/delete', description: 'deletes an entry from DynamoDB table' },
-    //         ],
-    //     }
-    // ];
+    const resourceObjToResourceUIObj = ({ resource_name, resource_type, name, unique_name, date_created }) => ({
+        name,
+        baseUrl: `/${resource_type}/${unique_name}`,
+        resourceName: resource_name,
+        type: resource_type,
+        created: date_created,
+        links: resourceLinks(resource_name, resource_type),
+    });
 
     const transition = '0.5s';
 
-    const resourceTable = ({ resource, core }) => (
+    const resourceTypeTo = {
+        'db/dynamodb': {
+            src: 'dynamodb',
+            name: 'AWS DynamoDB'
+        },
+        'db/s3': {
+            src: 's3',
+            name: 'AWS S3 Bucket',
+        },
+        'lambda': {
+            src: 'lambda',
+            name: 'AWS Lambda',
+        },
+    };
+
+    const resourceTable = ({ resource, core, created }) => (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '30px 44px 10px 44px' }}>
-            <div style={{ color: '#AEAEAE', fontSize: 12, marginBottom: 6 }}><span style={{ fontSize: 14, fontWeight: 'bold', marginRight: 6 }}>{resource.type}</span> created on 07/28/2023</div>
+            <div style={{ color: '#AEAEAE', fontSize: 12, marginBottom: 6 }}><span style={{ fontSize: 14, fontWeight: 'bold', marginRight: 6 }}>{core ? resource.type : resourceTypeTo[resource.type].name}</span>{`created on ${created}`}</div>
             <div style={{ border: core ? '1px solid rgba(0, 0, 0, 0.05)' : 'none', borderRadius: 8, padding: '26px 0px', display: 'flex', flexDirection: 'column', background: core ? 'rgba(255, 255, 255, 0.2)' : 'white' }}>
                 <div style={{ padding: '0px 31px', height: 45, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <img
-                        src={`/images/aws-${core ? 'dynamodb' : resource.type}.svg`}
+                        src={`/images/${core ? 'webhub-logo.png' : 'aws-' + resourceTypeTo[resource.type].src + '.svg'}`}
                         alt={`aws ${resource.type} service icon`}
                         width={45} height={45}
-                        style={{ borderRadius: 4 }}
+                        style={{ borderRadius: 4, position: 'relative', top: core ? -5 : 0 }}
                     />
                     <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 29 }}>
                         <div style={{ fontSize: 20, fontWeight: 'bold', color: '#262B2E' }}>{resource.name.toUpperCase()}</div>
@@ -287,6 +290,7 @@ const Projects = ({}) => {
 
             apiRequest({ url: `${url}/ledger/read`, method: 'POST' })
                 .then((raw_items) => {
+                    console.log('raw_items: ', raw_items)
                     const items = raw_items.map(({ name }) => {
                         let obj = {};
                         try {
@@ -307,12 +311,16 @@ const Projects = ({}) => {
                     const r = [];
 
                     for (let i = 0; i < items.length; i += 1) {
-                        const { api_id, date_created, resource_type, db_name, unique_dbname } = items[i]
+                        const { api_id, date_created, resource_type, db_name, unique_dbname, uniqueBucketName } = items[i]
 
                         if (api_id) {
                             p_obj.core.date_created = date_created;
-                        } else if (resource_type === 'dynamodb') {
-                            r.push({ resource_name: 'DynamoDB', resource_type, db_name, unique_dbname, date_created })
+                        } else if (resource_type === 'db/dynamodb') {
+                            r.push({ resource_name: 'DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
+                        } else if (resource_type === 'db/s3') {
+                            r.push({ resource_name: 'S3 Bucket', resource_type, name: 's3-bucket', unique_name: uniqueBucketName, date_created })
+                        } else {
+                            console.log('items[i]: ', items[i])
                         }
                     }
 
@@ -381,7 +389,7 @@ const Projects = ({}) => {
                     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%'  }}>
                         <Button variant={urlStatusStates[URLStatus].variant} size="sm" style={{ marginRight: 5 }}>{urlStatusStates[URLStatus].msg}</Button>
                         <input
-                            style={{ color: '#7D7D7D', fontSize: 14, width: '100%', maxWidth: 500, height: 28, borderRadius: 2, border: '1px solid grey'  }}
+                            style={{ color: '#7D7D7D', fontSize: 14, width: '100%', maxWidth: 500, height: 28, borderRadius: 2, border: '1px solid grey' }}
                             placeholder="Place your API URL here"
                             value={apiURLValue}
                             onChange={(ev) => setApiURLValue(ev.target.value)}
