@@ -13,6 +13,10 @@ import styles from './index.module.scss';
 
 const Projects = ({}) => {
 
+    const router = useRouter();
+
+    console.log(router.query.url)
+
     const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
     // const { data: session } = useSession({ required: true });
     // const session_email = session?.user?.email;
@@ -57,7 +61,7 @@ const Projects = ({}) => {
         },
     }
 
-    const [apiURLValue, setApiURLValue] = useState();
+    const [apiURLValue, setApiURLValue] = useState(router.query.url);
     const [URLStatus, setURLStatus] = useState('none');
 
     const [p, setP] = useState();
@@ -124,7 +128,8 @@ const Projects = ({}) => {
             { method: 'post', endpoint: '/create/{path+}', description: 'upload files and folders to your S3 Bucket at a specific location in your S3 Bucket denoted by {path+}'},
         ],
         'lambda': [
-            { method: 'post', endpoint: '/', description: 'execute your business logic running on the lambda'},
+            { method: 'post', endpoint: '/execute', description: 'execute your business logic running on the lambda'},
+            { method: 'post', endpoint: '/read', description: 'see the code contents that is running on your lambda'},
         ],
     }[resource_type]);
 
@@ -311,14 +316,23 @@ const Projects = ({}) => {
                     const r = [];
 
                     for (let i = 0; i < items.length; i += 1) {
-                        const { api_id, date_created, resource_type, db_name, unique_dbname, uniqueBucketName } = items[i]
+                        const {
+                            api_id,
+                            date_created,
+                            resource_type,
+                            db_name, unique_dbname,
+                            bucketName, uniqueBucketName,
+                            lambdaName, unique_lambda_name
+                        } = items[i]
 
                         if (api_id) {
                             p_obj.core.date_created = date_created;
                         } else if (resource_type === 'db/dynamodb') {
-                            r.push({ resource_name: 'DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
+                            r.push({ resource_name: 'AWS DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
                         } else if (resource_type === 'db/s3') {
-                            r.push({ resource_name: 'S3 Bucket', resource_type, name: 's3-bucket', unique_name: uniqueBucketName, date_created })
+                            r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
+                        } else if (resource_type === 'lambda') {
+                            r.push({ resource_name: 'AWS Lambda', resource_type, name: lambdaName, unique_name: unique_lambda_name, date_created })
                         } else {
                             console.log('items[i]: ', items[i])
                         }
