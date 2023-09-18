@@ -61,7 +61,7 @@ export default function Home() {
 
 				{/* <!-- Header --> */}
 					<header id="header" className="alt">
-						<h1><a href="#">WebHUB</a></h1>
+						<h1><a href="#">WebHub</a></h1>
 						{/* <nav id="nav">
 							<ul>
 								<li className="special">
@@ -81,32 +81,37 @@ export default function Home() {
 					</header>
 
 				{/* <!-- Banner --> */}
-					<section id="banner">
-						<div className="inner">
-							<h2>WebHUB</h2>
-                            <p>Develope, deploy, and<br /> manage your APIs effortlessly</p>
-                            {/* <p>Your one stop shop to build and manage your APIs</p> */}
-							{/* <p>Automating development, deployment, and management of APIs</p> */}
-							<ul className="actions special">
-								<li>
-								<button
-									className="button primary"
-									onClick={() => signIn('google', { callbackUrl: '/projects' })}
-								>{session ? 'Open Projects' : 'Sign In'}</button>
-								</li>
-							</ul>
-						</div>
-						<a href="#one" className="more scrolly">Learn More</a>
-					</section>
+				<section id="banner">
+	<div className="inner">
+		<h2>WebHub</h2>
+		<p>Build your backend in minutes<br /> manage it effortlessly</p>
+		<ul className="actions special">
+			<li>
+				<button
+					className="button primary"
+					onClick={() => signIn('google', { callbackUrl: '/projects' })}
+				>{session ? 'Open Projects' : 'Sign In'}</button>
+			</li>
+			<li>
+				<a href="https://webhub.mintlify.app/quickstart" className="button" target="_blank" rel="noopener noreferrer">Documentation</a> {/* Adjust the href as per your routing */}
+			</li>
+			<li>
+				<a href="mailto:webhubhq@gmail.com" className="button" target="_blank" rel="noopener noreferrer">Contact Us</a>
+			</li>
+		</ul>
+	</div>
+	<a href="#one" className="more scrolly">Learn More</a>
+</section>
 
 				{/* <!-- One --> */}
 					<section id="one" className="wrapper style1 special">
 						<div className="inner">
 							<header className="major">
 								<h2>
-                                Build and manage fully functional hosted APIs for free Powered by AWS
+                                {/* Build and manage fully functional hosted APIs for free Powered by AWS */}
+								Prototype and test your ideas by using your<br />  webhub API
                                 </h2>
-								<p>WebHUB offers web developers a <span style={{ textDecoration: 'underline' }}>online sandbox</span> to develop, test, and deploy CRUD APIs with zero code required. As a developer you are able to leverage the power of our <span style={{ textDecoration: 'underline' }}>out of the box integrations</span> with AWS services like DynamoDB, API Gateway, and Lambda to create dynamic and complex CRUD APIs effortlessly.  </p>
+								<p>WebHub offers web developers an <span style={{ textDecoration: 'underline' }}>online sandbox</span> to develop, test, and deploy backend resources with zero code required. As a developer you are able to leverage the power of our <span style={{ textDecoration: 'underline' }}>out of the box integrations</span> with AWS services like DynamoDB, API Gateway, and Lambda to create dynamic and complex APIs effortlessly.  </p>
 							</header>
 							{/* <ul className="icons major">
 								<li><span className="icon fa-gem major style1"><span className="label">Lorem</span></span></li>
@@ -122,21 +127,21 @@ export default function Home() {
 							<div className="image"><img src="images/pic01.jpg" alt="" /></div><div className="content">
 								<h2>Speed up your development<br />
 								 cycle and iterate faster</h2>
-								<p>Our application uses industry standard frameworks to deploy AWS infrastructure in seconds and orchastrate them through a simple REST APIs. Allowing developers to focus on designing a high level API architecture.</p>
+								<p>Our application uses industry standard frameworks to deploy AWS infrastructure in seconds and orchastrate them through a simple REST API. Allowing developers to focus on designing a high level API architecture.</p>
 							</div>
 						</section>
 						<section className="spotlight">
 							<div className="image"><img src="images/pic02.jpg" alt="" /></div><div className="content">
 								<h2>Automatic Documentation<br />
 								and data management out of the box</h2>
-								<p>All data passing through a WebHUB API endpoint is compressed and summarized into a secure ledger that records your API data story. This serves as a <span style={{ textDecoration: 'underline' }}>single source of truth</span> from which we dynamically build your API documentation from.</p>
+								<p>All data passing through a WebHub API endpoint is compressed and summarized into a secure ledger that records your API data story. This serves as a <span style={{ textDecoration: 'underline' }}>single source of truth</span> from which we dynamically build your API documentation from.</p>
 							</div>
 						</section>
 						<section className="spotlight">
 							<div className="image"><img src="images/pic03.jpg" alt="" /></div><div className="content">
 								<h2>Free Hosting and access<br />
 								to expensive third party services</h2>
-								<p>WebHUB builds developers an online sandbox to access enterprise level AWS servics with no strings attached.</p>
+								<p>WebHub builds developers an online sandbox to access enterprise level AWS services with no strings attached.</p>
 							</div>
 						</section>
 					</section>
@@ -182,7 +187,7 @@ export default function Home() {
 						<div className="inner">
 							<header>
 								<h2>Get Started</h2>
-								<p>Its time to stop wasting time, resource, and money and onboard on to the best backend development stack on the market today!</p>
+								<p>Its time to stop wasting time, resources, and money and onboard on to the best backend development stack on the market today!</p>
 							</header>
 							<ul className="actions stacked">
 								<li>
@@ -193,6 +198,17 @@ export default function Home() {
 								</li>
 								{/* <li><a href="#" className="button fit">Learn More</a></li> */}
 							</ul>
+						</div>
+					</section>
+
+
+				{/* <!-- Discord Section --> */}
+					<section className="discord-section">
+						<div className="inner">
+							<a href="https://discord.gg/8mY5BRv8" target="_blank" rel="noopener noreferrer">
+								<i className="icon brands fa-discord"></i>
+								Join the Community
+							</a>
 						</div>
 					</section>
 

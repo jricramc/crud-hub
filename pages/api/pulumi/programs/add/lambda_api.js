@@ -99,7 +99,7 @@ const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code
     }, {
         dependsOn: [lambdaFunctionResource], // Make the integration dependent on the create.
     });
-
+``
     const lambdaReadMethod = new aws.apigateway.Method(`lambda-read-method-${unique_lambda_name}-${rid}`, {
         restApi: apiID,
         resourceId: lambdaReadResourcefolder.id,
