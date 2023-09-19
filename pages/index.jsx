@@ -29,6 +29,32 @@ export default function Home() {
 			console.log('err: ', err);
 		}
 	};
+
+	const saveEmail = async (email) => {
+		try {
+			const response = await fetch('https://94e7dq31vc.execute-api.us-east-2.amazonaws.com/default/LandingPage', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email: email }),
+			});
+	
+			// Check for successful response
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}`);
+			}
+	
+			const data = await response.json();
+			console.log(data);
+	
+		} catch (error) {
+			console.error('There was a problem sending the email:', error);
+		}
+	}
+	
+	// Usage:
+	
 	
 		
 
@@ -44,12 +70,40 @@ export default function Home() {
 		console.log("Email submitted for early access:", email);
 
 		const email1 = {
-			subject: "early access email",
-			content: `New email`,
+			subject: "Welcome to WebHub 🚀 - Your Journey Begins Here!",
+			content: `
+				<h1>Welcome to WebHub!</h1>
+				
+				<p>Hey there,</p>
+		
+				<p>We're absolutely thrilled to have you onboard. 🎉 You're among the select few who have taken the first step into the future of the web with WebHub!</p>
+		
+				<p>Here's a sneak peek of what's in store for you:</p>
+		
+				<ul>
+					<li>🛠 Cutting-edge tools to supercharge your online projects.</li>
+					<li>🌐 A seamless browsing experience like never before.</li>
+					<li>🤝 A community of pioneers passionate about the web's future.</li>
+				</ul>
+		
+				<p>But that's just the tip of the iceberg. We're working day and night to bring even more features and improvements to make your WebHub experience truly exceptional.</p>
+		
+				<p>While you wait, we'd love for you to join our <a href="https://discord.gg/8mY5BRv8">community forums</a> and be part of the discussions. Share your thoughts, insights, or even just a hello! We value your feedback and insights as they help shape WebHub's future.</p>
+		
+				<p>Stay tuned for more updates. The best is yet to come!</p>
+		
+				<br>
+				<p>Happy exploring,</p>
+				<p><strong>The WebHub Team</strong></p>
+		
+				<p><small>P.S. Got questions? Feel free to <a href="mailto:webhubhq@gmail.com">reach out to us</a>. We're always here to help!</small></p>
+			`,
 			email: email
 		}
+		
 
 		sendEmail(email1)
+		saveEmail(email)
 		// TODO: Send the email to your backend or third-party service
 		setEmail(''); // Reset the email input field
 	}
