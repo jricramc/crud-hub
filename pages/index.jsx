@@ -81,9 +81,9 @@ export default function Home() {
 				<p>Here's a sneak peek of what's in store for you:</p>
 		
 				<ul>
-					<li>🛠 Cutting-edge tools to supercharge your online projects.</li>
-					<li>🌐 A seamless browsing experience like never before.</li>
-					<li>🤝 A community of pioneers passionate about the web's future.</li>
+					<li>🛠 Cutting-edge tools to supercharge your applications.</li>
+					<li>🌐 A seamless low-code app development experience like never before.</li>
+					<li>🤝 A community of pioneers passionate about the future of web development.</li>
 				</ul>
 		
 				<p>But that's just the tip of the iceberg. We're working day and night to bring even more features and improvements to make your WebHub experience truly exceptional.</p>
