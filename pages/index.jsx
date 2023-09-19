@@ -9,8 +9,51 @@ export default function Home() {
 
 	const { data: session } = useSession();
 	const [preload, setPreload] = useState(true);
+	const [email, setEmail] = useState('');
+
 
 	console.log('session: ', session)
+	const sendEmail = async ({ subject = '', content = '', email = '' }) => {
+		try {
+			const response = await fetch('https://ga33n2aqc3.execute-api.us-east-2.amazonaws.com/prod/send-email', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ subject, content, email }),
+			});
+			
+			const body = await response.json();
+			console.log('body: ', body);
+		} catch (err) {
+			console.log('err: ', err);
+		}
+	};
+	
+		
+
+	
+
+
+	const handleEmailChange = (e) => {
+		setEmail(e.target.value);
+	}
+
+	const handleEmailSubmission = (e) => {
+		e.preventDefault();
+		console.log("Email submitted for early access:", email);
+
+		const email1 = {
+			subject: "early access email",
+			content: `New email`,
+			email: email
+		}
+
+		sendEmail(email1)
+		// TODO: Send the email to your backend or third-party service
+		setEmail(''); // Reset the email input field
+	}
+	
 
   useEffect(() => {
     // const scripts = [
@@ -99,9 +142,42 @@ export default function Home() {
 				<a href="mailto:webhubhq@gmail.com" className="button" target="_blank" rel="noopener noreferrer">Contact Us</a>
 			</li>
 		</ul>
+		<ul className="early access">
+			<h3>Get Early Access</h3>
+		</ul>
+        <form onSubmit={handleEmailSubmission}>
+            <input
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                placeholder="Enter your email"
+                required
+				style={{ padding: '10px', width: '100%', maxWidth: '400px', display: 'block', margin: '0 auto', marginBottom: '60px'}}
+            />
+            <button type="submit">Submit</button>
+        </form>
 	</div>
 	<a href="#one" className="more scrolly">Learn More</a>
 </section>
+{/* 
+<section className="email-submission-section">
+    <div className="inner">
+        <h2>Get Early Access</h2>
+        <form onSubmit={handleEmailSubmission}>
+            <input
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                placeholder="Enter your email"
+                required
+            />
+            <button type="submit">Submit</button>
+        </form>
+	
+    </div>
+</section> */}
+
+
 
 				{/* <!-- One --> */}
 					<section id="one" className="wrapper style1 special">
@@ -111,7 +187,7 @@ export default function Home() {
                                 {/* Build and manage fully functional hosted APIs for free Powered by AWS */}
 								Prototype and test your ideas by using your<br />  webhub API
                                 </h2>
-								<p>WebHub offers web developers an <span style={{ textDecoration: 'underline' }}>online sandbox</span> to develop, test, and deploy backend resources with zero code required. As a developer you are able to leverage the power of our <span style={{ textDecoration: 'underline' }}>out of the box integrations</span> with AWS services like DynamoDB, API Gateway, and Lambda to create dynamic and complex APIs effortlessly.  </p>
+								<p>WebHub offers web developers an <span style={{ textDecoration: 'underline' }}>online sandbox</span> to develop, test, and deploy backend resources with zero code required. As a creator you are able to leverage the power of our <span style={{ textDecoration: 'underline' }}>out of the box integrations</span> with AWS services like DynamoDB, API Gateway, and Lambda to create dynamic and complex APIs effortlessly.  </p>
 							</header>
 							{/* <ul className="icons major">
 								<li><span className="icon fa-gem major style1"><span className="label">Lorem</span></span></li>
@@ -127,14 +203,14 @@ export default function Home() {
 							<div className="image"><img src="images/pic01.jpg" alt="" /></div><div className="content">
 								<h2>Speed up your development<br />
 								 cycle and iterate faster</h2>
-								<p>Our application uses industry standard frameworks to deploy AWS infrastructure in seconds and orchastrate them through a simple REST API. Allowing developers to focus on designing a high level API architecture.</p>
+								<p>Our application uses industry standard frameworks to deploy AWS infrastructure in seconds and orchastrate them through a simple REST API. Allowing you to focus on designing a high level backend architecture.</p>
 							</div>
 						</section>
 						<section className="spotlight">
 							<div className="image"><img src="images/pic02.jpg" alt="" /></div><div className="content">
 								<h2>Automatic Documentation<br />
 								and data management out of the box</h2>
-								<p>All data passing through a WebHub API endpoint is compressed and summarized into a secure ledger that records your API data story. This serves as a <span style={{ textDecoration: 'underline' }}>single source of truth</span> from which we dynamically build your API documentation from.</p>
+								<p>All data passing through a WebHub API endpoint is compressed and summarized into a secure ledger that records your API data story. This serves as a <span style={{ textDecoration: 'underline' }}>single source of truth</span> from which we dynamically build your backend's documentation from.</p>
 							</div>
 						</section>
 						<section className="spotlight">
@@ -204,7 +280,8 @@ export default function Home() {
 
 				{/* <!-- Discord Section --> */}
 					<section className="discord-section">
-						<div className="inner">
+						<div className="inner"
+						style={{ padding: '0px', width: '100%', maxWidth: '400px', display: 'block', margin: '0 auto', marginBottom: '10px', marginLeft: '775px'}}>
 							<a href="https://discord.gg/8mY5BRv8" target="_blank" rel="noopener noreferrer">
 								<i className="icon brands fa-discord"></i>
 								Join the Community
