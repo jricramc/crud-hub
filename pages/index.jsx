@@ -183,18 +183,21 @@ export default function Home() {
 		<h2>WebHub</h2>
 		<p>Build your backend in minutes<br /> manage it effortlessly</p>
 		<ul className="actions special">
-			<li>
+			{/* <li>
 				<button
 					className="button primary"
 					onClick={() => signIn('google', { callbackUrl: '/projects' })}
 				>{session ? 'Open Projects' : 'Sign In'}</button>
-			</li>
+			</li> */}
 			<li>
+				<a href="https://webhub-sandbox.up.railway.app/isoflow" className="button" target="_blank" rel="noopener noreferrer">Try Beta</a> {/* Adjust the href as per your routing */}
+			</li>
+			{/* <li>
 				<a href="https://webhub.mintlify.app/quickstart" className="button" target="_blank" rel="noopener noreferrer">Documentation</a> {/* Adjust the href as per your routing */}
-			</li>
-			<li>
+			{/* </li> */}
+			{/* <li>
 				<a href="mailto:webhubhq@gmail.com" className="button" target="_blank" rel="noopener noreferrer">Contact Us</a>
-			</li>
+			</li> */}
 		</ul>
 		<ul className="early access">
 			<h3>Get Early Access</h3>
@@ -345,16 +348,30 @@ export default function Home() {
 
 				{/* <!-- Footer --> */}
 					<footer id="footer">
-						<ul className="icons">
-							<li><a href="#" className="icon brands fa-twitter"><span className="label">Twitter</span></a></li>
+						
+			
+					
+							
+							{/* <li><a href="#" className="icon brands fa-twitter"><span className="label">Twitter</span></a></li>
 							<li><a href="#" className="icon brands fa-facebook-f"><span className="label">Facebook</span></a></li>
-							<li><a href="#" className="icon brands fa-instagram"><span className="label">Instagram</span></a></li>
-							<li><a href="#" className="icon brands fa-dribbble"><span className="label">Dribbble</span></a></li>
-							<li><a href="#" className="icon solid fa-envelope"><span className="label">Email</span></a></li>
-						</ul>
+							<li><a href="#" className="icon brands fa-instagram"><span className="label">Instagram</span></a></li> */}
+							{/* <li><a href="mailto:webhubhq@gmail.com" className="icon solid fa-envelope"><span className="label">Email</span></a></li> */}
+						<div>
+
+					
+							<a href="mailto:webhubhq@gmail.com" className="button" target="_blank" rel="noopener noreferrer">Contact Us</a>
+				
+						
+
+							<a href="https://webhub.mintlify.app/quickstart" className="button" target="_blank" rel="noopener noreferrer">Documentation</a> {/* Adjust the href as per your routing */}
+					
+						</div>
+						
 						<ul className="copyright">
 							<li>&copy; WEBHUB</li><li>MIT Affiliated</li>
 						</ul>
+						<a href="https://www.linkedin.com/company/usewebhub/about" className="icon brands fa-linkedin"><span className="label">Linkedin</span></a>
+
 					</footer>
 
 			</div>
