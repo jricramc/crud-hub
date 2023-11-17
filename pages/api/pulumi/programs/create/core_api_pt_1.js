@@ -316,6 +316,15 @@ const handler = async ({ rid }) => {
     });
 
     /*
+        /websockets
+    */
+    const folderMainWebsocketResource = new aws.apigateway.Resource(`folder-Main-Websocket-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: rootResourceId,
+        pathPart: "websocket",
+    });
+
+    /*
         /email
     */
     // const folderMainEmailResource = new aws.apigateway.Resource(`folder-Main-Email-Resource-${rid}`, {
@@ -344,6 +353,7 @@ const handler = async ({ rid }) => {
         s3ResourceId: folderMainS3Resource.id,
         stripeResourceId: folderMainStripeResource.id,
         googleResourceId: folderMainGoogleResource.id,
+        websocketsResourceId: folderMainWebsocketResource.id,
         sendgridResourceId: null, // folderMainSendGridResource.id,
         lam_role,
         executionArn,
