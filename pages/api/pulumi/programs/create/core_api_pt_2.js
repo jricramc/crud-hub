@@ -1006,12 +1006,13 @@ exports.handler = async (event) => {
         }
     );
 
-    // lambda test event
-    // {
-    //     "pathParameters": {
-    //         "name": "ricky6666"
-    //     }
-    // }
+    /* lambda test event
+    {
+        "pathParameters": {
+            "name": "ricky6666"
+        }
+    }
+    */
 
     const createServicePaymentStripeLambda = new aws.lambda.Function(
         `create-service-payment-stripe-lambda-${rid}`,
@@ -1491,10 +1492,10 @@ exports.handler = async (event) => {
                             const obj = JSON.parse(responseData);
                             if (obj.type === 'success') {
                                 const {
-                                dbName: { value: db_name },
-                                unique_db_name: { value: unique_dbname },
+                                socketName: { value: socket_name },
+                                unique_socket_name: { value: unique_socket_name },
                                 } = obj['0']['outputs'];
-                                return { type: 'success', resource: { oauth_name, unique_oauth_name: undefined, date_created: new Date() } }
+                                return { type: 'success', resource: { wsName, unique_socket_name, date_created: new Date() } }
                             } else {
                                 return { type: 'error', err: 'pulumi returned an error code' }
                             }

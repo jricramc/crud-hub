@@ -135,7 +135,7 @@ const handler = async ({ socketName, rid, lam_role_arn, websocket_endpoint = '' 
     });
 
 
-    return { websocketDeployment, websocketStage, socketName, unique_socket_name, websocketAPI };
+    return { websocketDeployment, websocketStage, socket_name: socketName, unique_socket_name, websocketAPI };
 };
 
 export default handler
