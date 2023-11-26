@@ -31,7 +31,7 @@ const handler = async ({ socketName, rid, lam_role_arn, websocket_endpoint = '' 
                 import AWS from 'aws-sdk';
                 let CONNECTIONS_OBJ = {};
 
-                const ENDPOINT = process.env.TABLE_NAME;
+                const ENDPOINT = process.env.WEBSOCKET_ENDPOINT;
                 const client = new AWS.ApiGatewayManagementApi({ endpoint: ENDPOINT });
 
 

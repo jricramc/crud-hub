@@ -16,7 +16,7 @@ const handler = async ({
     apiID, apiUrl, apiName,
     rootResourceId, dbResourceId, lambdaResourceId,
     s3ResourceId, stripeResourceId, googleResourceId,
-    sendgridResourceId, websocketsResourceId,
+    sendgridResourceId, websocketResourceId,
     lam_role_arn, executionArn, rid, stripeLayerArn
 }) => {
 
@@ -1401,7 +1401,7 @@ exports.handler = async (event) => {
                     const data = {
                         apiID: "${apiID}",
                         // apiName: "${apiName}",
-                        websocketsResourceId: "${websocketsResourceId}",
+                        websocketResourceId: "${websocketResourceId}",
                         socketName: name,
                         rid: "${rid}",
                         // executionArn: "${executionArn}",
@@ -1411,7 +1411,7 @@ exports.handler = async (event) => {
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${_webhub_host}',
-                            path: '/api/deploy/dynamoDBAPI',
+                            path: '/api/deploy/websocketAPI',
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'

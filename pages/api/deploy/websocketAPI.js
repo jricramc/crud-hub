@@ -5,8 +5,8 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   const { method, body, headers } = req;
   // const b = body.apiID ? body : JSON.parse(body);
-  const { apiID, websocketsResourceId, socketName, websocket_endpoint, rid, lam_role_arn } = body;
-  const stackName = `add-dynamodb-api-dbResourceId-${websocketsResourceId}-apiID-${apiID}-${RID()}`;
+  const { apiID, websocketResourceId, socketName, websocket_endpoint, rid, lam_role_arn } = body;
+  const stackName = `add-websocket-api-websocketResourceId-${websocketResourceId}-apiID-${apiID}-${RID()}`;
   try {
     // console.log('body: ', body)
     // console.log('stackName: ', stackName);
