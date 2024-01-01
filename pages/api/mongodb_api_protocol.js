@@ -1,22 +1,14 @@
 const mongodb_classes = {
     AbstractCursor: {
       accessors: [
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
+        'get closed(): boolean',
+        'get id(): undefined | Long',
+        'get killed(): boolean',
+        'get loadBalanced(): boolean',
+        'get namespace(): MongoDBNamespace',
+        'get readConcern(): undefined | ReadConcern',
+        'get readPreference(): ReadPreference',
+        'set session(clientSession): void',
       ],
       methods: [
         '[asyncIterator](): AsyncGenerator<TSchema, void, void>',
@@ -684,8 +676,8 @@ const mongodb_classes = {
             'toArray(): Promise<{ name: string; }[]>',
             'tryNext(): Promise<null | { name: string; }>',
             'unwind($unwind): ListSearchIndexesCursor',
-            'withReadConcern',
-            'withReadPreference',
+            'withReadConcern(readConcern): ListSearchIndexesCursor',
+            'withReadPreference(readPreference): ListSearchIndexesCursor',
         ],
     },
     MongoAPIError: {
@@ -1437,3 +1429,41 @@ const mongodb_classes = {
         ],
     },
   }
+
+  const convertTypescriptDefToObj = (tsDefinitions) => {
+    const result = {};
+  
+    tsDefinitions.forEach((tsDef) => {
+      const regex = /^(\[\w*\]|\w*)(\<\w*\>|.*)(\([^\)]*\))(\:\s*)(.*)/;
+      const match = tsDef.match(regex);
+  
+      if (match) {
+        const [, key, paramType, params, , returnType] = match;
+        console.log('match: ', match);
+        const isPromise = returnType.includes('Promise');
+        const types = isPromise
+          ? { promise: true }
+          : returnType
+              .replace(/<(.+)>/, '$1')
+              .split(/\s*\|\s*/)
+              .reduce((acc, t) => {
+                acc[t] = {};
+                return acc;
+              }, {});
+  
+          const regex_key_has_square_brackets = /^(\[\w*\])/;
+          console.log('m: ', key.match(regex_key_has_square_brackets));
+          const k = key.match(regex_key_has_square_brackets) ? `_${key.slice(1,-1)}_` : key;
+  
+        result[k] = {
+          returns: { types, promise: isPromise },
+          doc_description: tsDef,
+        };
+      } else {
+        result[tsDef] = 'error';
+      }
+    });
+  
+    return result;
+  }
+
