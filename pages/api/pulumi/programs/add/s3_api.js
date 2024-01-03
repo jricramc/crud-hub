@@ -364,6 +364,10 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
+    /*
+    **  DEPLOYMENT
+    */
+
     const deployment = new aws.apigateway.Deployment(`s3-api-deployment-${unique_bucket_name}-${rid}`, {
         restApi: apiID,
         stageName: "v3", // Uncomment this line if you want to specify a stage name.

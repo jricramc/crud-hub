@@ -265,6 +265,15 @@ const handler = async ({ rid }) => {
     });
 
     /*
+        /db/mongodb
+    */
+    const folderMainMongoDBResource = new aws.apigateway.Resource(`folder-Main-MongoDB-Resource-${rid}`, {
+        restApi: restApiId,
+        parentId: folderMainDBResource.id,
+        pathPart: "mongodb",
+    });
+
+    /*
         /db/s3
     */
     const folderMainS3Resource = new aws.apigateway.Resource(`folder-Main-S3-Resource-${rid}`, {
@@ -350,6 +359,7 @@ const handler = async ({ rid }) => {
         rootResourceId,
         lambdaResourceId: folderMainLambdaResource.id,
         dbResourceId: folderMainDynamoDBResource.id,
+        mongodbResourceId: folderMainMongoDBResource.id,
         s3ResourceId: folderMainS3Resource.id,
         stripeResourceId: folderMainStripeResource.id,
         googleResourceId: folderMainGoogleResource.id,

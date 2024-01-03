@@ -1430,7 +1430,94 @@ const mongodb_classes = {
     },
   }
 
-  const convertTypescriptDefToObj = (tsDefinitions) => {
+  const parse_return_type_string_to_obj = (rt) => {
+    // order of operations
+    // Example 1: (step 0) ChangeStreamEvents<{ name: string; }, TChange>[EventKey][]
+    // Example 2: (step 0) { cancel() => void; }[EventKey][]
+
+    const regex_order = [
+
+        // check if array symbol at the end of string
+        // Example 1: (step 1) ChangeStreamEvents<{ name: string; }, TChange>[EventKey]
+        // parsed out: []
+        // Example 2: (step 1) { cancel() => void; }[EventKey]
+        // parsed out: []
+        {
+            regex: /^(.*)(\[\])/,
+            // index of the data that was kept (parsed_in) and the data that was removed (parsed_out)
+            index: { in: 1, out: 2 } 
+        },
+        
+        // check if there is an object key symbol
+        // Example 1: (step 2) ChangeStreamEvents<{ name: string; }, TChange>
+        // parsed out: [EventKey]
+        // Example 2: (step 2) { cancel() => void; }
+        // parsed out: [EventKey]
+        {
+            regex: /^(.*)(\[)(\w+)(\])/,
+            // index of the data that was kept (parsed_in) and the data that was removed (parsed_out)
+            index: { in: 1, out: 3 } 
+        },
+        
+
+        // try to parse out a MongoDB Class
+        // Example 1: (step 3) { name: string; }, TChange
+        // parsed out: ChangeStreamEvents<...>
+        {
+            regex: /^(.+)(\<)(.*)(\>)/,
+            // index of the data that was kept (parsed_in) and the data that was removed (parsed_out)
+            index: { in: 3, out: 1 } 
+        },
+
+        // check if there is an object format string
+        // Example 2: (step 3)
+        // parsed out: { cancel() => void; }
+        {
+            regex: /^([^\{\}\n]*)(\{\s+)(.*)(\s+\})([^\{\}\n]*)/,
+            // index of the data that was kept (parsed_in) and the data that was removed (parsed_out)
+            index: { in: 3, out: 3 } 
+        },
+        
+        
+    ];
+
+    let obj = { [rt]: {} };
+
+    let matchFound = false;
+    let i = 0;
+    while (i < regex_order.length && !matchFound) {
+        const match = rt.match(regex_order[i].regex);
+        if (match) {
+            matchFound = true;
+            console.log('match: ', match)
+
+            switch (i) {
+                case 0:
+                    obj = { Array: { of: parse_return_type_string_to_obj(match[regex_order[i].index.in]) }}
+                    break;
+                case 1:
+                    obj = { Object: { withKeys: match[regex_order[i].index.out], of: parse_return_type_string_to_obj(match[regex_order[i].index.in]) }}
+                    break;
+                case 2:
+                    obj = { [match[regex_order[i].index.out]]: { of: parse_return_type_string_to_obj(match[regex_order[i].index.in]) }}
+                    break;
+                case 3:
+                    obj = { Object: { withFormat: match[regex_order[i].index.out] }}
+                    break;
+                default:
+                    console.log('index out of bounds for regex_order');
+            }
+        }
+
+        i += 1;
+    }
+
+    return obj
+
+};
+
+
+  const convertMethodStringsToObjects = (tsDefinitions) => {
     const result = {};
   
     tsDefinitions.forEach((tsDef) => {
@@ -1439,24 +1526,39 @@ const mongodb_classes = {
   
       if (match) {
         const [, key, paramType, params, , returnType] = match;
-        console.log('match: ', match);
-        const isPromise = returnType.includes('Promise');
-        const types = isPromise
-          ? { promise: true }
-          : returnType
-              .replace(/<(.+)>/, '$1')
-              .split(/\s*\|\s*/)
-              .reduce((acc, t) => {
-                acc[t] = {};
-                return acc;
-              }, {});
+        // console.log('match: ', match);
+        // const isPromise = returnType.includes('Promise');
+        const regex_promise_parsing = /^((?:Promise\<))(.*)(\>)/;  
+        const regex_is_promise_match = returnType.match(regex_promise_parsing);  
   
-          const regex_key_has_square_brackets = /^(\[\w*\])/;
-          console.log('m: ', key.match(regex_key_has_square_brackets));
-          const k = key.match(regex_key_has_square_brackets) ? `_${key.slice(1,-1)}_` : key;
+        const [, promise_start, rtPromise, promise_end] = regex_is_promise_match || [null, null, null, null];  
+  
+        const rType = rtPromise || returnType;
+
+        // parse types object from return type TypeScript string
+
+        const regex_get_types = /([^\s\|][^\|\n]+[^\s\|])/g;
+        const res_types = [...rType.matchAll(regex_get_types)];
+
+        const types = {};
+
+        res_types.map((a) => {
+
+            console.log('rt: ', a[1]);
+            Object.assign(types, parse_return_type_string_to_obj(a[1]))
+            return null;
+        });
+
+
+        // lastly check if the key is special
+        // for example: '[asyncIterator]'
+        // and make the proper adjustment => '_asyncIterator_'
+        // otherwise keep the key the same
+        const regex_key_has_square_brackets = /^(\[\w*\])/;
+        const k = key.match(regex_key_has_square_brackets) ? `_${key.slice(1,-1)}_` : key;
   
         result[k] = {
-          returns: { types, promise: isPromise },
+          returns: { types, promise: regex_is_promise_match ? true : false },
           doc_description: tsDef,
         };
       } else {
@@ -1465,5 +1567,66 @@ const mongodb_classes = {
     });
   
     return result;
-  }
+  };
 
+  const convertAccessorStringsToObjects = (tsDefinitions) => {
+    const result = {};
+  
+    tsDefinitions.forEach((tsDef) => {
+      const regex = /^((?:get)|(?:set))(\s*)(\w+)(\(.*\))(\:\s*)(([\w\{\"]).*)/;
+      const match = tsDef.match(regex);
+  
+      if (match) {
+        const [, accessor_type, , key, ,, returnType] = match;
+
+        const regex_get_types = /([^\s\|][^\|\n]+[^\s\|])/g;
+        const res_types = [...returnType.matchAll(regex_get_types)];
+
+        console.log({ key, accessor_type, res_types });
+
+        const types = {};
+
+        res_types.map((a) => {
+
+            console.log('rt: ', a[1]);
+            Object.assign(types, parse_return_type_string_to_obj(a[1]))
+            return null;
+        });
+  
+        result[key] = {
+          returns: { types, [accessor_type]: true },
+          doc_description: tsDef,
+        };
+      } else {
+        result[tsDef] = 'error';
+      }
+    });
+  
+    return result;
+  };
+
+
+  let testMethods = [
+    "fromOptions(options?, inherit?): undefined | WriteConcern",
+    "stream(options?): Readable & AsyncIterable<TSchema>",
+    "next(): Promise<null | TSchema>",
+    "rawListeners<EventKey>(event): { cancel() => void; }[EventKey][]", 
+    "toArray(): Promise<{ name: string; }[]>",
+    "[asyncIterator](): AsyncGenerator<TSchema, void, void>",
+    "group<T>($group): AggregationCursor<T>",
+    "rawListeners<EventKey>(event): Events[EventKey][]",
+    "removeAllListeners<EventKey>(event?): TypedEventEmitter<Events>",
+    "toBSON(): never",
+    "listeners<EventKey>(event): ChangeStreamEvents<TSchema, TChange>[EventKey][]",
+    "toHostPort(): { host: string; port: number; }",
+];
+
+let testAccessors = [
+    'get batches(): Batch<Document>[]',
+    'get bsonOptions(): BSONSerializeOptions',
+    'get writeConcern(): undefined | WriteConcern',
+    'set session(clientSession): void',
+    'get AVAILABLE(): "available" | "not available"',
+];
+
+console.log(convertAccessorStringsToObjects(testAccessors));

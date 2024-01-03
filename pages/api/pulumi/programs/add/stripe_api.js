@@ -177,6 +177,9 @@ function response(message, status) {
         dependsOn: [stripeApiLambda],
     });
 
+    /*
+    **  DEPLOYMENT
+    */
 
     const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_stripe_name}-${r_id}`, {
         restApi: apiID,

@@ -759,6 +759,10 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     });
 
+    /*
+    **  DEPLOYMENT
+    */
+
     const deployment = new aws.apigateway.Deployment(`api-deployment-${unique_db_name}-${rid}`, {
         restApi: apiID,
         stageName: "v3", // Uncomment this line if you want to specify a stage name.
