@@ -23,7 +23,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mongodbRequestHandler.zip")),
         runtime: "nodejs14.x",
         handler: "handler.requestHandler",
-        role: lam_role.arn,
+        role: lam_role_arn,
         environment: {
             variables: {
                 TABLE_NAME: unique_db_name,
