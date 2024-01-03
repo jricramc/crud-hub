@@ -304,7 +304,7 @@ const handler = async ({
     // }
 
     const createMongoDBApiLambda = new aws.lambda.Function(
-        `create-dynamodb-crud-api-lambda-${rid}`,
+        `create-mongodb-crud-api-lambda-${rid}`,
         {
             code: new pulumi.asset.AssetArchive({
                 "index.js": new pulumi.asset.StringAsset(`
