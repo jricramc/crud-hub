@@ -12,7 +12,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
 
     const r_id = RID(6);
-    const apiKey = generateUUID();
+    const apiKey = RID(32);
     const unique_db_name = `${dbName}-${r_id}`;
 
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']

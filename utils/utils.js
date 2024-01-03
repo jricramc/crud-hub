@@ -60,22 +60,6 @@ const RID = (l = 8) => {
     return rid;
 };
 
-const generateUUID = () => {
-	let d = new Date().getTime();
-	
-	if ( window.performance && typeof window.performance.now === "function" ) {
-		d += performance.now();
-	}
-	
-	const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-		const r = (d + Math.random()*16)%16 | 0;
-		d = Math.floor(d/16);
-		return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-	});
-
-    return uuid;
-};
-
 const extractDomain = (url) => {
     // Remove "http://" or "https://"
     url = url.replace("http://", "").replace("https://", "");
@@ -95,5 +79,5 @@ const extractRegionAndAccountIdFromExecutionArn = (inputString) => {
 }
 
 
-export { deployCRUDAPI, RID, generateUUID, apiRequest, getUserProjects, extractDomain, extractRegionAndAccountIdFromExecutionArn }
+export { deployCRUDAPI, RID, apiRequest, getUserProjects, extractDomain, extractRegionAndAccountIdFromExecutionArn }
 
