@@ -50,7 +50,7 @@ const parseBody = (body) => {
     }
 };
 
-const requestMongoDBPostRequest = (dbname, requestData) => {
+const requestMongoDBPostRequest = (mongodb_api_key, dbname, requestData) => {
     const data = {
         ...requestData,
         MongoDBName: dbname,
@@ -65,7 +65,7 @@ const requestMongoDBPostRequest = (dbname, requestData) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'api-key': '75pQZG2c9zFlpG0g6XCrQCT2BH7fvv1KDYpDJAPUQysxI4Etjrpqvff9n7thEsXP',
+                'api-key': mongodb_api_key,
             }
         };
 
@@ -110,7 +110,7 @@ exports.requestHandler = async function(event, context) {
 
     // next try to make the mongodb request
     
-    const requestMongoDBResult = await requestMongoDBPostRequest(process.env.MONGODB_NAME, bodyObj)
+    const requestMongoDBResult = await requestMongoDBPostRequest(process.env.MONGODB_API_KEY, process.env.MONGODB_NAME, bodyObj)
         .then(responseData => {
             console.log('Response data:', responseData);
             return { type: 'success', result: parseBody(responseData) };

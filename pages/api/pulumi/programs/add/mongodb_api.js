@@ -27,6 +27,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
         role: lam_role_arn,
         environment: {
             variables: {
+                MONGODB_API_KEY: process.env.MONGODB_API_KEY,
                 MONGODB_NAME: mongodb_name,
                 API_KEY: apiKey,
             },
