@@ -70,10 +70,12 @@ const handler = async ({ rid }) => {
     const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`ledger-lam-rle-policy-attchmnt-${rid}`, {
         policyArn: lambdaExecutionPolicy.arn,
         role: lam_s3_role.name,
-    }, { dependsOn: [
-        lambdaExecutionPolicy,
-        lam_s3_role
-    ]});
+    },
+    // { dependsOn: [
+    //     lambdaExecutionPolicy,
+    //     lam_s3_role
+    // ]},
+    );
 
     // Define an S3 policy to grant access to the bucket
     const s3AccessPolicy = new aws.iam.Policy(`ledger-s3-access-policy-${rid}`, {
@@ -107,10 +109,12 @@ const handler = async ({ rid }) => {
     const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment(`ledger-s3-access-policy-attachment-${rid}`, {
         policyArn: s3AccessPolicy.arn,
         roles: [lam_s3_role],
-    }, { dependsOn: [
-        s3AccessPolicy,
-        lam_s3_role
-    ]});
+    },
+    // { dependsOn: [
+    //     s3AccessPolicy,
+    //     lam_s3_role
+    // ]}
+    );
 
 
     // Define a policy to access DynamoDB
@@ -162,10 +166,12 @@ const handler = async ({ rid }) => {
     new iam.RolePolicy(`role-policy-${rid}`, {
         role: lam_role.id,
         policy: JSON.stringify(lam_policy)
-    }, { dependsOn: [
-        lam_role,
-        lam_policy,
-    ]});
+    },
+    // { dependsOn: [
+    //     lam_role,
+    //     lam_policy,
+    // ]}
+    );
 
 
 
@@ -182,9 +188,11 @@ const handler = async ({ rid }) => {
                 TABLE_NAME: table.name,
             },
         },
-    }, { dependsOn: [
-        lam_role,
-    ]});
+    },
+    // { dependsOn: [
+    //     lam_role,
+    // ]}
+    );
 
     
     const readFunc = new aws.lambda.Function(`ledger-read-function-${rid}`, {
@@ -197,9 +205,11 @@ const handler = async ({ rid }) => {
                 TABLE_NAME: table.name,
             },
         },
-    }, { dependsOn: [
-        lam_role,
-    ]});
+    },
+    // { dependsOn: [
+    //     lam_role,
+    // ]}
+    );
     
     const updateFunc = new aws.lambda.Function(`ledger-update-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
@@ -211,9 +221,11 @@ const handler = async ({ rid }) => {
                 TABLE_NAME: table.name,
             },
         },
-    }, { dependsOn: [
-        lam_role
-    ]});
+    },
+    // { dependsOn: [
+    //     lam_role
+    // ]}
+    );
     
     const deleteFunc = new aws.lambda.Function(`ledger-delete-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
@@ -225,9 +237,11 @@ const handler = async ({ rid }) => {
                 TABLE_NAME: table.name,
             },
         },
-    }, { dependsOn: [
-        lam_role
-    ]});
+    },
+    // { dependsOn: [
+    //     lam_role
+    // ]}
+    );
 
     const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mintlify.zip")),
@@ -241,9 +255,11 @@ const handler = async ({ rid }) => {
             },
         },
         layers: ["arn:aws:lambda:us-east-2:442052175141:layer:archive-layer:1"], // Add the Archive layer to your Lambda function
-    }, { dependsOn: [
-        lam_s3_role,
-    ]});
+    },
+    // { dependsOn: [
+    //     lam_s3_role,
+    // ]}
+    );
 
 
     // Create a new Rest API Gateway using awsx.
@@ -256,13 +272,15 @@ const handler = async ({ rid }) => {
             { path: "/ledger/delete", method: "POST", eventHandler: deleteFunc },
             { path: "/ledger/generate/mintlify-docs", method: "POST", eventHandler: generateMintlifyDocsFunc },
         ],
-    }, { dependsOn: [
-        createFunc,
-        readFunc,
-        updateFunc,
-        deleteFunc,
-        generateMintlifyDocsFunc,
-    ]});
+    },
+    // { dependsOn: [
+    //     createFunc,
+    //     readFunc,
+    //     updateFunc,
+    //     deleteFunc,
+    //     generateMintlifyDocsFunc,
+    // ]}
+    );
 
     const { api: { id: restApiId, name: apiName, rootResourceId, executionArn } } = api;
     
