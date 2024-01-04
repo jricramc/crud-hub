@@ -123,6 +123,9 @@ const Projects = ({}) => {
             { method: 'post', endpoint: '/update', description: `updates an entry from ${resource_name}` },
             { method: 'post', endpoint: '/delete', description: `deletes an entry from ${resource_name}` },
         ],
+        'db/mongodb': [
+            { method: 'post', endpoint: '/', description: `executes MongoDB commands on the database named ${resource_name}` },
+        ],
         'db/s3': [
             { method: 'get', endpoint: '/structure', description: 'returns the folder / file structure of your S3 Bucket' },
             { method: 'post', endpoint: '/create/{path+}', description: 'upload files and folders to your S3 Bucket at a specific location in your S3 Bucket denoted by {path+}'},
