@@ -149,6 +149,10 @@ const Projects = ({}) => {
             src: 'dynamodb',
             name: 'AWS DynamoDB'
         },
+        'db/mongodb': {
+            src: 'dynamodb',
+            name: 'MongoDB'
+        },
         'db/s3': {
             src: 's3',
             name: 'AWS S3 Bucket',
