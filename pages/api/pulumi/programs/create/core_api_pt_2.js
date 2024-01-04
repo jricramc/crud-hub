@@ -390,6 +390,12 @@ const handler = async ({
                         lam_role_arn: "${lam_role_arn}",
                     };
 
+                    /*
+                    
+                    ${JSON.stringify(publicRuntimeConfig)}
+                    
+                    */
+
                     return new Promise((resolve, reject) => {
                         const options = {
                             host: '${_webhub_host}',
