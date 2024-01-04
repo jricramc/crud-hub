@@ -14,6 +14,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
     const r_id = RID(6);
     const apiKey = RID(32);
     const unique_db_name = `${dbName}-${r_id}`;
+    const mongodb_name = RID(32);
 
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
 
@@ -26,7 +27,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
         role: lam_role_arn,
         environment: {
             variables: {
-                TABLE_NAME: unique_db_name,
+                MONGODB_NAME: mongodb_name,
                 API_KEY: apiKey,
             },
         },

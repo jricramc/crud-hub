@@ -36,7 +36,7 @@ exports.requestHandler = async function(event, context) {
         body: JSON.stringify({
             bodyObj,
             apiKey: process.env.API_KEY,
-            tableName: process.env.TABLE_NAME,
+            tableName: process.env.MONGODB_NAME,
         }),
     };
 };
