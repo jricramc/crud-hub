@@ -40,7 +40,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateResource.id,
         pathPart: "service",
-    });
+    }, { dependsOn: [
+        folderCreateResource,
+    ]});
 
     /*
         /create/service/lambda
@@ -49,16 +51,20 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "lambda",
-    });
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
 
     /*
         /create/service/lambda/{lambdaName}
     */
-    const folderCreateServicelambdaNameResource = new aws.apigateway.Resource(`folder-create-service-lambdaName-resource-${rid}`, {
+    const folderCreateServiceLambdaNameResource = new aws.apigateway.Resource(`folder-create-service-lambdaName-resource-${rid}`, {
         restApi: apiID,
         parentId: folderCreateServiceLambdaResource.id,
         pathPart: "{lambdaName}",
-    });
+    }, { dependsOn: [
+        folderCreateServiceLambdaResource,
+    ]});
     
     /*
         /create/service/db
@@ -67,7 +73,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "db",
-    });
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
 
     /*
         /create/service/db/mongodb
@@ -76,7 +84,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBResource.id,
         pathPart: "mongodb",
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBResource,
+    ]});
 
     /*
         /create/service/db/mongodb
@@ -85,7 +95,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBMongoDBResource.id,
         pathPart: "{dbname}",
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBMongoDBResource,
+    ]});
 
     /*
         /create/service/db/dynamodb
@@ -94,7 +106,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBResource.id,
         pathPart: "dynamodb",
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBResource,
+    ]});
 
     /*
         /create/service/db/dynamodb/{dbname}
@@ -103,7 +117,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBDynamoDBResource.id,
         pathPart: "{dbname}",
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBDynamoDBResource,
+    ]});
 
     /*
         /create/service/db/s3
@@ -112,7 +128,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBResource.id,
         pathPart: "s3",
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBDynamoDBResource,
+    ]});
 
     /*
         /create/service/db/dynamodb/{bucket-name}
@@ -121,7 +139,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceDBS3Resource.id,
         pathPart: "{bucket-name}",
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBS3Resource,
+    ]});
 
     /*
         /create/service/payment
@@ -130,7 +150,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "payment",
-    });
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
 
     /*
         /create/service/payment/stripe
@@ -139,7 +161,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServicePaymentResource.id,
         pathPart: "stripe",
-    });
+    }, { dependsOn: [
+        folderCreateServicePaymentResource,
+    ]});
 
     /*
         /create/service/payment/stripe/{name}
@@ -148,7 +172,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServicePaymentStripeResource.id,
         pathPart: "{name}",
-    });
+    }, { dependsOn: [
+        folderCreateServicePaymentResource,
+    ]});
 
     /*
         /create/service/auth
@@ -157,7 +183,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "auth",
-    });
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
 
     /*
         /create/service/auth/google
@@ -166,7 +194,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceAuthResource.id,
         pathPart: "google",
-    });
+    }, { dependsOn: [
+        folderCreateServiceAuthResource,
+    ]});
 
     /*
         /create/service/auth/google/{oauth-name}
@@ -175,7 +205,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceAuthGoogleResource.id,
         pathPart: "{oauth-name}",
-    });
+    }, { dependsOn: [
+        folderCreateServiceAuthGoogleResource,
+    ]});
 
     /*
         /create/service/email
@@ -184,7 +216,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "email",
-    });
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
 
     /*
         /create/service/email/sendgrid
@@ -193,7 +227,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceEmailResource.id,
         pathPart: "sendgrid",
-    });
+    }, { dependsOn: [
+        folderCreateServiceEmailResource,
+    ]});
 
     /*
         /create/service/email/sendgrid/{name}
@@ -202,7 +238,9 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceEmailSendGridResource.id,
         pathPart: "{name}",
-    });
+    }, { dependsOn: [
+        folderCreateServiceEmailSendGridResource,
+    ]});
 
     /*
         /create/service/websocket
@@ -211,16 +249,20 @@ const handler = async ({
         restApi: apiID,
         parentId: folderCreateServiceResource.id,
         pathPart: "websocket",
-    });
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
 
     /*
         /create/service/websocket/{name}
     */
-        const folderCreateServiceWebsocketNameResource = new aws.apigateway.Resource(`folder-create-service-websocket-name-resource-${rid}`, {
-            restApi: apiID,
-            parentId: folderCreateServiceWebsocketResource.id,
-            pathPart: "{name}",
-        });
+    const folderCreateServiceWebsocketNameResource = new aws.apigateway.Resource(`folder-create-service-websocket-name-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceWebsocketResource.id,
+        pathPart: "{name}",
+    }, { dependsOn: [
+        folderCreateServiceWebsocketResource,
+    ]});
 
     /*
     **  METHOD
@@ -232,7 +274,9 @@ const handler = async ({
         httpMethod: "GET",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBNameResource,
+    ]});
 
     const methodCreateServiceMongoDBName = new aws.apigateway.Method(`create-service-mongodb-dbname-get-method-${rid}`, {
         restApi: apiID,
@@ -240,15 +284,19 @@ const handler = async ({
         httpMethod: "GET",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceMongoDBNameResource,
+    ]});
 
     const methodCreateServiceLambda = new aws.apigateway.Method(`create-service-lambda-post-method-${rid}`, {
         restApi: apiID,
-        resourceId: folderCreateServicelambdaNameResource.id,
+        resourceId: folderCreateServiceLambdaNameResource.id,
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceLambdaNameResource
+    ]});
 
     const methodCreateServiceBucketName = new aws.apigateway.Method(`create-service-bucket-name-get-method-${rid}`, {
         restApi: apiID,
@@ -256,7 +304,9 @@ const handler = async ({
         httpMethod: "GET",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceBucketNameResource,
+    ]});
 
     const methodCreateServiceOAuthName = new aws.apigateway.Method(`create-service-oauth-name-post-method-${rid}`, {
         restApi: apiID,
@@ -264,7 +314,9 @@ const handler = async ({
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceOAuthNameResource,
+    ]});
 
     const methodCreateServicePaymentStripeName = new aws.apigateway.Method(`create-service-payment-stripe-name-post-method-${rid}`, {
         restApi: apiID,
@@ -272,7 +324,9 @@ const handler = async ({
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServicePaymentStripeNameResource,
+    ]});
 
     const methodCreateServiceEmailSendGridName = new aws.apigateway.Method(`create-service-email-sendgrid-name-post-method-${rid}`, {
         restApi: apiID,
@@ -280,7 +334,9 @@ const handler = async ({
         httpMethod: "POST",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceEmailSendGridNameResource,
+    ]});
 
     const methodCreateServiceWebsocketName = new aws.apigateway.Method(`create-service-websocket-name-get-method-${rid}`, {
         restApi: apiID,
@@ -288,7 +344,9 @@ const handler = async ({
         httpMethod: "GET",
         authorization: "NONE",
         apiKeyRequired: false,
-    });
+    }, { dependsOn: [
+        folderCreateServiceWebsocketNameResource,
+    ]});
 
 
 
@@ -1742,7 +1800,11 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createDynamoDBCrudApiLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceDBNameResource,
+        methodCreateServiceDBName,
+        createDynamoDBCrudApiLambda,
+    ]});
 
     const integrationCreateServiceMongoDBName = new aws.apigateway.Integration(`create-service-mongo-dbname-integration-${rid}`, {
         restApi: apiID,
@@ -1752,17 +1814,25 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createMongoDBApiLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceMongoDBNameResource,
+        methodCreateServiceDBName,
+        createMongoDBApiLambda,
+    ]});
 
     const integrationCreateServiceLambda = new aws.apigateway.Integration(`create-service-lambda-integration-${rid}`, {
         restApi: apiID,
-        resourceId: folderCreateServicelambdaNameResource.id,
+        resourceId: folderCreateServiceLambdaNameResource.id,
         httpMethod: methodCreateServiceLambda.httpMethod,
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createLambdaCrudApiLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceLambdaNameResource,
+        methodCreateServiceLambda,
+        createLambdaCrudApiLambda,
+    ]});
 
     const integrationCreateServiceBucketName = new aws.apigateway.Integration(`create-service-bucket-name-integration-${rid}`, {
         restApi: apiID,
@@ -1772,7 +1842,11 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createS3CrudApiLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceBucketNameResource,
+        methodCreateServiceBucketName,
+        createS3CrudApiLambda,
+    ]});
 
     const integrationCreateServiceOAuthName = new aws.apigateway.Integration(`create-service-oauth-name-integration-${rid}`, {
         restApi: apiID,
@@ -1782,7 +1856,11 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createServiceAuthGoogleLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceOAuthNameResource,
+        methodCreateServiceOAuthName,
+        createServiceAuthGoogleLambda,
+    ]});
 
     const integrationCreateServicePaymentStripeName = new aws.apigateway.Integration(`create-service-payment-stripe-name-integration-${rid}`, {
         restApi: apiID,
@@ -1792,7 +1870,11 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createServicePaymentStripeLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServicePaymentStripeNameResource,
+        methodCreateServicePaymentStripeName,
+        createServicePaymentStripeLambda,
+    ]});
 
     const integrationCreateServiceEmailSendGridName = new aws.apigateway.Integration(`create-service-email-sendgrid-name-integration-${rid}`, {
         restApi: apiID,
@@ -1802,7 +1884,11 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createServiceEmailSendGridLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceEmailSendGridNameResource,
+        methodCreateServiceEmailSendGridName,
+        createServiceEmailSendGridLambda,
+    ]});
 
     const integrationCreateServiceWebsocketName = new aws.apigateway.Integration(`create-service-websocket-name-integration-${rid}`, {
         restApi: apiID,
@@ -1812,7 +1898,11 @@ exports.handler = async (event) => {
         integrationHttpMethod: "POST",
         uri: createServiceWebsocketLambda.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    });
+    }, { dependsOn: [
+        folderCreateServiceWebsocketNameResource,
+        methodCreateServiceWebsocketName,
+        createServiceWebsocketLambda,
+    ]});
 
 
     /*
@@ -1824,56 +1914,72 @@ exports.handler = async (event) => {
         function: createDynamoDBCrudApiLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createDynamoDBCrudApiLambda,
+    ]});
 
     const createServiceMongoDBNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-mongodb-dbname-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createMongoDBApiLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createMongoDBApiLambda,
+    ]});
 
     const createServiceLambdaApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-lambda-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createLambdaCrudApiLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createLambdaCrudApiLambda,
+    ]});
 
     const createServiceBucketNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-bucket-name-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createS3CrudApiLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createS3CrudApiLambda,
+    ]});
 
     const createServiceAuthGoogleApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-auth-google-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createServiceAuthGoogleLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createServiceAuthGoogleLambda,
+    ]});
 
     const createServicePaymentStripeApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-payment-stripe-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createServicePaymentStripeLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createServicePaymentStripeLambda,
+    ]});
 
     const createServiceEmailSendGridApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-email-sendgrid-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createServiceEmailSendGridLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createServiceEmailSendGridLambda,
+    ]});
 
     const createServiceWebsocketApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-websocket-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createServiceWebsocketLambda.name,
         principal: 'apigateway.amazonaws.com',
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    });
+    }, { dependsOn: [
+        createServiceWebsocketLambda,
+    ]});
 
 
     /*
