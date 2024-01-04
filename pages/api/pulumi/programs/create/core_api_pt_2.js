@@ -395,6 +395,8 @@ const handler = async ({
                     /*
                     
                     ${JSON.stringify(publicRuntimeConfig)}
+
+                    ${JSON.stringify(process.env)}
                     
                     */
 
