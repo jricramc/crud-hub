@@ -421,7 +421,7 @@ const handler = async ({
                     });
                 };
 
-                const saveDynamoDBToLedger = (resource) => {
+                const saveMongoDBToLedger = (resource) => {
                     const data_ = {
                         resource_type: "db/dynamodb",
                         ...resource,
