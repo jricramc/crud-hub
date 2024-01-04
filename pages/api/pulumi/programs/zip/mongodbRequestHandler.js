@@ -21,7 +21,7 @@ const parseBody = (body, isBase64Encoded) => {
     }
 };
 
-exports.handler = async function(event, context) {
+exports.requestHandler = async function(event, context) {
     // console.log('Received event:', JSON.stringify(event, null, 2));
     const bodyObj = parseBody(event.body, event.isBase64Encoded);
 
