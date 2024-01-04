@@ -21,6 +21,7 @@ GOOGLE_CLIENT_SECRET={YOUR GOOGLE CLIENT SECRET}
 JWT_SECRET={JWT SECRET}
 NEXTAUTH_URL=http://localhost:3000
 WEBHUB_HOST=webhubmvp.onrender.com
+MONGODB_API_KEY=<email WebHUBHQ for yours>
 ```
 
 ## Content

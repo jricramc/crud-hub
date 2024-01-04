@@ -7,6 +7,11 @@ import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
 import { RID, generateUUID } from "../../../../../utils/utils";
+
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+
 const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn }) => {
 
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
@@ -27,7 +32,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
         role: lam_role_arn,
         environment: {
             variables: {
-                MONGODB_API_KEY: process.env.MONGODB_API_KEY || 'no-api-key',
+                MONGODB_API_KEY: publicRuntimeConfig.MONGODB_API_KEY || 'no-api-key',
                 MONGODB_NAME: mongodb_name,
                 API_KEY: apiKey,
             },

@@ -6,6 +6,7 @@ const nextConfig = {
       JWT_SECRET: process.env.JWT_SECRET,
       NEXTAUTH_URL: process.env.NEXTAUTH_URL,
       WEBHUB_HOST: process.env.WEBHUB_HOST,
+      MONGODB_API_KEY: process.env.MONGODB_API_KEY,
       // WEBHUB_DB_URL: process.env.WEBHUB_DB_URL,
     },
   };
