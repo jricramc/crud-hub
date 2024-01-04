@@ -91,10 +91,22 @@ const requestMongoDBPostRequest = (dbname, requestData) => {
 };
 
 exports.requestHandler = async function(event, context) {
-    // console.log('Received event:', JSON.stringify(event, null, 2));
-    const bodyObj = parseBody(event.body);
-
+    
     // first check that the api-key passed in the header matches the environment variable api-key
+    const { body, headers } = event || {};
+    
+    if (!headers || headers["api-key"] !== process.env.API_KEY) {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                headers: event.headers,
+                requestMongoDBResult: { type: 'error', message: 'NOT AUTHORIZED: API_KEY not defined or authorized correctly'},
+            }),
+        };
+    }
+    
+    const bodyObj = parseBody(body);
+
 
     // next try to make the mongodb request
     
@@ -114,9 +126,7 @@ exports.requestHandler = async function(event, context) {
     return {
         statusCode: 200,
         body: JSON.stringify({
-            bodyObj,
-            apiKey: process.env.API_KEY,
-            tableName: process.env.MONGODB_NAME,
+            headers: event.headers,
             requestMongoDBResult,
         }),
     };
