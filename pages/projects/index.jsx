@@ -106,8 +106,9 @@ const Projects = ({}) => {
         type: 'CORE CRUD API',
         created: p?.core?.date_created,
         links: [
-            { method: 'get', endpoint: '/dynamodb/{dbname}', description: 'creates a dynamodb resource with the name {dbname} and deploys a CRUD API to interact with the dynamoDB created' },
-            { method: 'get', endpoint: '/s3/{bucket-name}', description: 'creates a dynamodb resource with the name {bucket-name} and deploys a CRUD API to interact with the s3 bucket created' },
+            { method: 'get', endpoint: '/db/dynamodb/{dbname}', description: 'creates a dynamodb resource with the name {dbname} and deploys a CRUD API to interact with the dynamoDB created' },
+            { method: 'get', endpoint: '/db/mongodb/{dbname}', description: 'creates a MongoDB resource with the name {dbname} and deploys an API to execute MongoDB commands' },
+            { method: 'get', endpoint: '/db/s3/{bucket-name}', description: 'creates a dynamodb resource with the name {bucket-name} and deploys a CRUD API to interact with the s3 bucket created' },
             { method: 'post', endpoint: '/lambda/{lambda-name}', description: 'creates a lambda resource with the name {name} and deploys an API (web-hook) to interact with your resource' },
             { method: 'post', endpoint: '/payment/stripe/{integration-name}', description: 'Creates a Stripe Payment Integration API for business transactions' },
             { method: 'post', endpoint: '/auth/google/{integration-name}', description: 'Coming Soon! Creates a Google OAuth Integration API for user sign-in' },
