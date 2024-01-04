@@ -296,9 +296,11 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "db",
-    }, { dependsOn: [
-        api,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    // ]}
+    );
     
     /*
         /db/dynamodb
@@ -307,10 +309,12 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: folderMainDBResource.id,
         pathPart: "dynamodb",
-    }, { dependsOn: [
-        api,
-        folderMainDBResource,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    //     folderMainDBResource,
+    // ]}
+    );
 
     /*
         /db/mongodb
@@ -319,10 +323,12 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: folderMainDBResource.id,
         pathPart: "mongodb",
-    }, { dependsOn: [
-        api,
-        folderMainDBResource,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    //     folderMainDBResource,
+    // ]}
+    );
 
     /*
         /db/s3
@@ -331,18 +337,22 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: folderMainDBResource.id,
         pathPart: "s3",
-    }, { dependsOn: [
-        api,
-        folderMainDBResource,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    //     folderMainDBResource,
+    // ]}
+    );
 
     const folderMainLambdaResource = new aws.apigateway.Resource(`folder-Lambda-Resource-${rid}`, {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "lambda",
-    }, { dependsOn: [
-        api,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    // ]}
+    );
 
     /*
         /payment
@@ -351,9 +361,11 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "payment",
-    }, { dependsOn: [
-        api,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    // ]}
+    );
 
     /*
         /payment/stripe
@@ -362,10 +374,12 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: folderMainPaymentResource.id,
         pathPart: "stripe",
-    }, { dependsOn: [
-        api,
-        folderMainPaymentResource,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    //     folderMainPaymentResource,
+    // ]}
+    );
 
     /*
         /auth
@@ -374,9 +388,11 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "auth",
-    }, { dependsOn: [
-        api,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    // ]}
+    );
 
     /*
         /auth/google
@@ -385,10 +401,12 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: folderMainAuthResource.id,
         pathPart: "google",
-    }, { dependsOn: [
-        api,
-        folderMainAuthResource,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    //     folderMainAuthResource,
+    // ]}
+    );
 
     /*
         /websockets
@@ -397,9 +415,11 @@ const handler = async ({ rid }) => {
         restApi: restApiId,
         parentId: rootResourceId,
         pathPart: "websocket",
-    }, { dependsOn: [
-        api,
-    ]});
+    },
+    // { dependsOn: [
+    //     api,
+    // ]}
+    );
 
     /*
         /email
