@@ -16,12 +16,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 For this project to work locally you must have envirnoment variables filled out. First create a .env file in the root directory and fill it in with the proper values. Below is an example of how the file must look like.
 
 ```bash
-GOOGLE_CLIENT_ID={YOUR GOOG CLIENT ID}
-GOOGLE_CLIENT_SECRET={YOUR GOOGLE CLIENT SECRET}
-JWT_SECRET={JWT SECRET}
-NEXTAUTH_URL=http://localhost:3000
-WEBHUB_HOST=webhubmvp.onrender.com
-MONGODB_API_KEY=<email WebHUBHQ for yours>
+NEXT_PUBLIC_GOOGLE_CLIENT_ID={YOUR GOOG CLIENT ID}
+NEXT_PUBLIC_GOOGLE_CLIENT_SECRET={YOUR GOOGLE CLIENT SECRET}
+NEXT_PUBLIC_JWT_SECRET={JWT SECRET}
+NEXT_PUBLIC_NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_WEBHUB_HOST=webhubmvp.onrender.com
+NEXT_PUBLIC_MONGODB_API_KEY=<email WebHUBHQ for yours>
 ```
 
 ## Content

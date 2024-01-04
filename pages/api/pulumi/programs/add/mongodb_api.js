@@ -6,7 +6,7 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
-import { RID, generateUUID } from "../../../../../utils/utils";
+import { RID } from "../../../../../utils/utils";
 
 import getConfig from 'next/config';
 
