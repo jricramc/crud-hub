@@ -7,15 +7,18 @@ import { BoxArrowRight } from 'react-bootstrap-icons';
 import { RID, apiRequest, deployCRUDAPI, getUserProjects } from '../../utils/utils';
 import styles from './index.module.scss';
 
-// import getConfig from 'next/config';
+import getConfig from 'next/config';
 
-// const { publicRuntimeConfig } = getConfig();
+const { publicRuntimeConfig } = getConfig();
 
 const Projects = ({}) => {
 
     const router = useRouter();
 
     console.log(router.query.url)
+
+    console.log('publicRuntimeConfig: ', publicRuntimeConfig);
+    console.log('process.env: ', process?.env);
 
     const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
     // const { data: session } = useSession({ required: true });
