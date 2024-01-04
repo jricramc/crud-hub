@@ -19,7 +19,7 @@ For this project to work locally you must have envirnoment variables filled out.
 NEXT_PUBLIC_GOOGLE_CLIENT_ID={YOUR GOOG CLIENT ID}
 NEXT_PUBLIC_GOOGLE_CLIENT_SECRET={YOUR GOOGLE CLIENT SECRET}
 NEXT_PUBLIC_JWT_SECRET={JWT SECRET}
-NEXT_PUBLIC_NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_WEBHUB_HOST=webhubmvp.onrender.com
 NEXT_PUBLIC_MONGODB_API_KEY=<email WebHUBHQ for yours>
 ```

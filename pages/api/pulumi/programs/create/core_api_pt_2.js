@@ -10,7 +10,7 @@ import { RID, extractDomain } from "../../../../../utils/utils";
 import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
-const _webhub_host = extractDomain(publicRuntimeConfig.WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
+const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
 
 const handler = async ({
     apiID, apiUrl, apiName,

@@ -32,7 +32,7 @@ const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executi
         role: lam_role_arn,
         environment: {
             variables: {
-                MONGODB_API_KEY: publicRuntimeConfig.MONGODB_API_KEY || 'no-api-key',
+                MONGODB_API_KEY: publicRuntimeConfig.NEXT_PUBLIC_MONGODB_API_KEY || 'no-api-key',
                 MONGODB_NAME: mongodb_name,
                 API_KEY: apiKey,
             },
