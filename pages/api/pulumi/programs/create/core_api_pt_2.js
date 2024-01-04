@@ -11,7 +11,6 @@ import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
 const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
-const _mongodb_api_key = publicRuntimeConfig.NEXT_PUBLIC_MONGODB_API_KEY;
 
 const handler = async ({
     apiID, apiUrl, apiName,
@@ -389,16 +388,7 @@ const handler = async ({
                         rid: "${rid}",
                         executionArn: "${executionArn}",
                         lam_role_arn: "${lam_role_arn}",
-                        mongodb_api_key: "${_mongodb_api_key}",
                     };
-
-                    /*
-                    
-                    ${JSON.stringify(publicRuntimeConfig)}
-
-                    ${JSON.stringify(process.env)}
-                    
-                    */
 
                     return new Promise((resolve, reject) => {
                         const options = {

@@ -5,7 +5,7 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   const { method, body, headers } = req;
   // const b = body.apiID ? body : JSON.parse(body);
-  const { apiID, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn, mongodb_api_key } = body;
+  const { apiID, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn } = body;
   const stackName = `add-mongodb-api-mongodbResourceId-${mongodbResourceId}-apiID-${apiID}-${RID()}`;
   try {
     // console.log('body: ', body)
@@ -17,7 +17,7 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_mongodb_api({ apiID, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn, mongodb_api_key }),
+            program: async () =>  await add_mongodb_api({ apiID, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
