@@ -92,10 +92,11 @@ const requestMongoDBPostRequest = (mongodb_api_key, dbname, requestData) => {
 
 exports.requestHandler = async function(event, context) {
     
-    // first check that the api-key passed in the header matches the environment variable api-key
+    
     const { body, headers } = event || {};
     
-    if (!headers || headers["api-key"] !== process.env.MONGODB_API_KEY) {
+    // first check that the api-key passed in the header matches the environment variable api-key which is the api-key for webhub
+    if (!headers || headers["api-key"] !== process.env.API_KEY) {
         return {
             statusCode: 200,
             body: JSON.stringify({
