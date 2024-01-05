@@ -154,19 +154,19 @@ const Projects = ({}) => {
 
     const resourceTypeTo = {
         'db/dynamodb': {
-            src: 'dynamodb',
+            src: 'aws-dynamodb.svg',
             name: 'AWS DynamoDB'
         },
         'db/mongodb': {
-            src: 'dynamodb',
+            src: 'mongodb.png',
             name: 'MongoDB'
         },
         'db/s3': {
-            src: 's3',
+            src: 'aws-s3.svg',
             name: 'AWS S3 Bucket',
         },
         'lambda': {
-            src: 'lambda',
+            src: 'aws-lambda.svg',
             name: 'AWS Lambda',
         },
     };
@@ -177,8 +177,8 @@ const Projects = ({}) => {
             <div style={{ border: core ? '1px solid rgba(0, 0, 0, 0.05)' : 'none', borderRadius: 8, padding: '26px 0px', display: 'flex', flexDirection: 'column', background: core ? 'rgba(255, 255, 255, 0.2)' : 'white' }}>
                 <div style={{ padding: '0px 31px', height: 45, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <img
-                        src={`/images/${core ? 'webhub-logo.png' : 'aws-' + resourceTypeTo[resource.type].src + '.svg'}`}
-                        alt={`aws ${resource.type} service icon`}
+                        src={`/images/${core ? 'webhub-logo.png' : resourceTypeTo[resource.type].src}`}
+                        alt={`${resource.type} service icon`}
                         width={45} height={45}
                         style={{ borderRadius: 4, position: 'relative', top: core ? -5 : 0 }}
                     />
