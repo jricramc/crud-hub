@@ -140,11 +140,12 @@ const Projects = ({}) => {
         ],
     }[resource_type]);
 
-    const resourceObjToResourceUIObj = ({ resource_name, resource_type, name, unique_name, date_created }) => ({
+    const resourceObjToResourceUIObj = ({ resource_name, resource_type, name, unique_name, api_key, date_created }) => ({
         name,
         baseUrl: `/${resource_type}/${unique_name}`,
         resourceName: resource_name,
         type: resource_type,
+        api_key,
         created: date_created,
         links: resourceLinks(resource_name, resource_type),
     });
@@ -170,9 +171,9 @@ const Projects = ({}) => {
         },
     };
 
-    const resourceTable = ({ resource, core, created }) => (
+    const resourceTable = ({ resource, core }) => (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '30px 44px 10px 44px' }}>
-            <div style={{ color: '#AEAEAE', fontSize: 12, marginBottom: 6 }}><span style={{ fontSize: 14, fontWeight: 'bold', marginRight: 6 }}>{core ? resource.type : resourceTypeTo[resource.type].name}</span>{`created on ${created}`}</div>
+            <div style={{ color: '#AEAEAE', fontSize: 12, marginBottom: 6 }}><span style={{ fontSize: 14, fontWeight: 'bold', marginRight: 6 }}>{core ? resource.type : resourceTypeTo[resource.type].name}</span>{`created on ${resource?.created}`}</div>
             <div style={{ border: core ? '1px solid rgba(0, 0, 0, 0.05)' : 'none', borderRadius: 8, padding: '26px 0px', display: 'flex', flexDirection: 'column', background: core ? 'rgba(255, 255, 255, 0.2)' : 'white' }}>
                 <div style={{ padding: '0px 31px', height: 45, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <img
@@ -184,6 +185,7 @@ const Projects = ({}) => {
                     <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 29 }}>
                         <div style={{ fontSize: 20, fontWeight: 'bold', color: '#262B2E' }}>{resource.name.toUpperCase()}</div>
                         <div style={{ fontSize: 12, color: '#AEAEAE' }}>{resource.baseUrl}</div>
+                        {resource.api_key && <div style={{ fontSize: 12, color: '#004d40' }}>{`API Key (sensitive): ${resource.api_key}`}</div>}
                     </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', fontWeight: 'bold', fontSize: 14, color: '#7D7D7D', marginLeft: 104, marginTop: 30 }}>
@@ -329,6 +331,7 @@ const Projects = ({}) => {
                     for (let i = 0; i < items.length; i += 1) {
                         const {
                             api_id,
+                            api_key,
                             date_created,
                             resource_type,
                             db_name, unique_dbname,
@@ -341,7 +344,7 @@ const Projects = ({}) => {
                         } else if (resource_type === 'db/dynamodb') {
                             r.push({ resource_name: 'AWS DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
                         } else if (resource_type === 'db/mongodb') {
-                            r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
+                            r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, api_key, date_created })
                         } else if (resource_type === 'db/s3') {
                             r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
                         } else if (resource_type === 'lambda') {
