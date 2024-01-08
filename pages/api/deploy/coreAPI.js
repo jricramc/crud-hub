@@ -21,7 +21,9 @@ const handler = async (req, res) => {
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
 
-        await stack.up({ onOutput: () => {} })
+        await stack.up({ onOutput: (...args) => {
+          console.log('args output: ', args);
+        } })
           .then(async (upRes1) => {
             console.log('<<stage 1 complete>>');
             const {
@@ -138,7 +140,7 @@ const handler = async (req, res) => {
 
         }).catch((...args) => {
             console.log('err_1: ', args[0]);
-            res.status(409).json({ err: args[0], lvl: 'err_1', args });
+            res.status(409).json({ err: args[0], lvl: 'err_1', args, test: 'test' });
         });
 
     } else {
