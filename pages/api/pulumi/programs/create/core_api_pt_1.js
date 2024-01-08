@@ -71,10 +71,10 @@ const handler = async ({ rid }) => {
         policyArn: lambdaExecutionPolicy.arn,
         role: lam_s3_role.name,
     },
-    // { dependsOn: [
-    //     lambdaExecutionPolicy,
-    //     lam_s3_role
-    // ]},
+    { dependsOn: [
+        lambdaExecutionPolicy,
+        lam_s3_role
+    ]},
     );
 
     // Define an S3 policy to grant access to the bucket
@@ -110,10 +110,10 @@ const handler = async ({ rid }) => {
         policyArn: s3AccessPolicy.arn,
         roles: [lam_s3_role],
     },
-    // { dependsOn: [
-    //     s3AccessPolicy,
-    //     lam_s3_role
-    // ]}
+    { dependsOn: [
+        s3AccessPolicy,
+        lam_s3_role
+    ]}
     );
 
 
@@ -167,10 +167,10 @@ const handler = async ({ rid }) => {
         role: lam_role.id,
         policy: JSON.stringify(lam_policy)
     },
-    // { dependsOn: [
-    //     lam_role,
-    //     lam_policy,
-    // ]}
+    { dependsOn: [
+        lam_role,
+        lam_policy,
+    ]}
     );
 
 
@@ -189,9 +189,9 @@ const handler = async ({ rid }) => {
             },
         },
     },
-    // { dependsOn: [
-    //     lam_role,
-    // ]}
+    { dependsOn: [
+        lam_role,
+    ]}
     );
 
     
@@ -206,9 +206,9 @@ const handler = async ({ rid }) => {
             },
         },
     },
-    // { dependsOn: [
-    //     lam_role,
-    // ]}
+    { dependsOn: [
+        lam_role,
+    ]}
     );
     
     const updateFunc = new aws.lambda.Function(`ledger-update-function-${rid}`, {
@@ -222,9 +222,9 @@ const handler = async ({ rid }) => {
             },
         },
     },
-    // { dependsOn: [
-    //     lam_role
-    // ]}
+    { dependsOn: [
+        lam_role
+    ]}
     );
     
     const deleteFunc = new aws.lambda.Function(`ledger-delete-function-${rid}`, {
@@ -238,9 +238,9 @@ const handler = async ({ rid }) => {
             },
         },
     },
-    // { dependsOn: [
-    //     lam_role
-    // ]}
+    { dependsOn: [
+        lam_role
+    ]}
     );
 
     const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
@@ -256,9 +256,9 @@ const handler = async ({ rid }) => {
         },
         layers: ["arn:aws:lambda:us-east-2:442052175141:layer:archive-layer:1"], // Add the Archive layer to your Lambda function
     },
-    // { dependsOn: [
-    //     lam_s3_role,
-    // ]}
+    { dependsOn: [
+        lam_s3_role,
+    ]}
     );
 
 
@@ -273,13 +273,13 @@ const handler = async ({ rid }) => {
             { path: "/ledger/generate/mintlify-docs", method: "POST", eventHandler: generateMintlifyDocsFunc },
         ],
     },
-    // { dependsOn: [
-    //     createFunc,
-    //     readFunc,
-    //     updateFunc,
-    //     deleteFunc,
-    //     generateMintlifyDocsFunc,
-    // ]}
+    { dependsOn: [
+        createFunc,
+        readFunc,
+        updateFunc,
+        deleteFunc,
+        generateMintlifyDocsFunc,
+    ]}
     );
 
     const { api: { id: restApiId, name: apiName, rootResourceId, executionArn } } = api;
@@ -297,9 +297,9 @@ const handler = async ({ rid }) => {
         parentId: rootResourceId,
         pathPart: "db",
     },
-    // { dependsOn: [
-    //     api,
-    // ]}
+    { dependsOn: [
+        api,
+    ]}
     );
     
     /*
@@ -310,10 +310,10 @@ const handler = async ({ rid }) => {
         parentId: folderMainDBResource.id,
         pathPart: "dynamodb",
     },
-    // { dependsOn: [
-    //     api,
-    //     folderMainDBResource,
-    // ]}
+    { dependsOn: [
+        api,
+        folderMainDBResource,
+    ]}
     );
 
     /*
@@ -324,10 +324,10 @@ const handler = async ({ rid }) => {
         parentId: folderMainDBResource.id,
         pathPart: "mongodb",
     },
-    // { dependsOn: [
-    //     api,
-    //     folderMainDBResource,
-    // ]}
+    { dependsOn: [
+        api,
+        folderMainDBResource,
+    ]}
     );
 
     /*
@@ -338,10 +338,10 @@ const handler = async ({ rid }) => {
         parentId: folderMainDBResource.id,
         pathPart: "s3",
     },
-    // { dependsOn: [
-    //     api,
-    //     folderMainDBResource,
-    // ]}
+    { dependsOn: [
+        api,
+        folderMainDBResource,
+    ]}
     );
 
     const folderMainLambdaResource = new aws.apigateway.Resource(`folder-Lambda-Resource-${rid}`, {
@@ -349,9 +349,9 @@ const handler = async ({ rid }) => {
         parentId: rootResourceId,
         pathPart: "lambda",
     },
-    // { dependsOn: [
-    //     api,
-    // ]}
+    { dependsOn: [
+        api,
+    ]}
     );
 
     /*
@@ -362,9 +362,9 @@ const handler = async ({ rid }) => {
         parentId: rootResourceId,
         pathPart: "payment",
     },
-    // { dependsOn: [
-    //     api,
-    // ]}
+    { dependsOn: [
+        api,
+    ]}
     );
 
     /*
@@ -375,10 +375,10 @@ const handler = async ({ rid }) => {
         parentId: folderMainPaymentResource.id,
         pathPart: "stripe",
     },
-    // { dependsOn: [
-    //     api,
-    //     folderMainPaymentResource,
-    // ]}
+    { dependsOn: [
+        api,
+        folderMainPaymentResource,
+    ]}
     );
 
     /*
@@ -389,9 +389,9 @@ const handler = async ({ rid }) => {
         parentId: rootResourceId,
         pathPart: "auth",
     },
-    // { dependsOn: [
-    //     api,
-    // ]}
+    { dependsOn: [
+        api,
+    ]}
     );
 
     /*
@@ -402,10 +402,10 @@ const handler = async ({ rid }) => {
         parentId: folderMainAuthResource.id,
         pathPart: "google",
     },
-    // { dependsOn: [
-    //     api,
-    //     folderMainAuthResource,
-    // ]}
+    { dependsOn: [
+        api,
+        folderMainAuthResource,
+    ]}
     );
 
     /*
@@ -416,9 +416,9 @@ const handler = async ({ rid }) => {
         parentId: rootResourceId,
         pathPart: "websocket",
     },
-    // { dependsOn: [
-    //     api,
-    // ]}
+    { dependsOn: [
+        api,
+    ]}
     );
 
     /*
