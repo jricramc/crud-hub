@@ -17,7 +17,7 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: 'js-test',
-            program: async () =>  await add_websocket_api({ socketName, rid, lam_role_arn }),
+            program: async () =>  await add_websocket_api({ socketName, websocketResourceId, rid, lam_role_arn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });

@@ -9,7 +9,7 @@ import * as fs from "fs";
 import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ socketName, rid, lam_role_arn }) => {
+const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) => {
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
