@@ -113,6 +113,7 @@ const Projects = ({}) => {
             { method: 'get', endpoint: '/db/mongodb/{dbname}', description: 'creates a MongoDB resource with the name {dbname} and deploys an API to execute MongoDB commands' },
             { method: 'get', endpoint: '/db/s3/{bucket-name}', description: 'creates a dynamodb resource with the name {bucket-name} and deploys a CRUD API to interact with the s3 bucket created' },
             { method: 'post', endpoint: '/lambda/{lambda-name}', description: 'creates a lambda resource with the name {name} and deploys an API (web-hook) to interact with your resource' },
+            { method: 'post', endpoint: '/websocket/{socket-name}', description: 'creates a websocket resource with the name {socket-name} and deploys an API to execute websocket protocols' },
             { method: 'post', endpoint: '/payment/stripe/{integration-name}', description: 'Creates a Stripe Payment Integration API for business transactions' },
             { method: 'post', endpoint: '/auth/google/{integration-name}', description: 'Coming Soon! Creates a Google OAuth Integration API for user sign-in' },
             // { method: 'get', endpoint: '/delete/dynamodb/{dbname}', description: 'deletes a dynamodb resource with the name {dbname} if one exists along with the CRUD API...' },
@@ -138,14 +139,21 @@ const Projects = ({}) => {
             { method: 'post', endpoint: '/execute', description: 'execute your business logic running on the lambda'},
             { method: 'post', endpoint: '/read', description: 'see the code contents that is running on your lambda'},
         ],
+        'websocket': [],
     }[resource_type]);
 
-    const resourceObjToResourceUIObj = ({ resource_name, resource_type, name, unique_name, api_key, date_created }) => ({
+    const resourceObjToResourceUIObj = ({
+        resource_name, resource_type,
+        name, unique_name,
+        api_key, websocket_endpoint,
+        date_created,
+    }) => ({
         name,
         baseUrl: `/${resource_type}/${unique_name}`,
         resourceName: resource_name,
         type: resource_type,
         api_key,
+        websocket_endpoint,
         created: date_created,
         links: resourceLinks(resource_name, resource_type),
     });
@@ -169,6 +177,10 @@ const Projects = ({}) => {
             src: 'aws-lambda.svg',
             name: 'AWS Lambda',
         },
+        'websocket': {
+            src: 'aws-lambda.svg',
+            name: 'AWS Websocket',
+        },
     };
 
     const resourceTable = ({ resource, core }) => (
@@ -186,6 +198,7 @@ const Projects = ({}) => {
                         <div style={{ fontSize: 20, fontWeight: 'bold', color: '#262B2E' }}>{resource.name.toUpperCase()}</div>
                         <div style={{ fontSize: 12, color: '#AEAEAE' }}>{resource.baseUrl}</div>
                         {resource.api_key && <div style={{ fontSize: 12, color: '#004d40' }}>{`API Key (sensitive): ${resource.api_key}`}</div>}
+                        {resource.websocket_endpoint && <div style={{ fontSize: 12, color: '#004d40' }}>{`Websocket URL: ${resource.websocket_endpoint}`}</div>}
                     </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', fontWeight: 'bold', fontSize: 14, color: '#7D7D7D', marginLeft: 104, marginTop: 30 }}>
@@ -336,7 +349,8 @@ const Projects = ({}) => {
                             resource_type,
                             db_name, unique_dbname,
                             bucketName, uniqueBucketName,
-                            lambdaName, unique_lambda_name
+                            lambdaName, unique_lambda_name,
+                            socketName, unique_socket_name, websocket_endpoint,
                         } = items[i]
 
                         if (api_id) {
@@ -349,6 +363,8 @@ const Projects = ({}) => {
                             r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
                         } else if (resource_type === 'lambda') {
                             r.push({ resource_name: 'AWS Lambda', resource_type, name: lambdaName, unique_name: unique_lambda_name, date_created })
+                        } else if (resource_type === 'websocket') {
+                            r.push({ resource_name: 'Websocket', resource_type, name: socketName, unique_name: unique_socket_name, websocket_endpoint, date_created })
                         } else {
                             console.log('items[i]: ', items[i])
                         }

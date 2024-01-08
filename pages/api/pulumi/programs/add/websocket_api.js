@@ -9,10 +9,12 @@ import * as fs from "fs";
 import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ socketName, rid, lam_role_arn, websocket_endpoint = '' }) => {
+const handler = async ({ socketName, rid, lam_role_arn }) => {
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
+
+    const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
 
     // Create API Gatewayv2 WebSocket API
     const websocketAPI = new aws.apigatewayv2.Api(`websocketAPI-${unqiue_socket_name}-${rid}`, {
@@ -20,78 +22,25 @@ const handler = async ({ socketName, rid, lam_role_arn, websocket_endpoint = '' 
         routeSelectionExpression: "${request.body.action}",
     });
 
+    const websocketEndpoint = websocketAPI.apiEndpoint;
+
     // Create websocket lambda function
 
     const websocketFunc = new aws.lambda.Function(
         `websocketFunc-${unqiue_socket_name}-${rid}`,
         {
-            code: new pulumi.asset.AssetArchive({
-                "index.js": new pulumi.asset.StringAsset(`
-                
-                import AWS from 'aws-sdk';
-                let CONNECTIONS_OBJ = {};
-
-                const ENDPOINT = process.env.WEBSOCKET_ENDPOINT;
-                const client = new AWS.ApiGatewayManagementApi({ endpoint: ENDPOINT });
-
-
-                const sendToOne = async (id, body) => {
-                    try {
-                        await client.postToConnection({
-                        'ConnectionId': id,
-                        'Data': Buffer.from(JSON.stringify(body)),
-                        }).promise();
-                    } catch (err) {
-                        console.error(err);
-                    }
-                };
-                  
-                const sendToAll = async (ids, body) => {
-                    const all = ids.map(i => sendToOne(i, body));
-                    return Promise.all(all);
-                };
-
-
-                if (!event.requestContext) {
-                    return {};
-                }
-                
-                try {
-            
-                    const connectionId = event.requestContext.connectionId;
-                    const routeKey = event.requestContext.routeKey;
-                    const body = JSON.parse(event.body || '{}');
-
-                    switch (routeKey) {
-                        case '$connect':
-                            sendToOne(connectionId, body);
-                            break;
-                        case '$disconnect':
-                            // 
-                            break;
-                        case '$default':
-                            sendToOne(connectionId, body);
-                            break;
-                    }
-            
-                } catch (err) {
-                    console.error(err);
-                }
-            
-                return {};
-                
-                                
-                `),
-            }),
+            code: new pulumi.asset.FileArchive(path.join(...directoryArray, "websocketHandler.zip")),
             role: lam_role_arn,
             handler: "index.handler",
             runtime: "nodejs14.x",
             timeout: 120,
             environment: {
                 variables: {
-                    WEBSOCKET_ENDPOINT: websocket_endpoint,
+                    WEBSOCKET_ENDPOINT: websocketEndpoint,
                 },
             },
+            // Add layer for aws-sdk/client-apigatewaymanagementapi
+            layers: ["arn:aws:lambda:us-east-2:442052175141:layer:aws-sdk_client-apigatewaymanagementapi:1"],
         }
     );
 
@@ -135,7 +84,7 @@ const handler = async ({ socketName, rid, lam_role_arn, websocket_endpoint = '' 
     });
 
 
-    return { websocketDeployment, websocketStage, socket_name: socketName, unique_socket_name, websocketAPI };
+    return { websocketDeployment, websocketStage, socketName, unique_socket_name, websocketAPI, websocketEndpoint };
 };
 
 export default handler

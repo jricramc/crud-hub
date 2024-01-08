@@ -1738,10 +1738,11 @@ exports.handler = async (event) => {
                             const obj = JSON.parse(responseData);
                             if (obj.type === 'success') {
                                 const {
-                                socketName: { value: socket_name },
+                                socketName: { value: socketName },
                                 unique_socket_name: { value: unique_socket_name },
+                                websocketEndpoint: { value: websocket_endpoint }
                                 } = obj['0']['outputs'];
-                                return { type: 'success', resource: { wsName, unique_socket_name, date_created: new Date() } }
+                                return { type: 'success', resource: { socketName, unique_socket_name, websocket_endpoint, date_created: new Date() } }
                             } else {
                                 return { type: 'error', err: 'pulumi returned an error code' }
                             }
