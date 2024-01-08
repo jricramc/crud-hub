@@ -21,9 +21,9 @@ const handler = async (req, res) => {
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
 
-        await stack.up({ onOutput: (...args) => {
-          console.log('args output: ', args);
-        } })
+        const onOutput = {};
+
+        const { statusCode, output } = await stack.up({ onOutput: (...args) => { onOutput.stage1 = args; } })
           .then(async (upRes1) => {
             console.log('<<stage 1 complete>>');
             const {
@@ -66,7 +66,7 @@ const handler = async (req, res) => {
             const route = 'ledger/create';
             const ledger_url = `${api_url}${route}`;
 
-            await axios({
+            const { statusCode, output } = await axios({
               url: ledger_url,
               method: 'POST',
               headers: {
@@ -119,29 +119,54 @@ const handler = async (req, res) => {
                 await stack2.workspace.installPlugin("aws", "v4.0.0");
                 await stack2.setConfig("aws:region", { value: "us-east-2" });
 
-                await stack2.up({ onOutput: () => {} }).then((upRes2) => {
+                const { statusCode, output } = await stack2.up({ onOutput: (...args) => { onOutput.stage2 = args; } })
+                .then((upRes2) => {
                     console.log('<<stage 2 complete>>');
-                    res.status(200).json({
-                        upRes: {
-                            data,
-                            part1: upRes1,
-                            part2: upRes2,
-                        }
-                    })
+                    return {
+                      statusCode: 200,
+                      output: {
+                          upRes: {
+                              data,
+                              part1: upRes1,
+                              part2: upRes2,
+                          }
+                      }
+                    };
                 }).catch((err) => {
                     console.log('err_4: ', err);
-                    res.status(409).json({ err, lvl: 'err_4' })
+                    return {
+                      statusCode: 409,
+                      output: { err, lvl: 'err_4' }
+                    };
                 });
+
+                return {
+                  statusCode,
+                  output,
+                };
 
             }).catch((err) => {
                 console.log('err_2: ', err);
-                res.status(409).json({ err, lvl: 'err_2' });
+                return {
+                  statusCode: 409,
+                  output: { err, lvl: 'err_2' }
+                };
             });
+
+            return {
+              statusCode,
+              output,
+            };
 
         }).catch((...args) => {
             console.log('err_1: ', args[0]);
-            res.status(409).json({ err: args[0], lvl: 'err_1', args, test: 'test' });
+            return {
+              statusCode: 409,
+              output: { err: args[0], lvl: 'err_1', args, test: 'test' }
+            };
         });
+
+        res.status(statusCode).json({...output, onOutput });
 
     } else {
         res.status(405).end(`Method ${method} Not Allowed`);
