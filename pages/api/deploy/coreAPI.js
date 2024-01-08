@@ -136,9 +136,9 @@ const handler = async (req, res) => {
                 res.status(409).json({ err, lvl: 'err_2' });
             });
 
-        }).catch((err) => {
-            console.log('err_1: ', err);
-            res.status(409).json({ err, lvl: 'err_1' });
+        }).catch((...args) => {
+            console.log('err_1: ', args[0]);
+            res.status(409).json({ err: args[0], lvl: 'err_1', args });
         });
 
     } else {
