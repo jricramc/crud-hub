@@ -136,7 +136,7 @@ const handler = async (req, res) => {
                     console.log('err_4: ', err);
                     return {
                       statusCode: 409,
-                      output: { err, lvl: 'err_4' }
+                      output: { err, level: 'err_4' }
                     };
                 });
 
@@ -149,7 +149,7 @@ const handler = async (req, res) => {
                 console.log('err_2: ', err);
                 return {
                   statusCode: 409,
-                  output: { err, lvl: 'err_2' }
+                  output: { err, level: 'err_2' }
                 };
             });
 
@@ -162,7 +162,7 @@ const handler = async (req, res) => {
             console.log('err_1: ', args[0]);
             return {
               statusCode: 409,
-              output: { err: args[0], lvl: 'err_1', args, test: 'test' }
+              output: { err: args[0], level: 'err_1', args, test: 'test' }
             };
         });
 
