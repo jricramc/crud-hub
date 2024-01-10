@@ -190,7 +190,7 @@ const handler = async ({ rid }) => {
         },
     },
     { dependsOn: [
-        lam_role,
+        // lam_role,
     ]}
     );
 
@@ -207,7 +207,7 @@ const handler = async ({ rid }) => {
         },
     },
     { dependsOn: [
-        lam_role,
+        // lam_role,
     ]}
     );
     
@@ -223,7 +223,7 @@ const handler = async ({ rid }) => {
         },
     },
     { dependsOn: [
-        lam_role
+        // lam_role
     ]}
     );
     
@@ -239,7 +239,7 @@ const handler = async ({ rid }) => {
         },
     },
     { dependsOn: [
-        lam_role
+        // lam_role
     ]}
     );
 
@@ -257,7 +257,7 @@ const handler = async ({ rid }) => {
         layers: ["arn:aws:lambda:us-east-2:442052175141:layer:archive-layer:1"], // Add the Archive layer to your Lambda function
     },
     { dependsOn: [
-        lam_s3_role,
+        // lam_s3_role,
     ]}
     );
 
