@@ -45,7 +45,7 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
     );
 
     // Create the AWS Lambda Integration for API Gateway
-    const websocketIntegration = new aws.apigatewayv2.Integration(`websocketIntegration-${unique_socket_name}-${rid}`, {
+    const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         integrationType: "AWS_PROXY",
         integrationUri: websocketFunc.invokeArn,
@@ -55,21 +55,30 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
     const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         routeKey: "$connect",
-        target: `integrations/${websocketIntegration.id}`,
+        // target: `integrations/${websocketIntegration.id}`,
+        target: pulumi.interpolate`integrations/${websocketIntegration.id}`,
+    }, {
+        dependsOn: [websocketIntegration],
     });
 
     // Create API Gatewayv2 WebSocket route for $disconnect event
     const disconnectRoute = new aws.apigatewayv2.Route(`disconnectRoute-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         routeKey: "$disconnect",
-        target: `integrations/${websocketIntegration.id}`,
+        // target: `integrations/${websocketIntegration.id}`,
+        target: pulumi.interpolate`integrations/${websocketIntegration.id}`,
+    }, {
+        dependsOn: [websocketIntegration],
     });
 
     // Create API Gatewayv2 WebSocket route for "broadcast" event
     const defaultRoute = new aws.apigatewayv2.Route(`defaultRoute-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         routeKey: "$default",
-        target: `integrations/${websocketIntegration.id}`,
+        // target: `integrations/${websocketIntegration.id}`,
+        target: pulumi.interpolate`integrations/${websocketIntegration.id}`,
+    }, {
+        dependsOn: [websocketIntegration],
     });
 
     // Create the Deployment
