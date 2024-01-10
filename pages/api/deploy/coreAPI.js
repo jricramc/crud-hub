@@ -156,6 +156,7 @@ const handler = async (req, res) => {
               const upRes3 = await stack3.up({ onOutput: () => {} })
               .then((upRes) => {
                   console.log('<<stage 3 complete>>');
+                  console.log('upRes: ', upRes);
                   return {
                     statusCode: 200,
                     output: upRes?.outputs,
@@ -166,6 +167,8 @@ const handler = async (req, res) => {
                     output: { err, level: 'err_4' }
                   };
               });
+
+              console.log('upRes: ', upRes3);
 
               statusCode = upRes3.statusCode;
 
