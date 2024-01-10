@@ -13,16 +13,16 @@ const handler = async (req, res) => {
     const stackName = `stack-${rid}`;
    
     if (method === 'POST') {
-        const stack = await LocalWorkspace.createStack({
+        const stack1 = await LocalWorkspace.createStack({
             stackName: `${stackName}-pt-1`,
             projectName,
             program: async () => await core_api_pt_1({ rid }),
         });
 
-        await stack.workspace.installPlugin("aws", "v4.0.0");
-        await stack.setConfig("aws:region", { value: "us-east-2" });
+        await stack1.workspace.installPlugin("aws", "v4.0.0");
+        await stack1.setConfig("aws:region", { value: "us-east-2" });
 
-        const upRes1 = await stack.up({ onOutput: () => {} })
+        const upRes1 = await stack1.up({ onOutput: () => {} })
           .then((upRes) => ({ statusCode: 200, output: upRes.outputs }))
           .catch((err) => ({
             statusCode: 409,
@@ -185,149 +185,6 @@ const handler = async (req, res) => {
           statusCode = upRes1.statusCode;
           output = upRes1.output;
         }
-
-        // const { statusCode, output } = await stack.up({ onOutput: () => {} })
-        //   .then(async (upRes1) => {
-        //     console.log('<<stage 1 complete>>');
-        //     const {
-        //       outputs: {
-        //         url: { value: api_url },
-        //         apiID: { value: api_id },
-        //         apiName: { value: api_name },
-        //         rootResourceId: { value: root_resource_id },
-        //         lambdaResourceId: {value: lambda_resource_id },
-        //         dbResourceId: { value: db_resource_id },
-        //         mongodbResourceId: { value: mongodb_resource_id },
-        //         s3ResourceId: { value: s3_resource_id },
-        //         stripeResourceId: { value: stripe_resource_id },
-        //         googleResourceId: { value: google_resource_id },
-        //         sendgridResourceId: { value: sendgrid_resource_id },
-        //         lam_role: { value: { arn: lam_role_arn }},
-        //         executionArn: { value: execution_arn },
-        //         stripeLayerArn: { value: stripe_layer_arn}
-        //       }
-        //     } = upRes1;
-
-        //     const data = {
-        //         r_id: rid,
-        //         api_url,
-        //         api_id,
-        //         api_name,
-        //         root_resource_id,
-        //         lambda_resource_id,
-        //         db_resource_id,
-        //         mongodb_resource_id,
-        //         s3_resource_id,
-        //         stripe_resource_id,
-        //         google_resource_id,
-        //         lam_role_arn,
-        //         execution_arn,
-        //         stripe_layer_arn,
-        //         date_created: new Date(),
-        //     };
-
-        //     const route = 'ledger/create';
-        //     const ledger_url = `${api_url}${route}`;
-
-        //     const { statusCode, output } = await axios({
-        //       url: ledger_url,
-        //       method: 'POST',
-        //       headers: {
-        //         'Access-Control-Allow-Origin': '*',
-        //         'Content-Type': 'application/json',
-        //       },
-        //       data: {
-        //         id: rid,
-        //         name: JSON.stringify(data),
-        //       },
-        //     }).then(async (response_1) => {
-        //         console.log('<<stage 1.1 complete>>');
-
-        //         const db_data_ = {
-        //             rid,
-        //             email,
-        //             name,
-        //             url: api_url,
-        //         };
-
-        //         const db_data = {
-        //             id: email,
-        //             name: JSON.stringify(db_data_),
-        //         }
-
-        //         console.log('<<stage 1.2 complete>>');
-
-        //         const stack2 = await LocalWorkspace.createStack({
-        //             projectName,
-        //             stackName: `${stackName}-pt-2`,
-        //             program: async () =>  await core_api_pt_2({
-        //                 apiID: api_id,
-        //                 apiName: api_name,
-        //                 apiUrl: api_url,
-        //                 rootResourceId: root_resource_id,
-        //                 dbResourceId: db_resource_id,
-        //                 mongodbResourceId: mongodb_resource_id,
-        //                 lambdaResourceId: lambda_resource_id,
-        //                 s3ResourceId: s3_resource_id,
-        //                 stripeResourceId: stripe_resource_id,
-        //                 googleResourceId: google_resource_id,
-        //                 sendgridResourceId: sendgrid_resource_id,
-        //                 lam_role_arn,
-        //                 executionArn: execution_arn,
-        //                 rid,
-        //                 stripeLayerArn: stripe_layer_arn
-        //             })
-        //         });
-
-        //         await stack2.workspace.installPlugin("aws", "v4.0.0");
-        //         await stack2.setConfig("aws:region", { value: "us-east-2" });
-
-        //         const { statusCode, output } = await stack2.up({ onOutput: (...args) => { onOutput.stage2 = args; } })
-        //         .then((upRes2) => {
-        //             console.log('<<stage 2 complete>>');
-        //             return {
-        //               statusCode: 200,
-        //               output: {
-        //                   upRes: {
-        //                       data,
-        //                       part1: upRes1,
-        //                       part2: upRes2,
-        //                   }
-        //               }
-        //             };
-        //         }).catch((err) => {
-        //             console.log('err_4: ', err);
-        //             return {
-        //               statusCode: 409,
-        //               output: { err, level: 'err_4' }
-        //             };
-        //         });
-
-        //         return {
-        //           statusCode,
-        //           output,
-        //         };
-
-        //     }).catch((err) => {
-        //         console.log('err_2: ', err);
-        //         return {
-        //           statusCode: 409,
-        //           output: { err, level: 'err_2' }
-        //         };
-        //     });
-
-        //     return {
-        //       statusCode,
-        //       output,
-        //     };
-
-        // }).catch((...args) => {
-        //     console.log('err_1: ', args[0]);
-        //     return {
-        //       statusCode: 409,
-        //       output: { err: args[0], level: 'err_1', args, test: 'test' }
-        //     };
-        // });
 
         res.status(statusCode).json({...output });
 
