@@ -72,8 +72,8 @@ const handler = async ({ rid }) => {
         role: lam_s3_role.name,
     },
     { dependsOn: [
-        lambdaExecutionPolicy,
-        lam_s3_role
+        // lambdaExecutionPolicy,
+        // lam_s3_role
     ]},
     );
 
@@ -111,8 +111,8 @@ const handler = async ({ rid }) => {
         roles: [lam_s3_role],
     },
     { dependsOn: [
-        s3AccessPolicy,
-        lam_s3_role
+        // s3AccessPolicy,
+        // lam_s3_role
     ]}
     );
 
@@ -168,8 +168,8 @@ const handler = async ({ rid }) => {
         policy: JSON.stringify(lam_policy)
     },
     { dependsOn: [
-        lam_role,
-        lam_policy,
+        // lam_role,
+        // lam_policy,
     ]}
     );
 
