@@ -9,7 +9,7 @@ import * as fs from "fs";
 import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) => {
+const handler = async ({ socketName, rid, lam_role_arn }) => {
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
@@ -25,6 +25,12 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
 
     const websocketEndpoint = websocketAPI.apiEndpoint;
 
+    // Create Stage
+    const websocketStage = new aws.apigatewayv2.Stage(wsStage, {
+        apiId: websocketAPI.id,
+        autoDeploy: true,
+    });
+
     // Create websocket lambda function
 
     const websocketFunc = new aws.lambda.Function(
@@ -37,8 +43,9 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
             timeout: 120,
             environment: {
                 variables: {
-                    WEBSOCKET_ENDPOINT: websocketEndpoint,
-                    STAGE: wsStage,
+                    WEBSOCKET_ENDPOINT: (pulumi.interpolate`${websocketEndpoint}`.match(r) ||
+                    [ null, pulumi.interpolate`${websocketEndpoint}`.substring(6) ])[1],
+                    STAGE: websocketStage.name,
                 },
             },
             // Add layer for aws-sdk/client-apigatewaymanagementapi
@@ -88,14 +95,8 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
         apiId: websocketAPI.id,
     }, { dependsOn: [connectRoute, disconnectRoute, defaultRoute] });
 
-    // Create the Stage using the Deployment
-    const websocketStage = new aws.apigatewayv2.Stage(wsStage, {
-        apiId: websocketAPI.id,
-        autoDeploy: true,
-    });
 
-
-    return { websocketDeployment, websocketStage, socketName, unique_socket_name, websocketAPI, websocketEndpoint };
+    return { websocketDeployment, websocketStageName: websocketStage.name, socketName, unique_socket_name, websocketAPI, websocketEndpoint };
 };
 
 export default handler

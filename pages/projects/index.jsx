@@ -146,6 +146,7 @@ const Projects = ({}) => {
         resource_name, resource_type,
         name, unique_name,
         api_key, websocket_endpoint,
+        websocket_stage_name,
         date_created,
     }) => ({
         name,
@@ -154,6 +155,7 @@ const Projects = ({}) => {
         type: resource_type,
         api_key,
         websocket_endpoint,
+        websocket_stage_name,
         created: date_created,
         links: resourceLinks(resource_name, resource_type),
     });
@@ -198,7 +200,7 @@ const Projects = ({}) => {
                         <div style={{ fontSize: 20, fontWeight: 'bold', color: '#262B2E' }}>{resource.name.toUpperCase()}</div>
                         <div style={{ fontSize: 12, color: '#AEAEAE' }}>{resource.baseUrl}</div>
                         {resource.api_key && <div style={{ fontSize: 12, color: '#004d40' }}>{`API Key (sensitive): ${resource.api_key}`}</div>}
-                        {resource.websocket_endpoint && <div style={{ fontSize: 12, color: '#004d40' }}>{`Websocket URL: ${resource.websocket_endpoint}`}</div>}
+                        {resource.websocket_endpoint && resource.websocket_stage_name && <div style={{ fontSize: 12, color: '#004d40' }}>{`Websocket URL: ${resource.websocket_endpoint}/${resource.websocket_stage_name}/`}</div>}
                     </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', fontWeight: 'bold', fontSize: 14, color: '#7D7D7D', marginLeft: 104, marginTop: 30 }}>
@@ -350,7 +352,7 @@ const Projects = ({}) => {
                             db_name, unique_dbname,
                             bucketName, uniqueBucketName,
                             lambdaName, unique_lambda_name,
-                            socketName, unique_socket_name, websocket_endpoint,
+                            socketName, unique_socket_name, websocket_endpoint, websocket_stage_name,
                         } = items[i]
 
                         if (api_id) {
@@ -364,7 +366,7 @@ const Projects = ({}) => {
                         } else if (resource_type === 'lambda') {
                             r.push({ resource_name: 'AWS Lambda', resource_type, name: lambdaName, unique_name: unique_lambda_name, date_created })
                         } else if (resource_type === 'websocket') {
-                            r.push({ resource_name: 'Websocket', resource_type, name: socketName, unique_name: unique_socket_name, websocket_endpoint, date_created })
+                            r.push({ resource_name: 'Websocket', resource_type, name: socketName, unique_name: unique_socket_name, websocket_endpoint, websocket_stage_name, date_created })
                         } else {
                             console.log('items[i]: ', items[i])
                         }

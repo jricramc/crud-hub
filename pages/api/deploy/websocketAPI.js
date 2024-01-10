@@ -1,5 +1,5 @@
 import { RID } from '../../../utils/utils';
-import add_websocket_api from '../pulumi/programs/add/websocket_api'
+import add_websocket_api from '../pulumi/programs/add/websocket_api_pt_1'
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
@@ -22,7 +22,6 @@ const handler = async (req, res) => {
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
         await stack.up({ onOutput: () => {} }).then((...args) => {
-          console.log('args: ', JSON.stringify({ args }));
           res.status(200).json({ type: 'success', ...args });
         }).catch((...args) => {
           res.status(200).json({ type: 'error', ...args });
