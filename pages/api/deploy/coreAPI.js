@@ -154,8 +154,8 @@ const handler = async (req, res) => {
               await stack3.setConfig("aws:region", { value: "us-east-2" });
 
               const upRes3 = await stack3.up({ onOutput: () => {} })
-              .then((upRes2) => {
-                  console.log('<<stage 2 complete>>');
+              .then((upRes) => {
+                  console.log('<<stage 3 complete>>');
                   return {
                     statusCode: 200,
                     output: upRes?.outputs,
