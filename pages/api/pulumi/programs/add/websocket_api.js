@@ -13,6 +13,7 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
+    const wsStage = `stage-${unique_socket_name}-${rid}`;
 
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
 
@@ -37,6 +38,7 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
             environment: {
                 variables: {
                     WEBSOCKET_ENDPOINT: websocketEndpoint,
+                    STAGE: wsStage,
                 },
             },
             // Add layer for aws-sdk/client-apigatewaymanagementapi
@@ -87,7 +89,7 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
     }, { dependsOn: [connectRoute, disconnectRoute, defaultRoute] });
 
     // Create the Stage using the Deployment
-    const websocketStage = new aws.apigatewayv2.Stage("websocketStage", {
+    const websocketStage = new aws.apigatewayv2.Stage(wsStage, {
         apiId: websocketAPI.id,
         autoDeploy: true,
     });
