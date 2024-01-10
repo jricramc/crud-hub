@@ -78,6 +78,7 @@ const handler = async (req, res) => {
               stripeResourceId: { value: stripe_resource_id },
               googleResourceId: { value: google_resource_id },
               sendgridResourceId: { value: sendgrid_resource_id },
+              websocketResourceId: { value: websocket_resource_id },
             } = upRes2.output;
 
             const data = {
@@ -92,6 +93,7 @@ const handler = async (req, res) => {
               s3_resource_id,
               stripe_resource_id,
               google_resource_id,
+              websocket_resource_id,
               lam_role_arn,
               execution_arn,
               stripe_layer_arn,
@@ -143,6 +145,7 @@ const handler = async (req, res) => {
                     stripeResourceId: stripe_resource_id,
                     googleResourceId: google_resource_id,
                     sendgridResourceId: sendgrid_resource_id,
+                    websocketResourceId: websocket_resource_id,
                     lam_role_arn,
                     executionArn: execution_arn,
                     rid,
@@ -156,7 +159,6 @@ const handler = async (req, res) => {
               const upRes3 = await stack3.up({ onOutput: () => {} })
               .then((upRes) => {
                   console.log('<<stage 3 complete>>');
-                  console.log('upRes: ', upRes);
                   return {
                     statusCode: 200,
                     output: upRes?.outputs,
@@ -167,8 +169,6 @@ const handler = async (req, res) => {
                     output: { err, level: 'err_4' }
                   };
               });
-
-              console.log('upRes: ', upRes3);
 
               statusCode = upRes3.statusCode;
 
