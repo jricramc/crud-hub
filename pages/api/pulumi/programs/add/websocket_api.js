@@ -17,7 +17,7 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
 
     // Create API Gatewayv2 WebSocket API
-    const websocketAPI = new aws.apigatewayv2.Api(`websocketAPI-${unqiue_socket_name}-${rid}`, {
+    const websocketAPI = new aws.apigatewayv2.Api(`websocketAPI-${unique_socket_name}-${rid}`, {
         protocolType: "WEBSOCKET",
         routeSelectionExpression: "${request.body.action}",
     });
@@ -27,7 +27,7 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
     // Create websocket lambda function
 
     const websocketFunc = new aws.lambda.Function(
-        `websocketFunc-${unqiue_socket_name}-${rid}`,
+        `websocketFunc-${unique_socket_name}-${rid}`,
         {
             code: new pulumi.asset.FileArchive(path.join(...directoryArray, "websocketHandler.zip")),
             role: lam_role_arn,
@@ -45,35 +45,35 @@ const handler = async ({ socketName, websocketResourceId, rid, lam_role_arn }) =
     );
 
     // Create the AWS Lambda Integration for API Gateway
-    const websocketIntegration = new aws.apigatewayv2.Integration(`websocketIntegration-${unqiue_socket_name}-${rid}`, {
+    const websocketIntegration = new aws.apigatewayv2.Integration(`websocketIntegration-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         integrationType: "AWS_PROXY",
         integrationUri: websocketFunc.invokeArn,
     });
 
     // Create API Gatewayv2 WebSocket route for $connect event
-    const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${unqiue_socket_name}-${rid}`, {
+    const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         routeKey: "$connect",
         target: `integrations/${websocketIntegration.id}`,
     });
 
     // Create API Gatewayv2 WebSocket route for $disconnect event
-    const disconnectRoute = new aws.apigatewayv2.Route(`disconnectRoute-${unqiue_socket_name}-${rid}`, {
+    const disconnectRoute = new aws.apigatewayv2.Route(`disconnectRoute-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         routeKey: "$disconnect",
         target: `integrations/${websocketIntegration.id}`,
     });
 
     // Create API Gatewayv2 WebSocket route for "broadcast" event
-    const defaultRoute = new aws.apigatewayv2.Route(`defaultRoute-${unqiue_socket_name}-${rid}`, {
+    const defaultRoute = new aws.apigatewayv2.Route(`defaultRoute-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
         routeKey: "$default",
         target: `integrations/${websocketIntegration.id}`,
     });
 
     // Create the Deployment
-    const websocketDeployment = new aws.apigatewayv2.Deployment(`websocketDeployment-${unqiue_socket_name}-${rid}`, {
+    const websocketDeployment = new aws.apigatewayv2.Deployment(`websocketDeployment-${unique_socket_name}-${rid}`, {
         apiId: websocketAPI.id,
     }, { dependsOn: [connectRoute, disconnectRoute, defaultRoute] });
 
