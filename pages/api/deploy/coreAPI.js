@@ -14,8 +14,8 @@ const handler = async (req, res) => {
    
     if (method === 'POST') {
 
-        const statusCode = 400;
-        const output = { err: 'bad-request', level: 'err_0' };
+        let statusCode = 400;
+        let output = { err: 'bad-request', level: 'err_0' };
 
         const stack1 = await LocalWorkspace.createStack({
             stackName: `${stackName}-pt-1`,
