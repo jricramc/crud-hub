@@ -1,5 +1,5 @@
 import { RID } from '../../../utils/utils';
-import add_websocket_api from '../pulumi/programs/add/websocket_api_pt_1'
+import add_websocket_api from '../pulumi/programs/add/websocket_api'
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
