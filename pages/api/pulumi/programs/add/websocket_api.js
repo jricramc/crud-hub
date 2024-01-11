@@ -40,7 +40,9 @@ const handler = async ({ socketName, rid, executionArn }) => {
                     Action: "sts:AssumeRole",
                     Effect: "Allow",
                     Principal: {
-                        Service: "lambda.amazonaws.com",
+                        Service: [
+                            "lambda.amazonaws.com"
+                        ]
                     },
                 },
             ],
@@ -88,19 +90,18 @@ const handler = async ({ socketName, rid, executionArn }) => {
         }
     );
 
-    // Create the AWS Lambda Integration for API Gateway
-    const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${name_suffix}`, {
-        apiId: websocketAPI.id,
-        integrationType: "AWS_PROXY",
-        integrationUri: websocketFunc.invokeArn,
-        credentialsArn: lambdaRole.arn, // Connect the IAM Role here
-    });
+    // // Create the AWS Lambda Integration for API Gateway
+    // const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${name_suffix}`, {
+    //     apiId: websocketAPI.id,
+    //     integrationType: "AWS_PROXY",
+    //     integrationUri: websocketFunc.invokeArn,
+    //     credentialsArn: lambdaRole.arn, // Connect the IAM Role here
+    // });
 
     // Create API Gatewayv2 WebSocket route for $connect event
     const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${name_suffix}`, {
         apiId: websocketAPI.id,
         routeKey: "$connect",
-        // target: `integrations/${websocketIntegration.id}`,
         target: pulumi.interpolate`integrations/${websocketIntegration.id}`,
     }, {
         dependsOn: [websocketIntegration],
@@ -110,7 +111,6 @@ const handler = async ({ socketName, rid, executionArn }) => {
     const disconnectRoute = new aws.apigatewayv2.Route(`disconnectRoute-${name_suffix}`, {
         apiId: websocketAPI.id,
         routeKey: "$disconnect",
-        // target: `integrations/${websocketIntegration.id}`,
         target: pulumi.interpolate`integrations/${websocketIntegration.id}`,
     }, {
         dependsOn: [websocketIntegration],
@@ -120,7 +120,6 @@ const handler = async ({ socketName, rid, executionArn }) => {
     const defaultRoute = new aws.apigatewayv2.Route(`defaultRoute-${name_suffix}`, {
         apiId: websocketAPI.id,
         routeKey: "$default",
-        // target: `integrations/${websocketIntegration.id}`,
         target: pulumi.interpolate`integrations/${websocketIntegration.id}`,
     }, {
         dependsOn: [websocketIntegration],
