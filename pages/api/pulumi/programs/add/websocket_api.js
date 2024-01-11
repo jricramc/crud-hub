@@ -31,15 +31,50 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
         autoDeploy: true,
     });
 
+    const lambdaRole = new aws.iam.Role(`lambda-role-${unique_socket_name}-${rid}`, {
+        assumeRolePolicy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+                {
+                    Action: "sts:AssumeRole",
+                    Effect: "Allow",
+                    Principal: {
+                        Service: "lambda.amazonaws.com",
+                    },
+                },
+            ],
+        }),
+    });
+    
+    const lambdaPolicy = new aws.iam.Policy(`lambda-policy-${unique_socket_name}-${rid}`, {
+        name: "lambdaPolicy",
+        description: "Policy to allow WebSocket API to invoke Lambda function",
+        policy: pulumi.interpolate`{
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": "lambda:InvokeFunction",
+                    "Resource": arn:aws:lambda:*:*:function:*,
+                },
+            ]
+        }`,
+    });
+    
+    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lambda-role-policy-attachment-${unique_socket_name}-${rid}`, {
+        policyArn: lambdaPolicy.arn,
+        role: lambdaRole.name,
+    });
+
     // Create websocket lambda function
 
     const websocketFunc = new aws.lambda.Function(
         `websocketFunc-${unique_socket_name}-${rid}`,
         {
             code: new pulumi.asset.FileArchive(path.join(...directoryArray, "websocketHandler.zip")),
-            role: lam_role_arn,
+            role: lambdaRole.arn,
             handler: "websocketHandler.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120,
             environment: {
                 variables: {
@@ -57,6 +92,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
         apiId: websocketAPI.id,
         integrationType: "AWS_PROXY",
         integrationUri: websocketFunc.invokeArn,
+        credentialsArn: lambdaRole.arn, // Connect the IAM Role here
     });
 
     // Create API Gatewayv2 WebSocket route for $connect event
