@@ -54,18 +54,8 @@ const handler = async ({ socketName, rid, executionArn }) => {
     const lambdaPolicy = new aws.iam.Policy(`lambda-policy-${name_suffix}`, {
         name: `lambda-policy-${name_suffix}`,
         description: "Policy to allow WebSocket API to invoke Lambda function",
-        policy: JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [{
-                Effect: "Allow",
-                Action: "lambda:InvokeFunction",
-                Resource: `arn:aws:lambda:*:*:function:${websocketFuncName}`,
-            },{
-                Effect: "Allow",
-                Action: "execute-api:ManageConnections",
-                Resource: pulumi.interpolate`${websocketAPI.executionArn}/*/*`
-            }],
-        }),
+        // had to stringify JSON because we need to do a pulumi.interpolate to get the correct value
+        policy: pulumi.interpolate`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"lambda:InvokeFunction","Resource":"arn:aws:lambda:*:*:function:${websocketFuncName}"},{"Effect":"Allow","Action":"execute-api:ManageConnections","Resource":"${websocketAPI.executionArn}/*/*"}]}`
     });
     
     const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lambda-role-policy-attachment-${name_suffix}`, {
