@@ -21,7 +21,7 @@ const handler = async ({ socketName, rid, executionArn }) => {
     // Create API Gatewayv2 WebSocket API
     const websocketAPI = new aws.apigatewayv2.Api(`websocketAPI-${name_suffix}`, {
         protocolType: "WEBSOCKET",
-        routeSelectionExpression: "${request.body.action}",
+        routeSelectionExpression: "$request.body.action",
     });
 
     const websocketEndpoint = websocketAPI.apiEndpoint;
