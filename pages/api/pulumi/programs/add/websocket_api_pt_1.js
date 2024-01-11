@@ -32,6 +32,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     });
 
     // Create websocket lambda function
+    const regex = /^(?:wss\:\/\/)(.*)/;
 
     const websocketFunc = new aws.lambda.Function(
         `websocketFunc-${unique_socket_name}-${rid}`,
@@ -43,7 +44,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
             timeout: 120,
             environment: {
                 variables: {
-                    WEBSOCKET_ENDPOINT: (pulumi.interpolate`${websocketEndpoint}`.match(r) ||
+                    WEBSOCKET_ENDPOINT: (pulumi.interpolate`${websocketEndpoint}`?.match(regex) ||
                     [ null, pulumi.interpolate`${websocketEndpoint}`.substring(6) ])[1],
                     STAGE: websocketStage.name,
                 },
