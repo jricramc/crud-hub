@@ -60,6 +60,10 @@ const handler = async ({ socketName, rid, executionArn }) => {
                 Effect: "Allow",
                 Action: "lambda:InvokeFunction",
                 Resource: `arn:aws:lambda:*:*:function:${websocketFuncName}`,
+            },{
+                Effect: "Allow",
+                Action: "execute-api:ManageConnections",
+                Resource: pulumi.interpolate`${websocketAPI.executionArn}/*/*`
             }],
         }),
     });
