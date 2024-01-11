@@ -126,12 +126,12 @@ const handler = async ({ socketName, rid, executionArn }) => {
         dependsOn: [websocketIntegration],
     });
 
-    // const createApiGatewayInvokePermission = new aws.lambda.Permission(`ws-api-invoke-permission-${name_suffix}`, {
-    //     action: 'lambda:InvokeFunction',
-    //     function: websocketFunc.name,
-    //     principal: 'apigateway.amazonaws.com',
-    //     sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    // });
+    const createApiGatewayInvokePermission = new aws.lambda.Permission(`ws-api-invoke-permission-${name_suffix}`, {
+        action: 'lambda:InvokeFunction',
+        function: websocketFunc.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/*/*`
+    });
 
 
     // Create the Deployment
