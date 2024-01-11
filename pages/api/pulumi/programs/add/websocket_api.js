@@ -132,21 +132,21 @@ const handler = async ({ socketName, rid, executionArn }) => {
         action: 'lambda:InvokeFunction',
         function: websocketFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/${connectRoute.routeKey}`,
+        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/*/${connectRoute.routeKey}`,
     });
 
     const disconnectPermission = new aws.lambda.Permission(`ws-api-disconnect-permission-${name_suffix}`, {
         action: 'lambda:InvokeFunction',
         function: websocketFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/${disconnectRoute.routeKey}`,
+        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/*/${disconnectRoute.routeKey}`,
     });
 
     const defaultPermission = new aws.lambda.Permission(`ws-api-default-permission-${name_suffix}`, {
         action: 'lambda:InvokeFunction',
         function: websocketFunc.name,
         principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/${defaultRoute.routeKey}`,
+        sourceArn: pulumi.interpolate`${websocketAPI.executionArn}/*/${defaultRoute.routeKey}`,
     });
 
 
