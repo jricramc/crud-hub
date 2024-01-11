@@ -55,7 +55,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
                 {
                     "Effect": "Allow",
                     "Action": "lambda:InvokeFunction",
-                    "Resource": arn:aws:lambda:*:*:function:*,
+                    "Resource": "arn:aws:lambda:*:*:function:*",
                 },
             ]
         }`,
