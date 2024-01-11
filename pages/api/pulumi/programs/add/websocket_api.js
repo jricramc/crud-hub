@@ -9,7 +9,7 @@ import * as fs from "fs";
 import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ socketName, rid }) => {
+const handler = async ({ socketName, rid, executionArn }) => {
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
@@ -125,6 +125,14 @@ const handler = async ({ socketName, rid }) => {
     }, {
         dependsOn: [websocketIntegration],
     });
+
+    // const createApiGatewayInvokePermission = new aws.lambda.Permission(`ws-api-invoke-permission-${name_suffix}`, {
+    //     action: 'lambda:InvokeFunction',
+    //     function: websocketFunc.name,
+    //     principal: 'apigateway.amazonaws.com',
+    //     sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    // });
+
 
     // Create the Deployment
     const websocketDeployment = new aws.apigatewayv2.Deployment(`websocketDeployment-${name_suffix}`, {
