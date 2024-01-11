@@ -91,12 +91,11 @@ const handler = async ({ socketName, rid, executionArn }) => {
     );
 
     // // Create the AWS Lambda Integration for API Gateway
-    // const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${name_suffix}`, {
-    //     apiId: websocketAPI.id,
-    //     integrationType: "AWS_PROXY",
-    //     integrationUri: websocketFunc.invokeArn,
-    //     credentialsArn: lambdaRole.arn, // Connect the IAM Role here
-    // });
+    const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${name_suffix}`, {
+        apiId: websocketAPI.id,
+        integrationType: "AWS_PROXY",
+        integrationUri: websocketFunc.invokeArn,
+    });
 
     // Create API Gatewayv2 WebSocket route for $connect event
     const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${name_suffix}`, {
