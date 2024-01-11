@@ -50,7 +50,7 @@ const handler = async ({ socketName, rid }) => {
     const websocketFuncName = `websocketFunc-${name_suffix}`;
 
     const lambdaPolicy = new aws.iam.Policy(`lambda-policy-${name_suffix}`, {
-        name: "lambdaPolicy",
+        name: `lambda-policy-${name_suffix}`,
         description: "Policy to allow WebSocket API to invoke Lambda function",
         policy: JSON.stringify({
             Version: "2012-10-17",
