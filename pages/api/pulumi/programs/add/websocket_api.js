@@ -9,16 +9,17 @@ import * as fs from "fs";
 import * as archiver from 'archiver'; 
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ socketName, rid, lam_role_arn }) => {
+const handler = async ({ socketName, rid }) => {
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
-    const wsStage = `stage-${unique_socket_name}-${rid}`;
+    const name_suffix = `${unique_socket_name}-${rid}`;
+    const wsStage = `stage-${name_suffix}`;
 
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
 
     // Create API Gatewayv2 WebSocket API
-    const websocketAPI = new aws.apigatewayv2.Api(`websocketAPI-${unique_socket_name}-${rid}`, {
+    const websocketAPI = new aws.apigatewayv2.Api(`websocketAPI-${name_suffix}`, {
         protocolType: "WEBSOCKET",
         routeSelectionExpression: "${request.body.action}",
     });
@@ -31,7 +32,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
         autoDeploy: true,
     });
 
-    const lambdaRole = new aws.iam.Role(`lambda-role-${unique_socket_name}-${rid}`, {
+    const lambdaRole = new aws.iam.Role(`lambda-role-${name_suffix}`, {
         assumeRolePolicy: JSON.stringify({
             Version: "2012-10-17",
             Statement: [
@@ -46,7 +47,9 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
         }),
     });
     
-    const lambdaPolicy = new aws.iam.Policy(`lambda-policy-${unique_socket_name}-${rid}`, {
+    const websocketFuncName = `websocketFunc-${name_suffix}`;
+
+    const lambdaPolicy = new aws.iam.Policy(`lambda-policy-${name_suffix}`, {
         name: "lambdaPolicy",
         description: "Policy to allow WebSocket API to invoke Lambda function",
         policy: JSON.stringify({
@@ -54,12 +57,12 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
             Statement: [{
                 Effect: "Allow",
                 Action: "lambda:InvokeFunction",
-                Resource: "arn:aws:lambda:*:*:function:*",
+                Resource: `arn:aws:lambda:*:*:function:${websocketFuncName}`,
             }],
         }),
     });
     
-    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lambda-role-policy-attachment-${unique_socket_name}-${rid}`, {
+    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`lambda-role-policy-attachment-${name_suffix}`, {
         policyArn: lambdaPolicy.arn,
         role: lambdaRole.name,
     });
@@ -67,7 +70,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     // Create websocket lambda function
 
     const websocketFunc = new aws.lambda.Function(
-        `websocketFunc-${unique_socket_name}-${rid}`,
+        websocketFuncName,
         {
             code: new pulumi.asset.FileArchive(path.join(...directoryArray, "websocketHandler.zip")),
             role: lambdaRole.arn,
@@ -86,7 +89,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     );
 
     // Create the AWS Lambda Integration for API Gateway
-    const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${unique_socket_name}-${rid}`, {
+    const websocketIntegration = new aws.apigatewayv2.Integration(`wsIntegration-${name_suffix}`, {
         apiId: websocketAPI.id,
         integrationType: "AWS_PROXY",
         integrationUri: websocketFunc.invokeArn,
@@ -94,7 +97,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     });
 
     // Create API Gatewayv2 WebSocket route for $connect event
-    const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${unique_socket_name}-${rid}`, {
+    const connectRoute = new aws.apigatewayv2.Route(`connectRoute-${name_suffix}`, {
         apiId: websocketAPI.id,
         routeKey: "$connect",
         // target: `integrations/${websocketIntegration.id}`,
@@ -104,7 +107,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     });
 
     // Create API Gatewayv2 WebSocket route for $disconnect event
-    const disconnectRoute = new aws.apigatewayv2.Route(`disconnectRoute-${unique_socket_name}-${rid}`, {
+    const disconnectRoute = new aws.apigatewayv2.Route(`disconnectRoute-${name_suffix}`, {
         apiId: websocketAPI.id,
         routeKey: "$disconnect",
         // target: `integrations/${websocketIntegration.id}`,
@@ -114,7 +117,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     });
 
     // Create API Gatewayv2 WebSocket route for "broadcast" event
-    const defaultRoute = new aws.apigatewayv2.Route(`defaultRoute-${unique_socket_name}-${rid}`, {
+    const defaultRoute = new aws.apigatewayv2.Route(`defaultRoute-${name_suffix}`, {
         apiId: websocketAPI.id,
         routeKey: "$default",
         // target: `integrations/${websocketIntegration.id}`,
@@ -124,7 +127,7 @@ const handler = async ({ socketName, rid, lam_role_arn }) => {
     });
 
     // Create the Deployment
-    const websocketDeployment = new aws.apigatewayv2.Deployment(`websocketDeployment-${unique_socket_name}-${rid}`, {
+    const websocketDeployment = new aws.apigatewayv2.Deployment(`websocketDeployment-${name_suffix}`, {
         apiId: websocketAPI.id,
     }, { dependsOn: [connectRoute, disconnectRoute, defaultRoute] });
 
