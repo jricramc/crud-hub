@@ -101,9 +101,11 @@ const handler = async (req, res) => {
               execution_arn,
               stripe_layer_arn,
               ec2_instance: {
+                id: ec2_instance.id,
                 arn: ec2_instance.arn,
                 publicDns: ec2_instance.publicDns,
                 publicIp: ec2_instance.publicIp,
+                tags: ec2_instance.tags,
               },
               date_created: new Date(),
             };
