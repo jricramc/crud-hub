@@ -28,93 +28,94 @@ const handler = async ({ rid }) => {
         billingMode: "PAY_PER_REQUEST",
     });
 
-    // Create an S3 bucket
-    const ledger_s3_bucket_name = `ledger-s3-bucket-${rid}`.toLocaleLowerCase();
-    const bucket = new aws.s3.Bucket(ledger_s3_bucket_name, {
-        bucket: ledger_s3_bucket_name,
-    });
+    // Currently not using ledge_s3_bucket (comented out resource and related policies and roles)
 
-    // Create IAM Role for Lambda
-    const lam_s3_role = new aws.iam.Role(`ledger-s3-lambda-role-${rid}`, {
-        assumeRolePolicy: JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [{
-                Action: "sts:AssumeRole",
-                Effect: "Allow",
-                Principal: {
-                    Service: "lambda.amazonaws.com",
-                },
-            }],
-        }),
-    });
+    // // Create an S3 bucket
+    // const ledger_s3_bucket_name = `ledger-s3-bucket-${rid}`.toLocaleLowerCase();
+    // const bucket = new aws.s3.Bucket(ledger_s3_bucket_name, {
+    //     bucket: ledger_s3_bucket_name,
+    // });
 
-    const { region, accountId } =  {
-        region: 'us-east-2',
-        accountId: '442052175141',
-    }; // extractRegionAndAccountIdFromExecutionArn(executionArn);
+    // // Create IAM Role for Lambda
+    // const lam_s3_role = new aws.iam.Role(`ledger-s3-lambda-role-${rid}`, {
+    //     assumeRolePolicy: JSON.stringify({
+    //         Version: "2012-10-17",
+    //         Statement: [{
+    //             Action: "sts:AssumeRole",
+    //             Effect: "Allow",
+    //             Principal: {
+    //                 Service: "lambda.amazonaws.com",
+    //             },
+    //         }],
+    //     }),
+    // });
 
-    const generateMintlifyDocsLambdaName = `ledger-mintlify-docs-function-${rid}`;
+    // const { region, accountId } =  {
+    //     region: 'us-east-2',
+    //     accountId: '442052175141',
+    // }; // extractRegionAndAccountIdFromExecutionArn(executionArn);
 
-    // Attach necessary policies to the Lambda role
-    const lambdaExecutionPolicy = new aws.iam.Policy(`ledger-s3-lambda-exec-policy-${rid}`, {
-        policy: JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [{
-                Effect: "Allow",
-                Action: "lambda:InvokeFunction",
-                Resource: `arn:aws:lambda:${region}:${accountId}:function:${generateMintlifyDocsLambdaName}`,
-            }],
-        }),
-    });
+    // const generateMintlifyDocsLambdaName = `ledger-mintlify-docs-function-${rid}`;
 
-    const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`ledger-lam-rle-policy-attchmnt-${rid}`, {
-        policyArn: lambdaExecutionPolicy.arn,
-        role: lam_s3_role.name,
-    },
-    { dependsOn: [
-        // lambdaExecutionPolicy,
-        // lam_s3_role
-    ]},
-    );
+    // // Attach necessary policies to the Lambda role
+    // const lambdaExecutionPolicy = new aws.iam.Policy(`ledger-s3-lambda-exec-policy-${rid}`, {
+    //     policy: JSON.stringify({
+    //         Version: "2012-10-17",
+    //         Statement: [{
+    //             Effect: "Allow",
+    //             Action: "lambda:InvokeFunction",
+    //             Resource: `arn:aws:lambda:${region}:${accountId}:function:${generateMintlifyDocsLambdaName}`,
+    //         }],
+    //     }),
+    // });
 
-    // Define an S3 policy to grant access to the bucket
-    const s3AccessPolicy = new aws.iam.Policy(`ledger-s3-access-policy-${rid}`, {
-        policy: JSON.stringify({
-            Version: "2012-10-17",
-            Statement: [
-                {
-                    "Effect": "Allow",
-                    Action: [
-                        "s3:ListBucket",
-                        "s3:GetBucketLocation"
-                    ],
-                    Resource: [
-                        `arn:aws:s3:::${ledger_s3_bucket_name}`,
-                    ],
-                },
-                {
-                    "Effect": "Allow",
-                    Action: [
-                        "s3:PutObject",
-                        "s3:GetObject"
-                    ],
-                    Resource: [
-                        `arn:aws:s3:::${ledger_s3_bucket_name}/*`,
-                    ],
-                },
-            ],
-        }),
-    });
+    // const lambdaRolePolicyAttachment = new aws.iam.RolePolicyAttachment(`ledger-lam-rle-policy-attchmnt-${rid}`, {
+    //     policyArn: lambdaExecutionPolicy.arn,
+    //     role: lam_s3_role.name,
+    // },
+    // { dependsOn: [
+    //     // lambdaExecutionPolicy,
+    //     // lam_s3_role
+    // ]},
+    // );
 
-    const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment(`ledger-s3-access-policy-attachment-${rid}`, {
-        policyArn: s3AccessPolicy.arn,
-        roles: [lam_s3_role],
-    },
-    { dependsOn: [
-        // s3AccessPolicy,
-        // lam_s3_role
-    ]}
-    );
+    // // Define an S3 policy to grant access to the bucket
+    // const s3AccessPolicy = new aws.iam.Policy(`ledger-s3-access-policy-${rid}`, {
+    //     policy: JSON.stringify({
+    //         Version: "2012-10-17",
+    //         Statement: [
+    //             {
+    //                 "Effect": "Allow",
+    //                 Action: [
+    //                     "s3:ListBucket",
+    //                     "s3:GetBucketLocation"
+    //                 ],
+    //                 Resource: [
+    //                     `arn:aws:s3:::${ledger_s3_bucket_name}`,
+    //                 ],
+    //             },
+    //             {
+    //                 "Effect": "Allow",
+    //                 Action: [
+    //                     "s3:PutObject",
+    //                     "s3:GetObject"
+    //                 ],
+    //                 Resource: [
+    //                     `arn:aws:s3:::${ledger_s3_bucket_name}/*`,
+    //                 ],
+    //             },
+    //         ],
+    //     }),
+    // });
+
+    // const s3AccessPolicyAttachment = new aws.iam.PolicyAttachment(`ledger-s3-access-policy-attachment-${rid}`, {
+    //     policyArn: s3AccessPolicy.arn,
+    //     roles: [lam_s3_role],
+    // },
+    // { dependsOn: [
+    //     // s3AccessPolicy,
+    //     // lam_s3_role
+    // ]});
 
 
     // Define a policy to access DynamoDB
