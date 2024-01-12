@@ -156,7 +156,8 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
     const ec2Instance = new aws.ec2.Instance(ec2InstanceName, {
         instanceType: "t2.micro",
         keyName: "ec2-instance-key-pair",
-        ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
+        // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
+        ami: "ami-0c55b159cbfafe1f0",
         vpcSecurityGroupIds: [securityGroup.id],
         userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
             + ` -a ${appName}`
@@ -179,6 +180,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         websocketResourceId: folderMainWebsocketResource.id,
         sendgridResourceId: null, // folderMainSendGridResource.id,
         ec2Instance,
+        awsEC2: aws.ec2,
     };
 };
 
