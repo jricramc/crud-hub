@@ -132,6 +132,36 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
     //     pathPart: "sendgrid",
     // });
 
+
+    /*
+        Create EC2 Instance
+    */
+
+    const securityGroup = new aws.ec2.SecurityGroup(`security-group-${rid}`, {
+        ingress: [
+            {
+                protocol: "-1",
+                fromPort: 0,
+                toPort: 0,
+                cidrBlocks: ["0.0.0.0/0"],
+            },
+        ],
+    });
+
+    const appName = "GraphQL-PE-CORE-API";
+    const repoURL = "https://github.com/webhubhq/GraphQL-PE-CORE-API.git";
+    
+    // Create an EC2 instance
+    const ec2Instance = new aws.ec2.Instance("my-instance", {
+        instanceType: "t2.micro",
+        ami: "ami-0c55b159cbfafe1f0",  // Amazon Linux 2 AMI ID
+        vpcSecurityGroupIds: [securityGroup.id],
+        userData: fs.readFileSync("ec2-setup-script.sh", "utf-8")
+            + ` -a ${appName}`
+            + ` -r ${repoURL}`
+            // + ` -p ${port}`,
+    });
+
     return {
         lambdaResourceId: folderMainLambdaResource.id,
         dbResourceId: folderMainDynamoDBResource.id,
@@ -141,6 +171,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         googleResourceId: folderMainGoogleResource.id,
         websocketResourceId: folderMainWebsocketResource.id,
         sendgridResourceId: null, // folderMainSendGridResource.id,
+        ec2Instance,
     };
 };
 

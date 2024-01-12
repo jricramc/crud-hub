@@ -79,7 +79,11 @@ const handler = async (req, res) => {
               googleResourceId: { value: google_resource_id },
               sendgridResourceId: { value: sendgrid_resource_id },
               websocketResourceId: { value: websocket_resource_id },
+              ec2Instance: { value: ec2_instance },
             } = upRes2.output;
+
+            console.log('<< ec2Instance >>')
+            console.log(JSON.stringify(ec2_instance))
 
             const data = {
               r_id: rid,
@@ -97,6 +101,7 @@ const handler = async (req, res) => {
               lam_role_arn,
               execution_arn,
               stripe_layer_arn,
+              ec2_instance: { publicIp: ec2_instance.publicIp },
               date_created: new Date(),
             };
 
