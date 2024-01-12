@@ -72,7 +72,6 @@ const handler = async (req, res) => {
           
 
           if (upRes2.statusCode === 200 && upRes2.output) {
-            console.log(upRes2.output);
             const {
               lambdaResourceId: {value: lambda_resource_id },
               dbResourceId: { value: db_resource_id },
@@ -82,11 +81,8 @@ const handler = async (req, res) => {
               googleResourceId: { value: google_resource_id },
               sendgridResourceId: { value: sendgrid_resource_id },
               websocketResourceId: { value: websocket_resource_id },
-              // ec2Instance: { value: ec2_instance },
+              ec2Instance: { value: ec2_instance },
             } = upRes2.output;
-
-            console.log('<< ec2Instance >>')
-            // console.log(JSON.stringify(ec2_instance))
 
             const data = {
               r_id: rid,
@@ -104,7 +100,11 @@ const handler = async (req, res) => {
               lam_role_arn,
               execution_arn,
               stripe_layer_arn,
-              ec2_instance: { publicIp: ec2_instance.publicIp },
+              ec2_instance: {
+                arn: ec2_instance.arn,
+                publicDns: ec2_instance.publicDns,
+                publicIp: ec2_instance.publicIp,
+              },
               date_created: new Date(),
             };
 
