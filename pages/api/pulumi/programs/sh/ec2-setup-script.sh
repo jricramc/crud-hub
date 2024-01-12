@@ -28,19 +28,19 @@ while [ "$#" -gt 0 ]; do
 done
 
 # Update the package manager
-sudo yum update -y
+sudo apt update
 
 # Install Git
-sudo yum install -y git
+sudo apt install -y git
 
 # Install Node.js and npm
-sudo yum install -y nodejs npm
+sudo apt install -y nodejs npm
 
 # Install PM2 globally
 sudo npm install -g pm2
 
 # Install NGINX
-sudo amazon-linux-extras install nginx1.12 -y
+sudo apt install -y nginx
 
 # Start and enable NGINX
 sudo systemctl start nginx
