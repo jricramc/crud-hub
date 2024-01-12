@@ -148,8 +148,76 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         ],
     });
 
-    const appName = "GraphQL-PE-CORE-API";
-    const repoURL = "https://github.com/webhubhq/GraphQL-PE-CORE-API.git";
+    const APP_NAME = "GraphQL-PE-CORE-API";
+    const REPO_URL = "https://github.com/webhubhq/GraphQL-PE-CORE-API.git";
+
+    const userData = `#!/bin/bash
+
+    # Default values
+    # APP_NAME="GraphQL-PE-CORE-API"
+    # REPO_URL="https://github.com/webhubhq/GraphQL-PE-CORE-API.git"
+    # PORT=3000
+    
+    # Parse command-line parameters
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -a|--app-name)
+                APP_NAME="$2"
+                shift 2
+                ;;
+            -r|--repo-url)
+                REPO_URL="$2"
+                shift 2
+                ;;
+            -p|--port)
+                PORT="$2"
+                shift 2
+                ;;
+            *)
+                echo "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+    
+    # Update the package manager
+    sudo apt update
+    
+    # Install Git
+    sudo apt install -y git
+    
+    # Install Node.js and npm
+    sudo apt install -y nodejs npm
+    
+    # Install PM2 globally
+    sudo npm install -g pm2
+    
+    # Install NGINX
+    sudo apt install -y nginx
+    
+    # Start and enable NGINX
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+    
+    # Create a directory for your app
+    sudo mkdir "/var/www/${APP_NAME}"
+    sudo chown -R ec2-user:ec2-user "/var/www/${APP_NAME}"
+    
+    # Navigate to the app directory
+    cd "/var/www/${APP_NAME}"
+    
+    # Clone your app repository
+    git clone "${REPO_URL}" .
+    
+    # Install app dependencies
+    npm install
+    
+    # start the Apollo Server built in repo
+    npm run start
+    
+    # Add other commands using the variables, e.g., $PORT
+    
+    `
     
     // Create an EC2 instance
     const ec2InstanceName = `ec2-instance-${rid}`;
@@ -159,11 +227,12 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
         ami: "ami-0c55b159cbfafe1f0",
         vpcSecurityGroupIds: [securityGroup.id],
-        userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
-            + ` -a ${appName}`
-            + ` -r ${repoURL}`
-            // + ` -p ${port}`
-            ,
+        userData,
+        // userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
+        //     + ` -a ${appName}`
+        //     + ` -r ${repoURL}`
+        //     // + ` -p ${port}`
+        //     ,
         tags: {
             Name: ec2InstanceName, // Set the name using the "Name" tag
             // Add other tags if needed...
