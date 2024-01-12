@@ -72,7 +72,7 @@ const handler = async (req, res) => {
           
 
           if (upRes2.statusCode === 200 && upRes2.output) {
-            console.log(JSON.stringify(upRes2.output));
+            console.log(upRes2.output);
             const {
               lambdaResourceId: {value: lambda_resource_id },
               dbResourceId: { value: db_resource_id },

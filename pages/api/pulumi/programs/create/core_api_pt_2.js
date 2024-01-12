@@ -11,7 +11,7 @@ import { RID } from "../../../../../utils/utils";
 const handler = async ({ rid, apiID, rootResourceId }) => {
      
     
-    
+    const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'sh']
 
     /*
     ** ROOT RESOURCES
@@ -156,7 +156,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         instanceType: "t2.micro",
         ami: "ami-0c55b159cbfafe1f0",  // Amazon Linux 2 AMI ID
         vpcSecurityGroupIds: [securityGroup.id],
-        userData: fs.readFileSync("./ec2-setup-script.sh", "utf-8")
+        userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
             + ` -a ${appName}`
             + ` -r ${repoURL}`
             // + ` -p ${port}`,
