@@ -225,7 +225,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         instanceType: "t2.micro",
         keyName: "ec2-instance-key-pair",
         // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
-        ami: "ami-0c55b159cbfafe1f0",
+        ami: "ami-0cd3c7f72edd5b06d",
         vpcSecurityGroupIds: [securityGroup.id],
         userData,
         // userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
