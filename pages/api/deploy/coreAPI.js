@@ -86,7 +86,7 @@ const handler = async (req, res) => {
             } = upRes2.output;
 
             console.log('<< ec2Instance >>')
-            console.log(JSON.stringify(ec2_instance))
+            // console.log(JSON.stringify(ec2_instance))
 
             const data = {
               r_id: rid,
