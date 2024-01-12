@@ -69,7 +69,10 @@ const handler = async (req, res) => {
 
           console.log('<<stage 2 complete>>');
 
-          if (upRes1.statusCode === 200 && upRes1.output) {
+          
+
+          if (upRes2.statusCode === 200 && upRes2.output) {
+            console.log(JSON.stringify(upRes2.output));
             const {
               lambdaResourceId: {value: lambda_resource_id },
               dbResourceId: { value: db_resource_id },
@@ -79,7 +82,7 @@ const handler = async (req, res) => {
               googleResourceId: { value: google_resource_id },
               sendgridResourceId: { value: sendgrid_resource_id },
               websocketResourceId: { value: websocket_resource_id },
-              ec2Instance: { value: ec2_instance },
+              // ec2Instance: { value: ec2_instance },
             } = upRes2.output;
 
             console.log('<< ec2Instance >>')
