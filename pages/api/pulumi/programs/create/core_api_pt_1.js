@@ -244,23 +244,23 @@ const handler = async ({ rid }) => {
     ]}
     );
 
-    const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
-        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mintlify.zip")),
-        runtime: "nodejs14.x",
-        handler: "mintlify.handler",
-        role: lam_s3_role.arn,
-        environment: {
-            variables: {
-                TABLE_NAME: table.name,
-                BUCKET_NAME: ledger_s3_bucket_name,
-            },
-        },
-        layers: ["arn:aws:lambda:us-east-2:442052175141:layer:archive-layer:1"], // Add the Archive layer to your Lambda function
-    },
-    { dependsOn: [
-        // lam_s3_role,
-    ]}
-    );
+    // const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
+    //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mintlify.zip")),
+    //     runtime: "nodejs14.x",
+    //     handler: "mintlify.handler",
+    //     role: lam_s3_role.arn,
+    //     environment: {
+    //         variables: {
+    //             TABLE_NAME: table.name,
+    //             BUCKET_NAME: ledger_s3_bucket_name,
+    //         },
+    //     },
+    //     layers: ["arn:aws:lambda:us-east-2:442052175141:layer:archive-layer:1"], // Add the Archive layer to your Lambda function
+    // },
+    // { dependsOn: [
+    //     // lam_s3_role,
+    // ]}
+    // );
 
 
     // Create a new Rest API Gateway using awsx.
@@ -271,7 +271,7 @@ const handler = async ({ rid }) => {
             { path: "/ledger/read", method: "POST", eventHandler: readFunc },
             { path: "/ledger/update", method: "POST", eventHandler: updateFunc },
             { path: "/ledger/delete", method: "POST", eventHandler: deleteFunc },
-            { path: "/ledger/generate/mintlify-docs", method: "POST", eventHandler: generateMintlifyDocsFunc },
+            // { path: "/ledger/generate/mintlify-docs", method: "POST", eventHandler: generateMintlifyDocsFunc },
         ],
     },
     { dependsOn: [
@@ -279,7 +279,7 @@ const handler = async ({ rid }) => {
         readFunc,
         updateFunc,
         deleteFunc,
-        generateMintlifyDocsFunc,
+        // generateMintlifyDocsFunc,
     ]}
     );
 
