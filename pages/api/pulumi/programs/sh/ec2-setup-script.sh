@@ -56,4 +56,10 @@ cd "/var/www/${APP_NAME}"
 # Clone your app repository
 git clone "${REPO_URL}" .
 
+# Install app dependencies
+npm install
+
+# start the Apollo Server built in repo
+npm run start
+
 # Add other commands using the variables, e.g., $PORT
