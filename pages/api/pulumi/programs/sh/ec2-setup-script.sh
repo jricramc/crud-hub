@@ -5,28 +5,6 @@ APP_NAME="GraphQL-PE-CORE-API"
 REPO_URL="https://github.com/webhubhq/GraphQL-PE-CORE-API.git"
 PORT=3000
 
-# Parse command-line parameters
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        -a|--app-name)
-            APP_NAME="$2"
-            shift 2
-            ;;
-        -r|--repo-url)
-            REPO_URL="$2"
-            shift 2
-            ;;
-        -p|--port)
-            PORT="$2"
-            shift 2
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-    esac
-done
-
 # Update the package manager
 sudo apt update
 
