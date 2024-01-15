@@ -133,12 +133,34 @@ const handler = async ({
     ]});
 
     /*
-        /create/service/db/dynamodb/{bucket-name}
+        /create/service/db/s3/{bucket-name}
     */
     const folderCreateServiceBucketNameResource = new aws.apigateway.Resource(`folder-create-service-bucket-name-resource-${rid}`, {
         restApi: apiID,
         parentId: folderCreateServiceDBS3Resource.id,
         pathPart: "{bucket-name}",
+    }, { dependsOn: [
+        folderCreateServiceDBS3Resource,
+    ]});
+
+    /*
+        /create/service/cloudfrontS3
+    */
+    const folderCreateServiceCldfrntS3Resource = new aws.apigateway.Resource(`folder-create-service-cldfrnt-S3-resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceResource.id,
+        pathPart: "cloudfrontS3",
+    }, { dependsOn: [
+        folderCreateServiceResource,
+    ]});
+
+    /*
+        /create/service/cloudfrontS3/{name}
+    */
+    const folderCreateServiceCldfrntS3BucketNameResource = new aws.apigateway.Resource(`flder-crte-srvce-cldfrnt-s3-bckt-nme-rsrce-${rid}`, {
+        restApi: apiID,
+        parentId: folderCreateServiceCldfrntS3Resource.id,
+        pathPart: "{name}",
     }, { dependsOn: [
         folderCreateServiceDBS3Resource,
     ]});
@@ -306,6 +328,16 @@ const handler = async ({
         apiKeyRequired: false,
     }, { dependsOn: [
         folderCreateServiceBucketNameResource,
+    ]});
+
+    const methodCreateServiceCloudfrontS3 = new aws.apigateway.Method(`create-service-bucket-name-get-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceCldfrntS3BucketNameResource.id,
+        httpMethod: "GET",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, { dependsOn: [
+        folderCreateServiceCldfrntS3BucketNameResource,
     ]});
 
     const methodCreateServiceOAuthName = new aws.apigateway.Method(`create-service-oauth-name-post-method-${rid}`, {
@@ -1070,6 +1102,181 @@ exports.handler = async (event) => {
                     return response({
                         body: {
                             createS3Result,
+                            complete: false,
+                        },
+                        status: 409,
+                    });
+                };
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs14.x",
+            timeout: 120, 
+        }
+    );
+
+    const createCloudfrontS3Distribution = new aws.lambda.Function(
+        `create-cldfrnt-s3-distribution-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+                const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
+
+                const response = ({ body, status }) => {
+                    return {
+                        statusCode: status,
+                        body: JSON.stringify({ body }),
+                    };
+                }
+
+                const createCldfrntS3PostRequest = (name) => {
+                    const data = {
+                        name,
+                        rid: "${rid}",
+                        executionArn: "${executionArn}",
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${_webhub_host}',
+                            path: '/api/deploy/cloudfront_s3API',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const saveCldfrntS3ToLedger = (resource) => {
+                    const data_ = {
+                        resource_type: "cloudfrontS3",
+                        ...resource,
+                    };
+                    
+                    const data = {
+                        id: RID(),
+                        name: JSON.stringify(data_)
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${extractDomain(apiUrl)}',
+                            path: '/v3/ledger/create',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { name } = event.pathParameters || {};
+                    const createCldfrntS3Result = await createCldfrntS3PostRequest(name)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                    iamUser: { value: iam_user },
+                                    iamUserAccessKeys: { value: iam_user_access_keys },
+                                    cloudfrontDistribution: { value: cloudfront_distribution },
+                                    s3Bucket: { value: s3_bucket },
+                                    unique_cloudfrontS3_name: { value: unique_cloudfrontS3Name },
+
+                                } = obj['0']['outputs'];
+                                return { type: 'success', resource: { cloudfrontS3Name: name, uniqueCloudfrontS3Name: unique_cloudfrontS3Name, iam_user, iam_user_access_keys, cloudfront_distribution, s3_bucket, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
+                                return { type: 'error', err }
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createCldfrntS3Result.type === 'success') {
+                        const cldfrntS3LedgerResult = await saveCldfrntS3ToLedger(createCldfrntS3Result.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
+                        
+                        return response({
+                            body: {
+                                cldfrntS3LedgerResult,
+                                complete: true,
+                            },
+                            status: 200,
+                        });
+                    
+                    }
+                    
+                    return response({
+                        body: {
+                            createCldfrntS3Result,
                             complete: false,
                         },
                         status: 409,
@@ -1850,6 +2057,20 @@ exports.handler = async (event) => {
         createS3CrudApiLambda,
     ]});
 
+    const integrationCreateServiceCloudfrontS3 = new aws.apigateway.Integration(`create-service-cloudfront-s3-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceCldfrntS3BucketNameResource.id,
+        httpMethod: methodCreateServiceCloudfrontS3.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createCloudfrontS3Distribution.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
+    }, { dependsOn: [
+        folderCreateServiceCldfrntS3BucketNameResource,
+        methodCreateServiceCloudfrontS3,
+        createCloudfrontS3Distribution,
+    ]});
+
     const integrationCreateServiceOAuthName = new aws.apigateway.Integration(`create-service-oauth-name-integration-${rid}`, {
         restApi: apiID,
         resourceId: folderCreateServiceOAuthNameResource.id,
@@ -1947,6 +2168,15 @@ exports.handler = async (event) => {
         createS3CrudApiLambda,
     ]});
 
+    const createServiceCloudfrontS3GatewayInvokePermission = new aws.lambda.Permission(`create-service-cldfrnt-s3-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createCloudfrontS3Distribution.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    }, { dependsOn: [
+        createCloudfrontS3Distribution,
+    ]});
+
     const createServiceAuthGoogleApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-auth-google-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createServiceAuthGoogleLambda.name,
@@ -1998,6 +2228,8 @@ exports.handler = async (event) => {
         methodCreateServiceMongoDBName, integrationCreateServiceMongoDBName,
         // create/service/db/s3/{bucket-name}
         methodCreateServiceBucketName, integrationCreateServiceBucketName,
+        // create/service/cloudfrontS3
+        methodCreateServiceCloudfrontS3, integrationCreateServiceCloudfrontS3,
         // create/service/auth/google/{oauth-name}
         methodCreateServiceOAuthName, integrationCreateServiceOAuthName,
         // create/service/payment/stripe/{name}

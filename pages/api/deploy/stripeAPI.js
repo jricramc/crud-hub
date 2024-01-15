@@ -14,7 +14,7 @@ const handler = async (req, res) => {
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
             stackName,
-            projectName: 'js-test',
+            projectName: `API-72-${rid}`,
             program: async () =>  await add_stripe_api({ apiID, apiName, stripeResourceId, stripeName, rid, executionArn, stripeApiSecret, stripeLayerArn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");

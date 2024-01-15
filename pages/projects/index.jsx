@@ -175,6 +175,10 @@ const Projects = ({}) => {
             src: 'aws-s3.svg',
             name: 'AWS S3 Bucket',
         },
+        'cloudfrontS3': {
+            src: 'aws-cloudfront.svg',
+            name: 'AWS Cloudfront S3 Distribution',
+        },
         'lambda': {
             src: 'aws-lambda.svg',
             name: 'AWS Lambda',
@@ -351,6 +355,7 @@ const Projects = ({}) => {
                             resource_type,
                             db_name, unique_dbname,
                             bucketName, uniqueBucketName,
+                            cloudfrontS3Name, uniqueCloudfrontS3Name,
                             lambdaName, unique_lambda_name,
                             socketName, unique_socket_name, websocket_endpoint, websocket_stage_name,
                         } = items[i]
@@ -363,6 +368,9 @@ const Projects = ({}) => {
                             r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, api_key, date_created })
                         } else if (resource_type === 'db/s3') {
                             r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
+                        } else if (resource_type === 'cloudfrontS3') {
+                            // cloudfrontS3Name: name, uniqueCloudfrontS3Name: unique_cloudfrontS3Name, iam_user, iam_user_access_keys, cloudfront_distribution, s3_bucket
+                            r.push({ resource_name: 'Cloudfront S3 Distribution', resource_type, name: cloudfrontS3Name, unique_name: uniqueCloudfrontS3Name, date_created })
                         } else if (resource_type === 'lambda') {
                             r.push({ resource_name: 'AWS Lambda', resource_type, name: lambdaName, unique_name: unique_lambda_name, date_created })
                         } else if (resource_type === 'websocket') {

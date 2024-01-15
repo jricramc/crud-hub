@@ -11,7 +11,7 @@ const handler = async (req, res) => {
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
             stackName,
-            projectName: 'js-test',
+            projectName: `API-72-${rid}`,
             program: async () =>  await add_s3_api({ apiID, apiName, s3ResourceId, bucketName, rid, executionArn, lam_role_arn }),
         });
 
