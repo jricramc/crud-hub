@@ -52,8 +52,9 @@ const handler = async ({ name, rid, executionArn }) => {
                 cookies: { forward: "none" },
                 queryString: false,
             },
-            minTtl: 0,
-            defaultTtl: 60 * 60 * 24 * 7, // Cache for 1 week
+            minTTL: 0,
+            defaultTTL: 60 * 60 * 24,   // Cache for 1 day
+            maxTTL: 60 * 60 * 24 * 7,   // Cache for 1 week
         },
         // priceClass: "PriceClass_100",
         restrictions: {
