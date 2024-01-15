@@ -77,9 +77,10 @@ const handler = async ({ name, rid, executionArn }) => {
         Statement: [{
             Sid: "PublicRead",
             Effect: "Allow",
-            Principal: {
-                AWS: cloudfrontDistributionArn,
-            },
+            // Principal: {
+            //     AWS: cloudfrontDistributionArn,
+            // },
+            Principal: "*",
             Action: "s3:GetObject",
             Resource: `${s3BucketArn}/*`,
         }],
