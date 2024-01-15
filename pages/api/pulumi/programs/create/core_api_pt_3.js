@@ -1143,6 +1143,7 @@ exports.handler = async (event) => {
 
                 const createCldfrntS3PostRequest = (name) => {
                     const data = {
+                        apiID: "${apiID}",
                         name,
                         rid: "${rid}",
                         executionArn: "${executionArn}",

@@ -5,7 +5,7 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   const { method, body } = req;
 
-  const { name, rid, executionArn } = body;
+  const { apiID, name, rid, executionArn } = body;
   const stackName = `deploy-cldfrnt-s3-apiID-${apiID}-${RID()}`;
   try {
     if (method === 'POST') {
