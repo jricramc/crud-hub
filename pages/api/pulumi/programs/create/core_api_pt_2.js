@@ -153,61 +153,52 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
 
     const userData = `#!/bin/bash
 
+    exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+    yum -y update
+    echo "Finish basic update and system log config"
+
     # Default values
-    # APP_NAME="GraphQL-PE-CORE-API"
-    # REPO_URL="https://github.com/webhubhq/GraphQL-PE-CORE-API.git"
+    APP_NAME="${APP_NAME}"
+    REPO_URL="${REPO_URL}"
     # PORT=3000
-    
-    # Parse command-line parameters
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            -a|--app-name)
-                APP_NAME="$2"
-                shift 2
-                ;;
-            -r|--repo-url)
-                REPO_URL="$2"
-                shift 2
-                ;;
-            -p|--port)
-                PORT="$2"
-                shift 2
-                ;;
-            *)
-                echo "Unknown option: $1"
-                exit 1
-                ;;
-        esac
-    done
-    
-    # Update the package manager
-    sudo apt update
+
+    # Echo variable names
+    echo "APP_NAME: \${APP_NAME}"
+    echo "REPO_URL: \${REPO_URL}"
+
+    # Install Node.js 14.x (you can change the version if needed)
+    curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+    sudo yum install -y nodejs
+
+    # Confirm Node.js and npm installation
+    node --version
+    npm --version
+
     
     # Install Git
-    sudo apt install -y git
-    
-    # Install Node.js and npm
-    sudo apt install -y nodejs npm
-    
+    sudo yum install -y git
+
     # Install PM2 globally
     sudo npm install -g pm2
-    
+
     # Install NGINX
-    sudo apt install -y nginx
-    
-    # Start and enable NGINX
+    sudo yum install -y nginx
+
+    # Start NGINX
     sudo systemctl start nginx
+
+    # Enable NGINX to start on boot
     sudo systemctl enable nginx
     
     # Create a directory for your app
-    sudo mkdir "/var/www/${APP_NAME}"
-    sudo chown -R ec2-user:ec2-user "/var/www/${APP_NAME}"
+    sudo mkdir -p "/var/www/\${APP_NAME}"
+    # sudo chown -R ec2-user:ec2-user "/var/www/\${APP_NAME}"
     
     # Navigate to the app directory
-    cd "/var/www/${APP_NAME}"
+    cd "/var/www/\${APP_NAME}"
     
     # Clone your app repository
-    git clone "${REPO_URL}" .
+    git clone "\${REPO_URL}" .
     
     # Install app dependencies
     npm install
