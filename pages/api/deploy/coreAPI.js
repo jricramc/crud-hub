@@ -9,7 +9,7 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { name, email, rid } = body;
 
-    const projectName = 'crud-test';
+    const projectName = `API-72-${rid}`;
     const stackName = `stack-${rid}`;
    
     if (method === 'POST') {
