@@ -20,7 +20,7 @@ const handler = async ({ name, rid, executionArn }) => {
 
     // Create an S3 bucket
     const s3Bucket = new aws.s3.Bucket(bucketName, {
-        acl: "public-read", // Adjust permissions as needed
+        acl: "private", // Adjust permissions as needed
     });
 
     // Set the bucket policy
@@ -67,6 +67,12 @@ const handler = async ({ name, rid, executionArn }) => {
             maxTtl: 86400,
         },
         // priceClass: "PriceClass_100",
+        restrictions: {
+            geoRestriction: {
+                restrictionType: "none", // or "whitelist" or "blacklist"
+                locations: [], // Add your desired locations if using whitelist or blacklist
+            },
+        },
     });
 
     // Create an IAM user
