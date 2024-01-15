@@ -56,6 +56,9 @@ const handler = async ({ name, rid, executionArn }) => {
                 locations: [], // Add your desired locations if using whitelist or blacklist
             },
         },
+        viewerCertificate: {
+            cloudFrontDefaultCertificate: true,
+        },
     });
 
     // Set the bucket policy
