@@ -71,23 +71,24 @@ const handler = async ({ name, rid, executionArn }) => {
         },
     });
 
-    // Set the bucket policy
-    const s3BucketPolicy = new aws.s3.BucketPolicy(`${bucketName}-policy`, {
+    // Define the policy for the bucket
+    const policy = pulumi.all([s3Bucket.arn, cloudfrontDistribution.arn]).apply(([s3BucketArn, cloudfrontDistributionArn]) => JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [{
+            Sid: "PublicRead",
+            Effect: "Allow",
+            Principal: {
+                AWS: cloudfrontDistributionArn,
+            },
+            Action: "s3:GetObject",
+            Resource: `${s3BucketArn}/*`,
+        }],
+    }));
+
+    // Attach the policy to the bucket
+    const bucketPolicy = new aws.s3.BucketPolicy('my-bucket-policy', {
         bucket: s3Bucket.bucket,
-        policy: {
-            Version: "2012-10-17",
-            Statement: [
-                {
-                    Sid: "Statement1",
-                    Effect: "Allow",
-                    Principal: {
-                        AWS: cloudfrontDistribution.arn.apply(arn => arn),
-                    },
-                    Action: "s3:GetObject",
-                    Resource: pulumi.interpolate`${s3Bucket.arn}/*`,
-                },
-            ],
-        },
+        policy: policy,
     });
 
     // Create an IAM user
@@ -95,10 +96,10 @@ const handler = async ({ name, rid, executionArn }) => {
 
     // Create an IAM policy with the combined permissions
     const combinedPolicy = new aws.iam.Policy("combined-policy", {
-        name: pulumi.interpolate`combined-policy-${rid}-${unique_cloudfrontS3_name}`,
+        name: `combined-policy-${rid}-${unique_cloudfrontS3_name}`,
         path: "/",
         description: "Combined IAM policy for S3 and CloudFront",
-        policy: pulumi.all([cloudfrontDistribution.id]).apply(([cloudfrontDistribution_id]) => JSON.stringify({
+        policy: pulumi.all([s3Bucket.arn, cloudfrontDistribution.arn]).apply(([s3BucketArn, cloudfrontDistributionArn]) => JSON.stringify({
             Version: "2012-10-17",
             Statement: [
                 {
@@ -110,14 +111,14 @@ const handler = async ({ name, rid, executionArn }) => {
                         "s3:PutObject",
                     ],
                     Resource: [
-                        `arn:aws:s3:::${bucketName}`,
-                        `arn:aws:s3:::${bucketName}/*`,
+                        s3BucketArn,
+                        `${s3BucketArn}/*`,
                     ],
                 },
                 {
                     Effect: "Allow",
                     Action: "cloudfront:CreateInvalidation",
-                    Resource: `arn:aws:cloudfront::${accountId}:distribution/${cloudfrontDistribution_id}`,
+                    Resource: cloudfrontDistributionArn,
                 },
             ],
         })),
