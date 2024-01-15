@@ -20,34 +20,40 @@ const handler = async ({ name, rid, executionArn }) => {
 
     // Create an S3 bucket
     const s3Bucket = new aws.s3.Bucket(bucketName, {
-        acl: "private", // Adjust permissions as needed
+        acl: "public-read", // Allow public read access
+        website: {
+            indexDocument: "index.html", // Set the index document
+            errorDocument: "error.html", // Set the error document (optional)
+        },
     });
 
     // Create a CloudFront distribution
     const cloudfrontDistribution = new aws.cloudfront.Distribution(cloudfrontName, {
         enabled: true,
+        defaultRootObject: "index.html",
         origins: [
             {
+                originId: s3Bucket.arn,
                 domainName: s3Bucket.websiteEndpoint,
-                originId: s3Bucket.bucketDomainName,
-                s3OriginConfig: {
-                    originAccessIdentity: s3Bucket.arn.apply(arn => `origin-access-identity/cloudfront/${arn.split(":")[5]}`),
+                customOriginConfig: {
+                    originProtocolPolicy: "http-only",
+                    httpPort: 80,
+                    httpsPort: 443,
+                    originSslProtocols: ["TLSv1", "TLSv1.1", "TLSv1.2"],
                 },
             },
         ],
-        defaultRootObject: "index.html",
         defaultCacheBehavior: {
-            targetOriginId: s3Bucket.bucketDomainName,
+            targetOriginId: s3Bucket.arn,
             viewerProtocolPolicy: "redirect-to-https",
             allowedMethods: ["GET", "HEAD", "OPTIONS"],
-            cachedMethods: ["GET", "HEAD"],
+            cachedMethods: ["GET", "HEAD", "OPTIONS"],
             forwardedValues: {
                 cookies: { forward: "none" },
                 queryString: false,
             },
             minTtl: 0,
-            defaultTtl: 3600,
-            maxTtl: 86400,
+            defaultTtl: 60 * 60 * 24 * 7, // Cache for 1 week
         },
         // priceClass: "PriceClass_100",
         restrictions: {
@@ -56,8 +62,11 @@ const handler = async ({ name, rid, executionArn }) => {
                 locations: [], // Add your desired locations if using whitelist or blacklist
             },
         },
+        tags: {
+            Environment: "production",
+        },
         viewerCertificate: {
-            cloudFrontDefaultCertificate: true,
+            cloudfrontDefaultCertificate: true,
         },
     });
 
