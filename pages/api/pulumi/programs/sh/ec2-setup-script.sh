@@ -40,7 +40,7 @@ sudo systemctl enable nginx
 cd /etc/nginx/conf.d
 
 # This line of code must have no identation to work    
-read -d '\n' API_CONF << EndOfText
+read -d '' API_CONF << 'EndOfText'
 # Server configuration
 server {
     listen 80 default_server;
