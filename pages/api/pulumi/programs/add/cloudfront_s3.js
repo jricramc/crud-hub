@@ -23,23 +23,6 @@ const handler = async ({ name, rid, executionArn }) => {
         acl: "private", // Adjust permissions as needed
     });
 
-    // Set the bucket policy
-    const s3BucketPolicy = new aws.s3.BucketPolicy(`${bucketName}-policy`, {
-        bucket: s3Bucket.bucket,
-        policy: {
-            Version: "2012-10-17",
-            Statement: [
-                {
-                    Sid: "Statement1",
-                    Effect: "Allow",
-                    Principal: "*",
-                    Action: "s3:GetObject",
-                    Resource: pulumi.interpolate`${s3Bucket.arn}/*`,
-                },
-            ],
-        },
-    });
-
     // Create a CloudFront distribution
     const cloudfrontDistribution = new aws.cloudfront.Distribution(cloudfrontName, {
         enabled: true,
@@ -75,6 +58,25 @@ const handler = async ({ name, rid, executionArn }) => {
         },
     });
 
+    // Set the bucket policy
+    const s3BucketPolicy = new aws.s3.BucketPolicy(`${bucketName}-policy`, {
+        bucket: s3Bucket.bucket,
+        policy: {
+            Version: "2012-10-17",
+            Statement: [
+                {
+                    Sid: "Statement1",
+                    Effect: "Allow",
+                    Principal: {
+                        AWS: cloudfrontDistribution.arn,
+                    },
+                    Action: "s3:GetObject",
+                    Resource: pulumi.interpolate`${s3Bucket.arn}/*`,
+                },
+            ],
+        },
+    });
+
     // Create an IAM user
     const iamUser = new aws.iam.User(iamUserName);
 
@@ -103,24 +105,24 @@ const combinedPolicy = pulumi.all([cloudfrontDistribution.id]).apply(([cloudfron
     ],
 }));
 
-// Attach the inline policy to the IAM user
-const userPolicyAttachment = new aws.iam.UserPolicyAttachment(`user-policy-attachment-${rid}-${unique_cloudfrontS3_name}`, {
-    policyArn: pulumi.interpolate`arn:aws:iam::${accountId}:policy/${iamUser.name}`,
-    user: iamUser.name,
-    policy: combinedPolicy,
-});
-
-// Export IAM user access keys
-const iamUserAccessKeys = pulumi.all([iamUser.name, iamUser.id]).apply(([userName, userId]) => {
-    const accessKeys = new aws.iam.AccessKey(`${userName}-key`, {
-        user: userName,
+    // Attach the inline policy to the IAM user
+    const userPolicyAttachment = new aws.iam.UserPolicyAttachment(`user-policy-attachment-${rid}-${unique_cloudfrontS3_name}`, {
+        policyArn: pulumi.interpolate`arn:aws:iam::${accountId}:policy/${iamUser.name}`,
+        user: iamUser.name,
+        policy: combinedPolicy,
     });
 
-    return {
-        aws_access_key_id: accessKeys.id,
-        aws_secret_access_key: accessKeys.secret,
-    };
-});
+    // Export IAM user access keys
+    const iamUserAccessKeys = pulumi.all([iamUser.name, iamUser.id]).apply(([userName, userId]) => {
+        const accessKeys = new aws.iam.AccessKey(`${userName}-key`, {
+            user: userName,
+        });
+
+        return {
+            aws_access_key_id: accessKeys.id,
+            aws_secret_access_key: accessKeys.secret,
+        };
+    });
     
     return { unique_cloudfrontS3_name, iamUser, iamUserAccessKeys, cloudfrontDistribution, s3Bucket };
 };
