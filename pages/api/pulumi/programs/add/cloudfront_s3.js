@@ -27,6 +27,10 @@ const handler = async ({ name, rid, executionArn }) => {
         },
     });
 
+    // Create an origin access identity for the CloudFront distribution
+    const oai = new aws.cloudfront.OriginAccessIdentity(`${cloudfrontName}-origin-access-identity`, {});
+
+
     // Create a CloudFront distribution
     const cloudfrontDistribution = new aws.cloudfront.Distribution(cloudfrontName, {
         enabled: true,
@@ -35,11 +39,14 @@ const handler = async ({ name, rid, executionArn }) => {
             {
                 originId: s3Bucket.arn,
                 domainName: s3Bucket.websiteEndpoint,
-                customOriginConfig: {
-                    originProtocolPolicy: "http-only",
-                    httpPort: 80,
-                    httpsPort: 443,
-                    originSslProtocols: ["TLSv1", "TLSv1.1", "TLSv1.2"],
+                // customOriginConfig: {
+                //     originProtocolPolicy: "http-only",
+                //     httpPort: 80,
+                //     httpsPort: 443,
+                //     originSslProtocols: ["TLSv1", "TLSv1.1", "TLSv1.2"],
+                // },
+                s3OriginConfig: {
+                    originAccessIdentity: oai.cloudfrontAccessIdentityPath
                 },
             },
         ],
@@ -72,7 +79,7 @@ const handler = async ({ name, rid, executionArn }) => {
     });
 
     // Define the policy for the bucket
-    const policy = pulumi.all([s3Bucket.arn, cloudfrontDistribution.arn]).apply(([s3BucketArn, cloudfrontDistributionArn]) => JSON.stringify({
+    const policy = pulumi.all([s3Bucket.arn, cloudfrontDistribution.arn, oai.iamArn]).apply(([s3BucketArn, cloudfrontDistributionArn, oaiIamArn]) => JSON.stringify({
         Version: "2012-10-17",
         Statement: [{
             Sid: "PublicRead",
@@ -80,7 +87,10 @@ const handler = async ({ name, rid, executionArn }) => {
             // Principal: {
             //     AWS: cloudfrontDistributionArn,
             // },
-            Principal: "*",
+            // Principal: "*",
+            Principal: {
+                AWS: oaiIamArn,
+            },
             Action: "s3:GetObject",
             Resource: `${s3BucketArn}/*`,
         }],
@@ -110,6 +120,9 @@ const handler = async ({ name, rid, executionArn }) => {
                         "s3:GetObject",
                         "s3:ListBucket",
                         "s3:PutObject",
+                        "s3:PutBucketPolicy",
+                        "s3:PutBucketAcl",
+                        "s3:PutBucketWebsite",
                     ],
                     Resource: [
                         s3BucketArn,
