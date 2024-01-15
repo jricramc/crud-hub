@@ -137,78 +137,83 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         Create EC2 Instance
     */
 
-    const securityGroup = new aws.ec2.SecurityGroup(`security-group-${rid}`, {
-        ingress: [
-            {
-                protocol: "-1",
-                fromPort: 0,
-                toPort: 0,
-                cidrBlocks: ["0.0.0.0/0"],
-            },
-        ],
+    // const securityGroup = new aws.ec2.SecurityGroup(`security-group-${rid}`, {
+    //     ingress: [
+    //         {
+    //             protocol: "-1",
+    //             fromPort: 0,
+    //             toPort: 0,
+    //             cidrBlocks: ["0.0.0.0/0"],
+    //         },
+    //     ],
+    // });
+
+    // const APP_NAME = "GraphQL-PE-CORE-API";
+    // const REPO_URL = "https://github.com/webhubhq/GraphQL-PE-CORE-API.git";
+
+    // const userData = `#!/bin/bash
+
+    // exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+    // yum -y update
+    // echo "Finish basic update and system log config"
+
+    // # Default values
+    // APP_NAME="${APP_NAME}"
+    // REPO_URL="${REPO_URL}"
+    // # PORT=3000
+
+    // # Echo variable names
+    // echo "APP_NAME: \${APP_NAME}"
+    // echo "REPO_URL: \${REPO_URL}"
+
+    // # Install Node.js 14.x (you can change the version if needed)
+    // curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+    // sudo yum install -y nodejs
+
+    // # Confirm Node.js and npm installation
+    // node --version
+    // npm --version
+
+    
+    // # Install Git
+    // sudo yum install -y git
+
+    // # Install PM2 globally
+    // sudo npm install -g pm2
+
+    // # Install NGINX
+    // sudo yum install -y nginx
+
+    // # Start NGINX
+    // sudo systemctl start nginx
+
+    // # Enable NGINX to start on boot
+    // sudo systemctl enable nginx
+    
+    // # Create a directory for your app
+    // sudo mkdir -p "/var/www/\${APP_NAME}"
+    // # sudo chown -R ec2-user:ec2-user "/var/www/\${APP_NAME}"
+    
+    // # Navigate to the app directory
+    // cd "/var/www/\${APP_NAME}"
+    
+    // # Clone your app repository
+    // git clone "\${REPO_URL}" .
+    
+    // # Install app dependencies
+    // npm install
+    
+    // # start the Apollo Server built in repo
+    // npm run start
+    
+    // # Add other commands using the variables, e.g., $PORT
+    
+    // `
+
+    // We can lookup the existing launch template using `aws.ec2.getLaunchTemplate`
+    const launchTemplate = aws.ec2.getLaunchTemplate({
+        name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
     });
-
-    const APP_NAME = "GraphQL-PE-CORE-API";
-    const REPO_URL = "https://github.com/webhubhq/GraphQL-PE-CORE-API.git";
-
-    const userData = `#!/bin/bash
-
-    exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-    yum -y update
-    echo "Finish basic update and system log config"
-
-    # Default values
-    APP_NAME="${APP_NAME}"
-    REPO_URL="${REPO_URL}"
-    # PORT=3000
-
-    # Echo variable names
-    echo "APP_NAME: \${APP_NAME}"
-    echo "REPO_URL: \${REPO_URL}"
-
-    # Install Node.js 14.x (you can change the version if needed)
-    curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
-    sudo yum install -y nodejs
-
-    # Confirm Node.js and npm installation
-    node --version
-    npm --version
-
-    
-    # Install Git
-    sudo yum install -y git
-
-    # Install PM2 globally
-    sudo npm install -g pm2
-
-    # Install NGINX
-    sudo yum install -y nginx
-
-    # Start NGINX
-    sudo systemctl start nginx
-
-    # Enable NGINX to start on boot
-    sudo systemctl enable nginx
-    
-    # Create a directory for your app
-    sudo mkdir -p "/var/www/\${APP_NAME}"
-    # sudo chown -R ec2-user:ec2-user "/var/www/\${APP_NAME}"
-    
-    # Navigate to the app directory
-    cd "/var/www/\${APP_NAME}"
-    
-    # Clone your app repository
-    git clone "\${REPO_URL}" .
-    
-    # Install app dependencies
-    npm install
-    
-    # start the Apollo Server built in repo
-    npm run start
-    
-    # Add other commands using the variables, e.g., $PORT
-    
-    `
     
     // Create an EC2 instance
     const ec2InstanceName = `ec2-instance-${rid}`;
@@ -217,8 +222,8 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         keyName: "ec2-instance-key-pair",
         // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
         ami: "ami-0cd3c7f72edd5b06d",
-        vpcSecurityGroupIds: [securityGroup.id],
-        userData,
+        // vpcSecurityGroupIds: [securityGroup.id],
+        //userData,
         // userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
         //     + ` -a ${appName}`
         //     + ` -r ${repoURL}`
@@ -227,6 +232,10 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         tags: {
             Name: ec2InstanceName, // Set the name using the "Name" tag
             // Add other tags if needed...
+        },
+        launchTemplate: {
+            id: launchTemplate.then(lt => lt.id), // Use the launch template ID
+            version: launchTemplate.then(lt => lt.defaultVersion.toString()), // Optionally, specify the version of the launch template
         },
     });
 

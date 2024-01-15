@@ -330,7 +330,7 @@ const handler = async ({
         folderCreateServiceBucketNameResource,
     ]});
 
-    const methodCreateServiceCloudfrontS3 = new aws.apigateway.Method(`create-service-bucket-name-get-method-${rid}`, {
+    const methodCreateServiceCloudfrontS3Name = new aws.apigateway.Method(`create-service-cldfrnt-s3-name-get-method-${rid}`, {
         restApi: apiID,
         resourceId: folderCreateServiceCldfrntS3BucketNameResource.id,
         httpMethod: "GET",
@@ -2057,17 +2057,17 @@ exports.handler = async (event) => {
         createS3CrudApiLambda,
     ]});
 
-    const integrationCreateServiceCloudfrontS3 = new aws.apigateway.Integration(`create-service-cloudfront-s3-integration-${rid}`, {
+    const integrationCreateServiceCloudfrontS3Name = new aws.apigateway.Integration(`create-service-cloudfront-s3-name-integration-${rid}`, {
         restApi: apiID,
         resourceId: folderCreateServiceCldfrntS3BucketNameResource.id,
-        httpMethod: methodCreateServiceCloudfrontS3.httpMethod,
+        httpMethod: methodCreateServiceCloudfrontS3Name.httpMethod,
         type: "AWS_PROXY",
         integrationHttpMethod: "POST",
         uri: createCloudfrontS3Distribution.invokeArn,
         timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
     }, { dependsOn: [
         folderCreateServiceCldfrntS3BucketNameResource,
-        methodCreateServiceCloudfrontS3,
+        methodCreateServiceCloudfrontS3Name,
         createCloudfrontS3Distribution,
     ]});
 
@@ -2229,7 +2229,7 @@ exports.handler = async (event) => {
         // create/service/db/s3/{bucket-name}
         methodCreateServiceBucketName, integrationCreateServiceBucketName,
         // create/service/cloudfrontS3
-        methodCreateServiceCloudfrontS3, integrationCreateServiceCloudfrontS3,
+        methodCreateServiceCloudfrontS3Name, integrationCreateServiceCloudfrontS3Name,
         // create/service/auth/google/{oauth-name}
         methodCreateServiceOAuthName, integrationCreateServiceOAuthName,
         // create/service/payment/stripe/{name}
