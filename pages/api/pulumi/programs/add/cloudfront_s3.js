@@ -39,15 +39,15 @@ const handler = async ({ name, rid, executionArn }) => {
             {
                 originId: s3Bucket.arn,
                 domainName: s3Bucket.websiteEndpoint,
-                // customOriginConfig: {
-                //     originProtocolPolicy: "http-only",
-                //     httpPort: 80,
-                //     httpsPort: 443,
-                //     originSslProtocols: ["TLSv1", "TLSv1.1", "TLSv1.2"],
-                // },
-                s3OriginConfig: {
-                    originAccessIdentity: oai.cloudfrontAccessIdentityPath
+                customOriginConfig: {
+                    originProtocolPolicy: "http-only",
+                    httpPort: 80,
+                    httpsPort: 443,
+                    originSslProtocols: ["TLSv1", "TLSv1.1", "TLSv1.2"],
                 },
+                // s3OriginConfig: {
+                //     originAccessIdentity: oai.cloudfrontAccessIdentityPath
+                // },
             },
         ],
         defaultCacheBehavior: {
@@ -87,10 +87,10 @@ const handler = async ({ name, rid, executionArn }) => {
             // Principal: {
             //     AWS: cloudfrontDistributionArn,
             // },
-            // Principal: "*",
-            Principal: {
-                AWS: oaiIamArn,
-            },
+            Principal: "*",
+            // Principal: {
+            //     AWS: oaiIamArn,
+            // },
             Action: "s3:GetObject",
             Resource: `${s3BucketArn}/*`,
         }],
