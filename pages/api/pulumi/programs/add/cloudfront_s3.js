@@ -110,7 +110,6 @@ const combinedPolicy = pulumi.all([cloudfrontDistribution.id]).apply(([cloudfron
 
     // Attach the inline policy to the IAM user
     const userPolicyAttachment = new aws.iam.UserPolicyAttachment(`user-policy-attachment-${rid}-${unique_cloudfrontS3_name}`, {
-        policyArn: pulumi.interpolate`arn:aws:iam::${accountId}:policy/${iamUser.name}`,
         user: iamUser.name,
         policy: combinedPolicy,
     });
