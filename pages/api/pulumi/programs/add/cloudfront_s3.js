@@ -81,7 +81,7 @@ const handler = async ({ name, rid, executionArn }) => {
                     Sid: "Statement1",
                     Effect: "Allow",
                     Principal: {
-                        AWS: cloudfrontDistribution.arn,
+                        AWS: cloudfrontDistribution.arn.apply(arn => arn),
                     },
                     Action: "s3:GetObject",
                     Resource: pulumi.interpolate`${s3Bucket.arn}/*`,
