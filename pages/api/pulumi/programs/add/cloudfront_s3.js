@@ -20,7 +20,7 @@ const handler = async ({ name, rid, executionArn }) => {
 
     // Create an S3 bucket
     const s3Bucket = new aws.s3.Bucket(bucketName, {
-        acl: "private", // Allow public read access
+        acl: "public-read", // Allow public read access
         website: {
             indexDocument: "index.html", // Set the index document
             errorDocument: "error.html", // Set the error document (optional)
