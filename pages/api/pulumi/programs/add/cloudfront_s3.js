@@ -98,7 +98,7 @@ const handler = async ({ name, rid, executionArn }) => {
 
     // Attach the policy to the bucket
     const bucketPolicy = new aws.s3.BucketPolicy('my-bucket-policy', {
-        bucket: s3Bucket.bucket,
+        bucket: s3Bucket.id,
         policy: policy,
     });
 
