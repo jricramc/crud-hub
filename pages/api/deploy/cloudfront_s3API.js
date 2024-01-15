@@ -21,6 +21,7 @@ const handler = async (req, res) => {
             console.log('args: ', JSON.stringify({ args }));
           res.status(200).json({ type: 'success', ...args });
         }).catch((...args) => {
+            console.log('errors: ', JSON.stringify({ args }))
           res.status(200).json({ type: 'error', ...args });
         });
     } else res.status(405).end(`Method ${method} Not Allowed`);
