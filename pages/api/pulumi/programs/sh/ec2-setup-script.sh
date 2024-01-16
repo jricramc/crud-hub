@@ -39,8 +39,8 @@ sudo systemctl enable nginx
 # Add NGINX proxy pass
 cd /etc/nginx/conf.d
 
-# This line of code must have no identation to work    
-read -d '' API_CONF << 'EndOfText'
+# Overwrite or create api.conf
+cat << 'EndOfText' > api.conf
 # Server configuration
 server {
     listen 80 default_server;
@@ -74,10 +74,9 @@ server {
     }
 
 }
-EndOfText    
+EndOfText
 
-echo "$API_CONF"
-echo "$API_CONF" >> api.conf
+
 
 # Reload NGINX with changes
 sudo systemctl reload nginx
