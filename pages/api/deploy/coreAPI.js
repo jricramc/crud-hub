@@ -40,6 +40,7 @@ const handler = async (req, res) => {
           const {
             url: { value: api_url },
             apiID: { value: api_id },
+            apiKey: { value: api_key },
             apiName: { value: api_name },
             rootResourceId: { value: root_resource_id },
             lam_role: { value: { arn: lam_role_arn }},
@@ -88,6 +89,7 @@ const handler = async (req, res) => {
               r_id: rid,
               api_url,
               api_id,
+              api_key,
               api_name,
               root_resource_id,
               lambda_resource_id,
@@ -145,6 +147,7 @@ const handler = async (req, res) => {
                 stackName: `${stackName}-pt-3`,
                 program: async () =>  await core_api_pt_3({
                     apiID: api_id,
+                    apiKey: api_key,
                     apiName: api_name,
                     apiUrl: api_url,
                     rootResourceId: root_resource_id,
@@ -203,7 +206,7 @@ const handler = async (req, res) => {
           output = upRes1.output;
         }
 
-        res.status(statusCode).json({...output });
+        res.status(statusCode).json({ ...output });
 
     } else {
         res.status(405).end(`Method ${method} Not Allowed`);

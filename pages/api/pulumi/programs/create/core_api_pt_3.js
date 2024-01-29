@@ -13,7 +13,7 @@ const { publicRuntimeConfig } = getConfig();
 const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
 
 const handler = async ({
-    apiID, apiUrl, apiName,
+    apiID, apiKey, apiUrl, apiName,
     rootResourceId, dbResourceId, mongodbResourceId, lambdaResourceId,
     s3ResourceId, stripeResourceId, googleResourceId,
     sendgridResourceId, websocketResourceId,
@@ -414,6 +414,7 @@ const handler = async ({
                 const createMongoDBPostRequest = (dbname) => {
                     const data = {
                         apiID: "${apiID}",
+                        apiKey: "${apiKey}",
                         apiName: "${apiName}",
                         mongodbResourceId: "${mongodbResourceId}",
                         dbName: dbname,
@@ -505,11 +506,10 @@ const handler = async ({
                             const obj = JSON.parse(responseData);
                             if (obj.type === 'success') {
                                 const {
-                                    apiKey: { value: api_key },
                                     dbName: { value: db_name },
                                     unique_db_name: { value: unique_dbname },
                                 } = obj['0']['outputs'];
-                                return { type: 'success', resource: { api_key, db_name, unique_dbname, date_created: new Date() } }
+                                return { type: 'success', resource: { db_name, unique_dbname, date_created: new Date() } }
                             } else {
                                 return { type: 'error', err: 'pulumi returned an error code' }
                             }
@@ -1855,6 +1855,8 @@ exports.handler = async (event) => {
                 const createWebsocketPostRequest = (name) => {
                     const data = {
                         apiID: "${apiID}",
+                        apiUrl: "${apiUrl}",
+                        apiKey: "${apiKey}",
                         // apiName: "${apiName}",
                         websocketResourceId: "${websocketResourceId}",
                         socketName: name,

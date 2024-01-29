@@ -10,6 +10,8 @@ import { RID } from "../../../../../utils/utils";
 
 const handler = async ({ rid }) => {
 
+    const apiKey = RID(32);
+
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
      
     let layer = new aws.lambda.LayerVersion("stripe-lambda-layer", {
@@ -287,6 +289,7 @@ const handler = async ({ rid }) => {
 
     return {
         url: api.url,
+        apiKey,
         api,
         apiID: restApiId,
         apiName,

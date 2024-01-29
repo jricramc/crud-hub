@@ -12,12 +12,11 @@ import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
 
-const handler = async ({ apiID, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn }) => {
+const handler = async ({ apiID, apiKey, apiName, mongodbResourceId, dbName, rid, executionArn, lam_role_arn }) => {
 
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
 
     const r_id = RID(6);
-    const apiKey = RID(32);
     const unique_db_name = `${dbName}-${r_id}`;
     const mongodb_name = RID(32);
 

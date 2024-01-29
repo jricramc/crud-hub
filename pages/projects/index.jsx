@@ -365,7 +365,7 @@ const Projects = ({}) => {
                         } else if (resource_type === 'db/dynamodb') {
                             r.push({ resource_name: 'AWS DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
                         } else if (resource_type === 'db/mongodb') {
-                            r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, api_key, date_created })
+                            r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
                         } else if (resource_type === 'db/s3') {
                             r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
                         } else if (resource_type === 'cloudfrontS3') {

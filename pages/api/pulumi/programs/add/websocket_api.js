@@ -7,9 +7,9 @@ import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import * as fs from "fs";
 import * as archiver from 'archiver'; 
-import { RID } from "../../../../../utils/utils";
+import { RID, extractDomain } from "../../../../../utils/utils";
 
-const handler = async ({ socketName, rid, executionArn }) => {
+const handler = async ({ socketName, apiUrl, apiKey, rid, executionArn }) => {
 
     const r_id = RID(6);
     const unique_socket_name = `${socketName}-${r_id}`;
@@ -77,6 +77,8 @@ const handler = async ({ socketName, rid, executionArn }) => {
                 variables: {
                     WEBSOCKET_ENDPOINT: websocketEndpoint,
                     STAGE: websocketStage.name,
+                    API_KEY: apiKey,
+                    API_URL_DOMAIN: extractDomain(apiUrl),
                 },
             },
             // Add layer for aws-sdk/client-apigatewaymanagementapi

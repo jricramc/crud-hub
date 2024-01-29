@@ -4,8 +4,8 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
   const { method, body, headers } = req;
-  // const b = body.apiID ? body : JSON.parse(body);
-  const { apiID, websocketResourceId, socketName, rid, lam_role_arn } = body;
+
+  const { apiID, apiUrl, apiKey, websocketResourceId, socketName, rid, lam_role_arn } = body;
   const stackName = `add-websocket-api-websocketResourceId-${websocketResourceId}-apiID-${apiID}-${RID()}`;
   try {
     // console.log('body: ', body)
@@ -17,7 +17,7 @@ const handler = async (req, res) => {
         const stack = await LocalWorkspace.createStack({
             stackName,
             projectName: `API-72-${rid}`,
-            program: async () =>  await add_websocket_api({ socketName, websocketResourceId, rid, lam_role_arn }),
+            program: async () =>  await add_websocket_api({ apiUrl, apiKey, socketName, websocketResourceId, rid, lam_role_arn }),
         });
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
