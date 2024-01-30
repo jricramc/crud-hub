@@ -187,6 +187,12 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
             cachedMethods: ["GET", "HEAD"],
             // other cache behavior settings
         },
+        // Specify no restrictions for the distribution
+        restrictions: {
+            geoRestriction: {
+                restrictionType: "none",
+            },
+        },
         isIpv6Enabled: true,
         // additional CloudFront settings
     });
