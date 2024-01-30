@@ -17,7 +17,7 @@ const handler = async ({
     rootResourceId, dbResourceId, mongodbResourceId, lambdaResourceId,
     s3ResourceId, stripeResourceId, googleResourceId,
     sendgridResourceId, websocketResourceId,
-    lam_role_arn, executionArn, rid, stripeLayerArn
+    lam_role_arn, executionArn, rid, secretRid, stripeLayerArn
 }) => {
 
     /*
@@ -419,6 +419,7 @@ const handler = async ({
                         mongodbResourceId: "${mongodbResourceId}",
                         dbName: dbname,
                         rid: "${rid}",
+                        secretRid: "${secretRid}",
                         executionArn: "${executionArn}",
                         lam_role_arn: "${lam_role_arn}",
                     };

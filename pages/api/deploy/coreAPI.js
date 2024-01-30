@@ -7,7 +7,10 @@ const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
-    const { name, email, rid } = body;
+    const { email } = body;
+
+    const rid = RID(12);
+    const secretRid = RID(12);
 
     const projectName = `API-72-${rid}`;
     const stackName = `stack-${rid}`;
@@ -87,7 +90,9 @@ const handler = async (req, res) => {
             } = upRes2.output;
 
             const data = {
+              email,
               r_id: rid,
+              secret_rid: secretRid,
               api_url,
               api_id,
               api_key,
@@ -166,6 +171,7 @@ const handler = async (req, res) => {
                     lam_role_arn,
                     executionArn: execution_arn,
                     rid,
+                    secretRid,
                     stripeLayerArn: stripe_layer_arn
                 })
               });
