@@ -166,6 +166,31 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         },
     });
 
+    // Create a CloudFront distribution using the instance's public DNS name
+    const ec2CloudfrontDistribution = new aws.cloudfront.Distribution(`ec2-instance-cldfrnt-distribution-${rid}`, {
+        origins: [
+            {
+                domainName: pulumi.interpolate`${ec2Instance.publicDns}`, // This uses the public DNS of the instance
+                originId: pulumi.interpolate`cldfrnt-dist-ec2-id-${ec2Instance.id}`,
+                customOriginConfig: {
+                    originProtocolPolicy: "http-only", // or "https-only" or "match-viewer" based on needs
+                    httpPort: 80, // the HTTP port your instance listens on, adjust as necessary
+                    httpsPort: 443, // the HTTPS port your instance listens on, adjust as necessary
+                },
+            },
+        ],
+        enabled: true,
+        defaultCacheBehavior: {
+            targetOriginId: "ec2InstanceOrigin",
+            viewerProtocolPolicy: "redirect-to-https", // Force HTTPS
+            allowedMethods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+            cachedMethods: ["GET", "HEAD"],
+            // other cache behavior settings
+        },
+        isIpv6Enabled: true,
+        // additional CloudFront settings
+    });
+
     return {
         lambdaResourceId: folderMainLambdaResource.id,
         dbResourceId: folderMainDynamoDBResource.id,
@@ -176,7 +201,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         websocketResourceId: folderMainWebsocketResource.id,
         sendgridResourceId: null, // folderMainSendGridResource.id,
         ec2Instance,
-        awsEC2: aws.ec2,
+        ec2CloudfrontDistribution,
     };
 };
 

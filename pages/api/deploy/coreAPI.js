@@ -83,6 +83,7 @@ const handler = async (req, res) => {
               sendgridResourceId: { value: sendgrid_resource_id },
               websocketResourceId: { value: websocket_resource_id },
               ec2Instance: { value: ec2_instance },
+              ec2CloudfrontDistribution: { value: ec2_cloud_front_distribution }
             } = upRes2.output;
 
             const data = {
@@ -108,6 +109,9 @@ const handler = async (req, res) => {
                 publicDns: ec2_instance.publicDns,
                 publicIp: ec2_instance.publicIp,
                 tags: ec2_instance.tags,
+              },
+              ec2_cloud_front_distribution: {
+                domainName: ec2_cloud_front_distribution.domainName,
               },
               date_created: new Date(),
             };
