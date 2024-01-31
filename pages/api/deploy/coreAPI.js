@@ -85,6 +85,8 @@ const handler = async (req, res) => {
               ec2Instance: { value: ec2_instance },
             } = upRes2.output;
 
+            JSON.stringify(ec2_instance);
+
             const stack2_1 = await LocalWorkspace.createStack({
               projectName,
               stackName: `${stackName}-pt-2.1`,
