@@ -45,10 +45,22 @@ const apiRequest = async ({ url, method, data }) => {
             'Content-Type': 'application/json',
         },
     });
+
     if (res.status === 200) {
         return Promise.resolve(res.json());
     } return Promise.reject(`error ${res.status} received from server`);
-  };
+};
+
+const sendEmail = async ({ subject = '', content = '', email = '' }) => {
+
+    const r = await apiRequest({
+        url: 'https://ga33n2aqc3.execute-api.us-east-2.amazonaws.com/prod/send-email',
+        method: 'POST',
+        data: { email, subject, content },
+    })
+
+    return r;
+};
 
 const RID = (l = 8) => {
     const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -79,5 +91,5 @@ const extractRegionAndAccountIdFromExecutionArn = (inputString) => {
 }
 
 
-export { deployCRUDAPI, RID, apiRequest, getUserProjects, extractDomain, extractRegionAndAccountIdFromExecutionArn }
+export { deployCRUDAPI, RID, apiRequest, getUserProjects, extractDomain, extractRegionAndAccountIdFromExecutionArn, sendEmail }
 

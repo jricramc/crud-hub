@@ -2,7 +2,7 @@ import axios from 'axios';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
-import { RID } from '../../../utils/utils';
+import { RID, sendEmail } from '../../../utils/utils';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
@@ -198,6 +198,38 @@ const handler = async (req, res) => {
 
               if (upRes3.statusCode === 200) {
                 output = data;
+
+                let clientEmail;
+
+                if (email) {
+                  clientEmail = {
+                    subject: "Your API is ready!",
+                    content: `Now that you have created your API (${api_url}), you can view documentation and functionality by going here:<br><br><a href="https://webhub.mintlify.app/">WebHub Documentation</a><br><br>Happy building,<br><br>Email us at <a href="mailto:webhubhq@gmail.com">webhubhq@gmail.com</a> with any questions!`,
+                    email
+                  }
+                }
+
+                // send an email to webhubhq saying that someone deployed a new api
+                const webhubhqEmail = {
+                  subject: "New WebHUB API Deployed",
+                  content: `
+                  <br>
+                  Email: ${email || 'email-undefined'}
+                  Pulumi project name: ${projectName}
+                  <br>
+                  API URL: ${api_url}
+                  <br>
+                  EOM
+                  `,
+                  email: 'webhubhq@gmail.com'
+                }
+
+                await Promise.all([
+                  clientEmail ? sendEmail(clientEmail) : () => {},
+                  sendEmail(webhubhqEmail)
+                ]);
+                
+
               } else {
                 output = upRes3.output;
               }
