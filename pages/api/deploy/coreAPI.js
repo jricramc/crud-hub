@@ -73,17 +73,15 @@ const handler = async (req, res) => {
               statusCode: 409,
               output: { err, level: 'err_2' }
             }));
-
-          console.log('<<stage 2.0 complete>>');
           
 
           if (upRes2.statusCode === 200 && upRes2.output) {
+            console.log('<<stage 2.0 complete>>');
+
             const {
-              lambdaResourceId: {value: lambda_resource_id },
+              lambdaResourceId: { value: lambda_resource_id },
               dynamodbResourceId: { value: dynamodb_resource_id },
-              mongodbResourceId: { value: mongodb_resource_id },
               s3ResourceId: { value: s3_resource_id },
-              websocketResourceId: { value: websocket_resource_id },
               ec2Instance: { value: ec2_instance },
             } = upRes2.output;
 
@@ -107,9 +105,10 @@ const handler = async (req, res) => {
                 output: { err, level: 'err_2' }
               }));
   
-            console.log('<<stage 2.1 complete>>');
+            
 
             if (upRes2_1.statusCode === 200 && upRes2_1.output) {
+              console.log('<<stage 2.1 complete>>');
 
               const {
                 ec2CloudfrontDistribution: { value: ec2_cloud_front_distribution }

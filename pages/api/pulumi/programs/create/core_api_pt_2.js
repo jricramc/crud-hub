@@ -59,7 +59,6 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
     { dependsOn: [ folderMainDBResource ]});
 
 
-
     /*
         /aws/lambda
     */
@@ -69,7 +68,6 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         pathPart: "lambda",
     },
     { dependsOn: [] });
-
 
 
     /*
