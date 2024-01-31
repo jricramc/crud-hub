@@ -53,11 +53,15 @@ const apiRequest = async ({ url, method, data }) => {
 
 const sendEmail = async ({ subject = '', content = '', email = '' }) => {
 
-    const r = await apiRequest({
+    const r = await axios({
         url: 'https://ga33n2aqc3.execute-api.us-east-2.amazonaws.com/prod/send-email',
         method: 'POST',
+        headers: {
+                'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+        },
         data: { email, subject, content },
-    })
+    });
 
     return r;
 };
