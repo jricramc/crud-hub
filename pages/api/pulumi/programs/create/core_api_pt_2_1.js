@@ -64,6 +64,12 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
             enabled: true,
             defaultCacheBehavior: {
                 targetOriginId: originId,
+                forwardedValues: {
+                    queryString: false,
+                    cookies: {
+                        forward: "none",
+                    },
+                },
                 viewerProtocolPolicy: "redirect-to-https", // Force HTTPS
                 allowedMethods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
                 cachedMethods: ["GET", "HEAD"],
