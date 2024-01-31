@@ -291,6 +291,8 @@ const handler = async ({ rid }) => {
     const launchTemplate = aws.ec2.getLaunchTemplate({
         name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
     });
+
+    console.log('launchTemplate: ', launchTemplate);
     
     // Create an EC2 instance
     const ec2InstanceName = `ec2-instance-${rid}`;
