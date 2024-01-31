@@ -166,44 +166,6 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         },
     });
 
-    // Create a CloudFront distribution using the instance's public DNS name
-    const ec2CloudfrontDistribution =  ec2Instance.publicDns.apply(ec2Instance_publicDns => new aws.cloudfront.Distribution(
-        `ec2-instance-cldfrnt-distribution-${rid}`,
-        {
-            origins: [
-                {
-                    domainName: ec2Instance_publicDns, // This uses the public DNS of the instance
-                    originId: pulumi.interpolate`cldfrnt-dist-ec2-id-${ec2Instance.id}`,
-                    customOriginConfig: {
-                        originProtocolPolicy: "http-only", // or "https-only" or "match-viewer" based on needs
-                        originSslProtocols: [], // Empty array since HTTPS is not used
-                        httpPort: 80, // the HTTP port your instance listens on, adjust as necessary
-                        httpsPort: 443, // the HTTPS port your instance listens on, adjust as necessary
-                    },
-                },
-            ],
-            enabled: true,
-            defaultCacheBehavior: {
-                targetOriginId: "ec2InstanceOrigin",
-                viewerProtocolPolicy: "redirect-to-https", // Force HTTPS
-                allowedMethods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
-                cachedMethods: ["GET", "HEAD"],
-                // other cache behavior settings
-            },
-            viewerCertificate: {
-                cloudfrontDefaultCertificate: true, // Use the default cloudfront certificate
-            },
-            // Specify no restrictions for the distribution
-            restrictions: {
-                geoRestriction: {
-                    restrictionType: "none",
-                },
-            },
-            isIpv6Enabled: true,
-            // additional CloudFront settings
-        }
-    ));
-
     return {
         lambdaResourceId: folderMainLambdaResource.id,
         dbResourceId: folderMainDynamoDBResource.id,
@@ -214,7 +176,6 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
         websocketResourceId: folderMainWebsocketResource.id,
         sendgridResourceId: null, // folderMainSendGridResource.id,
         ec2Instance,
-        ec2CloudfrontDistribution,
     };
 };
 
