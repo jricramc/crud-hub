@@ -66,6 +66,7 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
                 targetOriginId: originId,
                 forwardedValues: {
                     queryString: false,
+                    headers: ["*"], // Forward all headers
                     cookies: {
                         forward: "none",
                     },
