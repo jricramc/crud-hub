@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ rid, ec2InstanceName, ec2InstancePublicDns }) => {
+const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicDns }) => {
 
     let ec2Instances;
 
@@ -27,7 +27,7 @@ const handler = async ({ rid, ec2InstanceName, ec2InstancePublicDns }) => {
 
         ec2Instances = await aws.ec2.getInstances({
             instanceTags: {
-                Name: ec2InstanceName,
+                Name: "impossible-name-to-know",
             },
             filters: [],
             instanceStateNames: [
