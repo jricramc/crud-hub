@@ -8,7 +8,41 @@ import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ rid, ec2InstanceId, ec2InstancePublicDns }) => {
+const handler = async ({ rid, ec2InstanceName, ec2InstancePublicDns }) => {
+
+    let ec2Instances;
+
+    const retryCount = 5;
+    const retryDelay = 30000;
+    
+    for (let i = 0; i < retryCount; i += 1) {
+
+        if (i > 0) {
+            console.log(`(${i}) retry ec2.getInstances`)
+            // wait 30 seconds before retrying again
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+
+        
+
+        ec2Instances = await aws.ec2.getInstances({
+            instanceTags: {
+                Name: ec2InstanceName,
+            },
+            filters: [],
+            instanceStateNames: [
+                "running",
+            ],
+        });
+
+        if (ec2Instances?.ids?.length > 0) {
+            // break
+            i = retryCount;
+        }
+    }
+
+    console.log('ec2Instances: ', ec2Instances)
+    
 
     // Create a CloudFront distribution using the instance's public DNS name
     const ec2CloudfrontDistribution = new aws.cloudfront.Distribution(

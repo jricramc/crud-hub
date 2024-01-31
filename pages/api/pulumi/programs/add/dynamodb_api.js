@@ -7,7 +7,7 @@ import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
-const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn, lam_role_arn }) => {
+const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, executionArn, lam_role_arn }) => {
 
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });
 
@@ -441,7 +441,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
     */
     const folderdbNameResource = new aws.apigateway.Resource(`folder-dbName-resource-${unique_db_name}-${rid}`, {
         restApi: apiID,
-        parentId: dbResourceId,
+        parentId: dynamodbResourceId,
         pathPart: unique_db_name,
     });
     
@@ -778,7 +778,7 @@ const handler = async ({ apiID, apiName, dbResourceId, dbName, rid, executionArn
         ]
     });
     
-    return { apiID, apiName, dbResourceId, dbName, unique_db_name };
+    return { apiID, apiName, dynamodbResourceId, dbName, unique_db_name };
 };
 
 export default handler;
