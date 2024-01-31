@@ -63,6 +63,11 @@ const handler = async (req, res) => {
                 ec2InstanceName: ec2_instance.tags.Name,
                 ec2InstanceId: ec2_instance.id,
                 ec2InstancePublicDns: ec2_instance.publicDns,
+                apiName: api_name,
+                apiUrl: api_url,
+                lam_role_arn,
+                executionArn: execution_arn,
+                secretRid,
             })
           });
 
