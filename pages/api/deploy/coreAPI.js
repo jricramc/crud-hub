@@ -13,6 +13,7 @@ const handler = async (req, res) => {
 
     const rid = RID (12);
     const secretRid = RID(12);
+    const apiKey = RID(32);
 
     const projectName = `API-72-${rid}`;
     const stackName = `stack-${rid}`;
@@ -46,12 +47,11 @@ const handler = async (req, res) => {
           const {
             url: { value: api_url },
             apiID: { value: api_id },
-            apiKey: { value: api_key },
             apiName: { value: api_name },
             rootResourceId: { value: root_resource_id },
             lam_role: { value: { arn: lam_role_arn }},
             executionArn: { value: execution_arn },
-            stripeLayerArn: { value: stripe_layer_arn}
+            ec2Instance: { value: ec2_instance },
           } = upRes1.output;
 
           const stack2 = await LocalWorkspace.createStack({
@@ -61,6 +61,9 @@ const handler = async (req, res) => {
                 apiID: api_id,
                 rootResourceId: root_resource_id,
                 rid,
+                ec2InstanceName: ec2_instance.tags.Name,
+                ec2InstanceId: ec2_instance.id,
+                ec2InstancePublicDns: ec2_instance.publicDns,
             })
           });
 
@@ -82,7 +85,7 @@ const handler = async (req, res) => {
               lambdaResourceId: { value: lambda_resource_id },
               dynamodbResourceId: { value: dynamodb_resource_id },
               s3ResourceId: { value: s3_resource_id },
-              ec2Instance: { value: ec2_instance },
+              ec2CloudfrontDistribution: { value: ec2_cloud_front_distribution }
             } = upRes2.output;
 
             console.log(ec2_instance);
@@ -91,10 +94,7 @@ const handler = async (req, res) => {
               projectName,
               stackName: `${stackName}-pt-2.1`,
               program: async () =>  await core_api_pt_2_1({
-                  rid,
-                  ec2InstanceName: ec2_instance.tags.Name,
-                  ec2InstanceId: ec2_instance.id,
-                  ec2InstancePublicDns: ec2_instance.publicDns,
+                  
               })
             });
   
@@ -114,7 +114,7 @@ const handler = async (req, res) => {
               console.log('<<stage 2.1 complete>>');
 
               const {
-                ec2CloudfrontDistribution: { value: ec2_cloud_front_distribution }
+                
               } = upRes2_1.output;
 
 
@@ -124,7 +124,7 @@ const handler = async (req, res) => {
                 secret_rid: secretRid,
                 api_url,
                 api_id,
-                api_key,
+                api_key: apiKey,
                 api_name,
                 root_resource_id,
                 lambda_resource_id,
@@ -132,7 +132,6 @@ const handler = async (req, res) => {
                 s3_resource_id,
                 lam_role_arn,
                 execution_arn,
-                stripe_layer_arn,
                 ec2_instance: {
                   id: ec2_instance.id,
                   arn: ec2_instance.arn,
@@ -181,7 +180,7 @@ const handler = async (req, res) => {
                   stackName: `${stackName}-pt-3`,
                   program: async () =>  await core_api_pt_3({
                       apiID: api_id,
-                      apiKey: api_key,
+                      apiKey,
                       apiName: api_name,
                       apiUrl: api_url,
                       rootResourceId: root_resource_id,
@@ -192,7 +191,6 @@ const handler = async (req, res) => {
                       executionArn: execution_arn,
                       rid,
                       secretRid,
-                      stripeLayerArn: stripe_layer_arn
                   })
                 });
   

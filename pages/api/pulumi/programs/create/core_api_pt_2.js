@@ -8,7 +8,10 @@ import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ rid, apiID, rootResourceId }) => {
+const handler = async ({
+    rid, apiID, rootResourceId,
+    ec2InstanceId, ec2InstanceName, ec2InstancePublicDns
+}) => {
      
     
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'sh']
@@ -69,45 +72,93 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
     },
     { dependsOn: [] });
 
-
     /*
-        Create EC2 Instance
+        EC2 CLOUDFRONT DISTRIBUTION
     */
 
-    // We can lookup the existing launch template using `aws.ec2.getLaunchTemplate`
-    const launchTemplate = aws.ec2.getLaunchTemplate({
-        name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
-    });
+    let ec2Instances;
+
+    const retryCount = 5;
+    const retryDelay = 30000;
     
-    // Create an EC2 instance
-    const ec2InstanceName = `ec2-instance-${rid}`;
-    const ec2Instance = new aws.ec2.Instance(ec2InstanceName, {
-        instanceType: "t2.micro",
-        keyName: "ec2-instance-key-pair",
-        // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
-        ami: "ami-0cd3c7f72edd5b06d",
-        // vpcSecurityGroupIds: [securityGroup.id],
-        //userData,
-        // userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
-        //     + ` -a ${appName}`
-        //     + ` -r ${repoURL}`
-        //     // + ` -p ${port}`
-        //     ,
-        tags: {
-            Name: ec2InstanceName, // Set the name using the "Name" tag
-            // Add other tags if needed...
-        },
-        launchTemplate: {
-            id: launchTemplate.then(lt => lt.id), // Use the launch template ID
-            version: launchTemplate.then(lt => lt.defaultVersion.toString()), // Optionally, specify the version of the launch template
-        },
-    });
+    for (let i = 0; i < retryCount; i += 1) {
+
+        if (i > 0) {
+            console.log(`(${i}) retry ec2.getInstances`)
+            // wait 30 seconds before retrying again
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+
+        
+
+        ec2Instances = await aws.ec2.getInstances({
+            instanceTags: {
+                Name: ec2InstanceName,
+            },
+            filters: [],
+            instanceStateNames: [
+                "running",
+            ],
+        });
+
+        if (ec2Instances?.ids?.length > 0) {
+            // break
+            i = retryCount;
+        }
+    }
+    
+
+    const originId = `origin-id-cldfrnt-dist-ec2-id-${ec2InstanceId}`;
+    // Create a CloudFront distribution using the instance's public DNS name
+    const ec2CloudfrontDistribution = new aws.cloudfront.Distribution(
+        `ec2-instance-cldfrnt-distribution-${rid}`,
+        {
+            origins: [
+                {
+                    domainName: ec2InstancePublicDns, // This uses the public DNS of the instance
+                    originId,
+                    customOriginConfig: {
+                        originProtocolPolicy: "http-only", // or "https-only" or "match-viewer" based on needs
+                        originSslProtocols: ["SSLv3"], // ["SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"]
+                        httpPort: 80, // the HTTP port your instance listens on, adjust as necessary
+                        httpsPort: 443, // the HTTPS port your instance listens on, adjust as necessary
+                    },
+                },
+            ],
+            enabled: true,
+            defaultCacheBehavior: {
+                targetOriginId: originId,
+                forwardedValues: {
+                    queryString: false,
+                    headers: ["*"], // Forward all headers
+                    cookies: {
+                        forward: "none",
+                    },
+                },
+                viewerProtocolPolicy: "redirect-to-https", // Force HTTPS
+                allowedMethods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+                cachedMethods: ["GET", "HEAD"],
+                // other cache behavior settings
+            },
+            viewerCertificate: {
+                cloudfrontDefaultCertificate: true, // Use the default cloudfront certificate
+            },
+            // Specify no restrictions for the distribution
+            restrictions: {
+                geoRestriction: {
+                    restrictionType: "none",
+                },
+            },
+            isIpv6Enabled: true,
+            // additional CloudFront settings
+        }
+    );
 
     return {
         lambdaResourceId: folderMainLambdaResource.id,
         dynamodbResourceId: folderMainDynamoDBResource.id,
         s3ResourceId: folderMainS3Resource.id,
-        ec2Instance,
+        ec2CloudfrontDistribution,
     };
 };
 

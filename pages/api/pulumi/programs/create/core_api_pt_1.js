@@ -10,8 +10,6 @@ import { RID } from "../../../../../utils/utils";
 
 const handler = async ({ rid }) => {
 
-    const apiKey = RID(32);
-
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
      
     let layer = new aws.lambda.LayerVersion("stripe-lambda-layer", {
@@ -285,11 +283,43 @@ const handler = async ({ rid }) => {
     ]}
     );
 
+    /*
+        Create EC2 Instance
+    */
+
+    // We can lookup the existing launch template using `aws.ec2.getLaunchTemplate`
+    const launchTemplate = aws.ec2.getLaunchTemplate({
+        name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
+    });
+    
+    // Create an EC2 instance
+    const ec2InstanceName = `ec2-instance-${rid}`;
+    const ec2Instance = new aws.ec2.Instance(ec2InstanceName, {
+        instanceType: "t2.micro",
+        keyName: "ec2-instance-key-pair",
+        // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
+        ami: "ami-0cd3c7f72edd5b06d",
+        // vpcSecurityGroupIds: [securityGroup.id],
+        //userData,
+        // userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
+        //     + ` -a ${appName}`
+        //     + ` -r ${repoURL}`
+        //     // + ` -p ${port}`
+        //     ,
+        tags: {
+            Name: ec2InstanceName, // Set the name using the "Name" tag
+            // Add other tags if needed...
+        },
+        launchTemplate: {
+            id: launchTemplate.then(lt => lt.id), // Use the launch template ID
+            version: launchTemplate.then(lt => lt.defaultVersion.toString()), // Optionally, specify the version of the launch template
+        },
+    });
+
     const { api: { id: restApiId, name: apiName, rootResourceId, executionArn } } = api;
 
     return {
         url: api.url,
-        apiKey,
         api,
         apiID: restApiId,
         apiName,
@@ -297,7 +327,7 @@ const handler = async ({ rid }) => {
         lam_role,
         executionArn,
         rid,
-        stripeLayerArn: layer.arn
+        ec2Instance
     };
 };
 
