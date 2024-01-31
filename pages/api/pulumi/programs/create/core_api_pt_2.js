@@ -8,6 +8,11 @@ import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
 
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
+
 const handler = async ({
     rid, apiID, rootResourceId,
     ec2InstanceId, ec2InstanceName, ec2InstancePublicDns,
