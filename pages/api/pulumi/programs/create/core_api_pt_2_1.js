@@ -27,7 +27,7 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
 
         ec2Instances = await aws.ec2.getInstances({
             instanceTags: {
-                Name: "impossible-name-to-know",
+                Name: ec2InstanceName,
             },
             filters: [],
             instanceStateNames: [
@@ -44,6 +44,7 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
     console.log('ec2Instances: ', ec2Instances)
     
 
+    const originId = `origin-id-cldfrnt-dist-ec2-id-${ec2InstanceId}`;
     // Create a CloudFront distribution using the instance's public DNS name
     const ec2CloudfrontDistribution = new aws.cloudfront.Distribution(
         `ec2-instance-cldfrnt-distribution-${rid}`,
@@ -51,7 +52,7 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
             origins: [
                 {
                     domainName: ec2InstancePublicDns, // This uses the public DNS of the instance
-                    originId: `cldfrnt-dist-ec2-id-${ec2InstanceId}`,
+                    originId,
                     customOriginConfig: {
                         originProtocolPolicy: "http-only", // or "https-only" or "match-viewer" based on needs
                         originSslProtocols: [], // Empty array since HTTPS is not used
@@ -62,7 +63,7 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
             ],
             enabled: true,
             defaultCacheBehavior: {
-                targetOriginId: "ec2InstanceOrigin",
+                targetOriginId: originId,
                 viewerProtocolPolicy: "redirect-to-https", // Force HTTPS
                 allowedMethods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
                 cachedMethods: ["GET", "HEAD"],

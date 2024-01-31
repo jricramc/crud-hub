@@ -92,6 +92,7 @@ const handler = async (req, res) => {
               stackName: `${stackName}-pt-2.1`,
               program: async () =>  await core_api_pt_2_1({
                   rid,
+                  ec2InstanceName: ec2_instance.tags.Name,
                   ec2InstanceId: ec2_instance.id,
                   ec2InstancePublicDns: ec2_instance.publicDns,
               })
