@@ -55,7 +55,7 @@ const handler = async ({ rid, ec2InstanceId, ec2InstanceName, ec2InstancePublicD
                     originId,
                     customOriginConfig: {
                         originProtocolPolicy: "http-only", // or "https-only" or "match-viewer" based on needs
-                        originSslProtocols: [], // Empty array since HTTPS is not used
+                        originSslProtocols: ["SSLv3"], // ["SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"]
                         httpPort: 80, // the HTTP port your instance listens on, adjust as necessary
                         httpsPort: 443, // the HTTPS port your instance listens on, adjust as necessary
                     },
