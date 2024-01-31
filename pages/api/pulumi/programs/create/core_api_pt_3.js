@@ -14,8 +14,8 @@ const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST |
 
 const handler = async ({
     apiID, apiKey, apiUrl, apiName,
-    rootResourceId, dynamodbResourceId, mongodbResourceId, lambdaResourceId,
-    s3ResourceId, websocketResourceId,
+    rootResourceId, dynamodbResourceId, lambdaResourceId,
+    s3ResourceId,
     lam_role_arn, executionArn, rid, secretRid
 }) => {
 
@@ -74,28 +74,6 @@ const handler = async ({
         pathPart: "db",
     }, { dependsOn: [
         folderCreateServiceResource,
-    ]});
-
-    /*
-        /create/service/db/mongodb
-    */
-    const folderCreateServiceDBMongoDBResource = new aws.apigateway.Resource(`folder-create-service-db-mongodb-resource-${rid}`, {
-        restApi: apiID,
-        parentId: folderCreateServiceDBResource.id,
-        pathPart: "mongodb",
-    }, { dependsOn: [
-        folderCreateServiceDBResource,
-    ]});
-
-    /*
-        /create/service/db/mongodb
-    */
-    const folderCreateServiceMongoDBNameResource = new aws.apigateway.Resource(`folder-create-service-mongodb-dbname-resource-${rid}`, {
-        restApi: apiID,
-        parentId: folderCreateServiceDBMongoDBResource.id,
-        pathPart: "{dbname}",
-    }, { dependsOn: [
-        folderCreateServiceDBMongoDBResource,
     ]});
 
     /*
@@ -163,28 +141,7 @@ const handler = async ({
     }, { dependsOn: [
         folderCreateServiceDBS3Resource,
     ]});
-
-    /*
-        /create/service/websocket
-    */
-    const folderCreateServiceWebsocketResource = new aws.apigateway.Resource(`folder-create-service-websocket-resource-${rid}`, {
-        restApi: apiID,
-        parentId: folderCreateServiceResource.id,
-        pathPart: "websocket",
-    }, { dependsOn: [
-        folderCreateServiceResource,
-    ]});
-
-    /*
-        /create/service/websocket/{name}
-    */
-    const folderCreateServiceWebsocketNameResource = new aws.apigateway.Resource(`folder-create-service-websocket-name-resource-${rid}`, {
-        restApi: apiID,
-        parentId: folderCreateServiceWebsocketResource.id,
-        pathPart: "{name}",
-    }, { dependsOn: [
-        folderCreateServiceWebsocketResource,
-    ]});
+    
 
     /*
     **  METHOD
@@ -198,16 +155,6 @@ const handler = async ({
         apiKeyRequired: false,
     }, { dependsOn: [
         folderCreateServiceDBNameResource,
-    ]});
-
-    const methodCreateServiceMongoDBName = new aws.apigateway.Method(`create-service-mongodb-dbname-get-method-${rid}`, {
-        restApi: apiID,
-        resourceId: folderCreateServiceMongoDBNameResource.id,
-        httpMethod: "GET",
-        authorization: "NONE",
-        apiKeyRequired: false,
-    }, { dependsOn: [
-        folderCreateServiceMongoDBNameResource,
     ]});
 
     const methodCreateServiceLambda = new aws.apigateway.Method(`create-service-lambda-post-method-${rid}`, {
@@ -240,191 +187,11 @@ const handler = async ({
         folderCreateServiceCldfrntS3BucketNameResource,
     ]});
 
-    const methodCreateServiceWebsocketName = new aws.apigateway.Method(`create-service-websocket-name-get-method-${rid}`, {
-        restApi: apiID,
-        resourceId: folderCreateServiceWebsocketNameResource.id,
-        httpMethod: "GET",
-        authorization: "NONE",
-        apiKeyRequired: false,
-    }, { dependsOn: [
-        folderCreateServiceWebsocketNameResource,
-    ]});
-
 
 
     /*
     **  LAMBDAS
     */
-
-    // lambda test event
-    // {
-    //     "pathParameters": {
-    //         "dbname": "ricky6666"
-    //     }
-    // }
-
-    const createMongoDBApiLambda = new aws.lambda.Function(
-        `create-mongodb-crud-api-lambda-${rid}`,
-        {
-            code: new pulumi.asset.AssetArchive({
-                "index.js": new pulumi.asset.StringAsset(`
-
-                const https = require('https');
-                
-                const RID = (l = 8) => {
-                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                    let rid = '';
-                    for (let i = 0; i < l; i += 1) {
-                        const r = Math.random() * c.length;
-                        rid += c.substring(r, r + 1);
-                    }
-                    return rid;
-                };
-
-                const createMongoDBPostRequest = (dbname) => {
-                    const data = {
-                        apiID: "${apiID}",
-                        apiKey: "${apiKey}",
-                        apiName: "${apiName}",
-                        mongodbResourceId: "${mongodbResourceId}",
-                        dbName: dbname,
-                        rid: "${rid}",
-                        secretRid: "${secretRid}",
-                        executionArn: "${executionArn}",
-                        lam_role_arn: "${lam_role_arn}",
-                    };
-
-                    return new Promise((resolve, reject) => {
-                        const options = {
-                            host: '${_webhub_host}',
-                            path: '/api/deploy/mongoDBAPI',
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        };
-
-                        const req = https.request(options, (res) => {
-                            let responseData = '';
-                            
-                            res.on('data', (chunk) => {
-                                responseData += chunk;
-                            });
-
-                            res.on('end', () => {
-                                resolve(responseData); // Resolve with the complete response data
-                            });
-                        });
-
-                        req.on('error', (e) => {
-                            reject(e.message);
-                        });
-
-                        req.write(JSON.stringify(data));
-                        req.end();
-                    });
-                };
-
-                const saveMongoDBToLedger = (resource) => {
-                    const data_ = {
-                        resource_type: "db/mongodb",
-                        ...resource,
-                    };
-                    
-                    const data = {
-                        id: RID(),
-                        name: JSON.stringify(data_)
-                    };
-
-                    return new Promise((resolve, reject) => {
-                        const options = {
-                            host: '${extractDomain(apiUrl)}',
-                            path: '/v3/ledger/create',
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        };
-
-                        const req = https.request(options, (res) => {
-                            let responseData = '';
-                            
-                            res.on('data', (chunk) => {
-                                responseData += chunk;
-                            });
-
-                            res.on('end', () => {
-                                resolve(responseData); // Resolve with the complete response data
-                            });
-                        });
-
-                        req.on('error', (e) => {
-                            reject(e.message);
-                        });
-
-                        req.write(JSON.stringify(data));
-                        req.end();
-                    });
-                };
-
-
-                exports.handler = async (event) => {
-                    const { dbname } = event.pathParameters || {};
-                    const createMongoDBResult = await createMongoDBPostRequest(dbname)
-                        .then(responseData => {
-                            // console.log('Response data:', responseData);
-                            try {
-                            const obj = JSON.parse(responseData);
-                            if (obj.type === 'success') {
-                                const {
-                                    dbName: { value: db_name },
-                                    unique_db_name: { value: unique_dbname },
-                                } = obj['0']['outputs'];
-                                return { type: 'success', resource: { db_name, unique_dbname, date_created: new Date() } }
-                            } else {
-                                return { type: 'error', err: 'pulumi returned an error code' }
-                            }
-                            } catch (err) {
-                                return { type: 'error', err }
-                            }
-                        })
-                        .catch(err => {
-                            // console.error('Error:', err);
-                            // throw err; // Re-throw the error to be caught by the Lambda handler
-                            return { type: 'error', err }
-                        });
-                        
-                    if (createMongoDBResult.type === 'success') {
-                        const mongoDBLedgerResult = await saveMongoDBToLedger(createMongoDBResult.resource)
-                            .then(responseData => {
-                                // console.log('Response data:', responseData);
-                                return { type: 'success', responseData }
-                            })
-                            .catch(err => {
-                                // console.error('Error:', err);
-                                // throw err; // Re-throw the error to be caught by the Lambda handler
-                                return { type: 'error', err }
-                            });
-                        
-                        return {
-                            mongoDBLedgerResult,
-                            complete: true,
-                        }
-                    
-                    }
-                    return {
-                        createMongoDBResult,
-                        complete: false,
-                    }
-                };
-                `),
-            }),
-            role: lam_role_arn,
-            handler: "index.handler",
-            runtime: "nodejs14.x",
-            timeout: 120, 
-        }
-    );
 
     const createDynamoDBCrudApiLambda = new aws.lambda.Function(
         `create-dynamodb-crud-api-lambda-${rid}`,
@@ -1164,172 +931,6 @@ exports.handler = async (event) => {
     );
 
 
-    const createServiceWebsocketLambda = new aws.lambda.Function(
-        `create-service-websocket-lambda-${rid}`,
-        {
-            code: new pulumi.asset.AssetArchive({
-                "index.js": new pulumi.asset.StringAsset(`
-
-                const https = require('https');
-                
-                const RID = (l = 8) => {
-                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                    let rid = '';
-                    for (let i = 0; i < l; i += 1) {
-                        const r = Math.random() * c.length;
-                        rid += c.substring(r, r + 1);
-                    }
-                    return rid;
-                };
-
-                const createWebsocketPostRequest = (name) => {
-                    const data = {
-                        apiID: "${apiID}",
-                        apiUrl: "${apiUrl}",
-                        apiKey: "${apiKey}",
-                        // apiName: "${apiName}",
-                        websocketResourceId: "${websocketResourceId}",
-                        socketName: name,
-                        rid: "${rid}",
-                        // executionArn: "${executionArn}",
-                        lam_role_arn: "${lam_role_arn}",
-                    };
-
-                    return new Promise((resolve, reject) => {
-                        const options = {
-                            host: '${_webhub_host}',
-                            path: '/api/deploy/websocketAPI',
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        };
-
-                        const req = https.request(options, (res) => {
-                            let responseData = '';
-                            
-                            res.on('data', (chunk) => {
-                                responseData += chunk;
-                            });
-
-                            res.on('end', () => {
-                                resolve(responseData); // Resolve with the complete response data
-                            });
-                        });
-
-                        req.on('error', (e) => {
-                            reject(e.message);
-                        });
-
-                        req.write(JSON.stringify(data));
-                        req.end();
-                    });
-                };
-
-                const saveWebsocketToLedger = (resource) => {
-                    const data_ = {
-                        resource_type: "websocket",
-                        ...resource,
-                    };
-                    
-                    const data = {
-                        id: RID(),
-                        name: JSON.stringify(data_)
-                    };
-
-                    return new Promise((resolve, reject) => {
-                        const options = {
-                            host: '${extractDomain(apiUrl)}',
-                            path: '/v3/ledger/create',
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        };
-
-                        const req = https.request(options, (res) => {
-                            let responseData = '';
-                            
-                            res.on('data', (chunk) => {
-                                responseData += chunk;
-                            });
-
-                            res.on('end', () => {
-                                resolve(responseData); // Resolve with the complete response data
-                            });
-                        });
-
-                        req.on('error', (e) => {
-                            reject(e.message);
-                        });
-
-                        req.write(JSON.stringify(data));
-                        req.end();
-                    });
-                };
-
-
-                exports.handler = async (event) => {
-                    const { name } = event.pathParameters || {};
-                    const createWebsocketResult = await createWebsocketPostRequest(name)
-                        .then(responseData => {
-                            // console.log('Response data:', responseData);
-                            try {
-                            const obj = JSON.parse(responseData);
-                            if (obj.type === 'success') {
-                                const {
-                                socketName: { value: socketName },
-                                unique_socket_name: { value: unique_socket_name },
-                                websocketEndpoint: { value: websocket_endpoint },
-                                websocketStageName: { value: websocket_stage_name },
-                                } = obj['0']['outputs'];
-                                return { type: 'success', resource: { socketName, unique_socket_name, websocket_endpoint, websocket_stage_name, date_created: new Date() } }
-                            } else {
-                                return { type: 'error', err: 'pulumi returned an error code' }
-                            }
-                            } catch (err) {
-                                return { type: 'error', err }
-                            }
-                        })
-                        .catch(err => {
-                            // console.error('Error:', err);
-                            // throw err; // Re-throw the error to be caught by the Lambda handler
-                            return { type: 'error', err }
-                        });
-                        
-                    if (createWebsocketResult.type === 'success') {
-                        const websocketToLedgerResult = await saveWebsocketToLedger(createWebsocketResult.resource)
-                            .then(responseData => {
-                                // console.log('Response data:', responseData);
-                                return { type: 'success', responseData }
-                            })
-                            .catch(err => {
-                                // console.error('Error:', err);
-                                // throw err; // Re-throw the error to be caught by the Lambda handler
-                                return { type: 'error', err }
-                            });
-                        
-                        return {
-                            websocketToLedgerResult,
-                            complete: true,
-                        }
-                    
-                    }
-                    return {
-                        createWebsocketResult,
-                        complete: false,
-                    }
-                };
-                `),
-            }),
-            role: lam_role_arn,
-            handler: "index.handler",
-            runtime: "nodejs14.x",
-            timeout: 120, 
-        }
-    );
-
-
     /*
     **  INTEGRATIONS
     */
@@ -1346,20 +947,6 @@ exports.handler = async (event) => {
         folderCreateServiceDBNameResource,
         methodCreateServiceDBName,
         createDynamoDBCrudApiLambda,
-    ]});
-
-    const integrationCreateServiceMongoDBName = new aws.apigateway.Integration(`create-service-mongo-dbname-integration-${rid}`, {
-        restApi: apiID,
-        resourceId: folderCreateServiceMongoDBNameResource.id,
-        httpMethod: methodCreateServiceDBName.httpMethod,
-        type: "AWS_PROXY",
-        integrationHttpMethod: "POST",
-        uri: createMongoDBApiLambda.invokeArn,
-        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    }, { dependsOn: [
-        folderCreateServiceMongoDBNameResource,
-        methodCreateServiceDBName,
-        createMongoDBApiLambda,
     ]});
 
     const integrationCreateServiceLambda = new aws.apigateway.Integration(`create-service-lambda-integration-${rid}`, {
@@ -1404,20 +991,6 @@ exports.handler = async (event) => {
         createCloudfrontS3Distribution,
     ]});
 
-    const integrationCreateServiceWebsocketName = new aws.apigateway.Integration(`create-service-websocket-name-integration-${rid}`, {
-        restApi: apiID,
-        resourceId: folderCreateServiceWebsocketNameResource.id,
-        httpMethod: methodCreateServiceWebsocketName.httpMethod,
-        type: "AWS_PROXY",
-        integrationHttpMethod: "POST",
-        uri: createServiceWebsocketLambda.invokeArn,
-        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
-    }, { dependsOn: [
-        folderCreateServiceWebsocketNameResource,
-        methodCreateServiceWebsocketName,
-        createServiceWebsocketLambda,
-    ]});
-
 
     /*
     **  LAMBDA PERMISSIONS
@@ -1430,15 +1003,6 @@ exports.handler = async (event) => {
         sourceArn: pulumi.interpolate`${executionArn}/*/*`
     }, { dependsOn: [
         createDynamoDBCrudApiLambda,
-    ]});
-
-    const createServiceMongoDBNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-mongodb-dbname-api-gateway-invoke-permission-${rid}`, {
-        action: 'lambda:InvokeFunction',
-        function: createMongoDBApiLambda.name,
-        principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    }, { dependsOn: [
-        createMongoDBApiLambda,
     ]});
 
     const createServiceLambdaApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-lambda-api-gateway-invoke-permission-${rid}`, {
@@ -1468,15 +1032,6 @@ exports.handler = async (event) => {
         createCloudfrontS3Distribution,
     ]});
 
-    const createServiceWebsocketApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-websocket-invoke-permission-${rid}`, {
-        action: 'lambda:InvokeFunction',
-        function: createServiceWebsocketLambda.name,
-        principal: 'apigateway.amazonaws.com',
-        sourceArn: pulumi.interpolate`${executionArn}/*/*`
-    }, { dependsOn: [
-        createServiceWebsocketLambda,
-    ]});
-
 
     /*
     **  DEPLOYMENT
@@ -1488,22 +1043,12 @@ exports.handler = async (event) => {
     }, { dependsOn: [
         // create/service/db/dynamodb/{dbname}
         methodCreateServiceDBName, integrationCreateServiceDBName,
-        // create/service/db/mongodb/{dbname}
-        methodCreateServiceMongoDBName, integrationCreateServiceMongoDBName,
         // create/service/db/s3/{bucket-name}
         methodCreateServiceBucketName, integrationCreateServiceBucketName,
         // create/service/cloudfrontS3
         methodCreateServiceCloudfrontS3Name, integrationCreateServiceCloudfrontS3Name,
-        // create/service/auth/google/{oauth-name}
-        methodCreateServiceOAuthName, integrationCreateServiceOAuthName,
-        // create/service/payment/stripe/{name}
-        methodCreateServicePaymentStripeName, integrationCreateServicePaymentStripeName,
-        // create/service/email/sendgrid/{name}
-        methodCreateServiceEmailSendGridName, integrationCreateServiceEmailSendGridName,
         // create/service/lambda/{name}
         methodCreateServiceLambda, integrationCreateServiceLambda,
-        // create/service/websocket/{name}
-        methodCreateServiceWebsocketName, integrationCreateServiceWebsocketName,
     ] });
     
     return { };
