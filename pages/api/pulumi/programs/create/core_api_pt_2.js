@@ -174,6 +174,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
                 originId: pulumi.interpolate`cldfrnt-dist-ec2-id-${ec2Instance.id}`,
                 customOriginConfig: {
                     originProtocolPolicy: "http-only", // or "https-only" or "match-viewer" based on needs
+                    originSslProtocols: [], // Empty array since HTTPS is not used
                     httpPort: 80, // the HTTP port your instance listens on, adjust as necessary
                     httpsPort: 443, // the HTTPS port your instance listens on, adjust as necessary
                 },
@@ -188,7 +189,7 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
             // other cache behavior settings
         },
         viewerCertificate: {
-            cloudFrontDefaultCertificate: true, // Use the default CloudFront certificate
+            cloudfrontDefaultCertificate: true, // Use the default cloudfront certificate
         },
         // Specify no restrictions for the distribution
         restrictions: {
