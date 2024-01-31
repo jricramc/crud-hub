@@ -1,7 +1,7 @@
 import axios from 'axios';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
-import core_api_pt_2_5 from '../pulumi/programs/create/core_api_pt_2_1';
+import core_api_pt_2_1 from '../pulumi/programs/create/core_api_pt_2_1';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
 import { RID, sendEmail } from '../../../utils/utils';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
