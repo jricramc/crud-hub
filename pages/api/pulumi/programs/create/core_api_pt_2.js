@@ -187,6 +187,9 @@ const handler = async ({ rid, apiID, rootResourceId }) => {
             cachedMethods: ["GET", "HEAD"],
             // other cache behavior settings
         },
+        viewerCertificate: {
+            cloudFrontDefaultCertificate: true, // Use the default CloudFront certificate
+        },
         // Specify no restrictions for the distribution
         restrictions: {
             geoRestriction: {
