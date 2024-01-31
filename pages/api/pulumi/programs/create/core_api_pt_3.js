@@ -13,7 +13,7 @@ const { publicRuntimeConfig } = getConfig();
 const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
 
 const handler = async ({
-    apiID, apiKey, apiUrl, apiName,
+    apiID, apiUrl, apiName,
     rootResourceId, dynamodbResourceId, lambdaResourceId,
     s3ResourceId,
     lam_role_arn, executionArn, rid, secretRid
@@ -141,7 +141,7 @@ const handler = async ({
     }, { dependsOn: [
         folderCreateServiceDBS3Resource,
     ]});
-    
+
 
     /*
     **  METHOD
