@@ -4,8 +4,8 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 yum -y update
 echo "Finish basic update and system log config"
 
-export API72_SECRET_ACCESS_ID=API72_SECRET_ACCESS_ID_INJECT_POINT
 echo "export API72_SECRET_ACCESS_ID=API72_SECRET_ACCESS_ID_INJECT_POINT" >> ~/.bashrc
+source ~/.bashrc
 
 # Default Node Server Values
 NODE_NAME="Node-Server-API"
