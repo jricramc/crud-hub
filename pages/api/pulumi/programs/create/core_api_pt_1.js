@@ -287,12 +287,24 @@ const handler = async ({ rid }) => {
         Create EC2 Instance
     */
 
+    // The ID of the existing security group you want to use
+    const existingSecurityGroupId = "sg-087f5e652a6141a33";
+
+    // Getting the existing security group by ID
+    const securityGroup = aws.ec2.SecurityGroup.get("existingSecurityGroup", existingSecurityGroupId);
+
     // We can lookup the existing launch template using `aws.ec2.getLaunchTemplate`
     const launchTemplate = aws.ec2.getLaunchTemplate({
         name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
     });
 
     console.log('launchTemplate: ', launchTemplate);
+
+    // Read Bash script from file
+    const p = path.join(process.cwd(), "pages/api/pulumi/programs/sh/ec2-setup-script.sh");
+    const buffer = Buffer.from(fs.readFileSync(p, "binary"));
+    console.log(buffer.toString())
+    const userData = buffer.toString('base64');
     
     // Create an EC2 instance
     const ec2InstanceName = `ec2-instance-${rid}`;
@@ -301,21 +313,16 @@ const handler = async ({ rid }) => {
         keyName: "ec2-instance-key-pair",
         // ami: aws.ec2.AmazonLinux2Image.id, // Use the latest Amazon Linux 2 AMI
         ami: "ami-0cd3c7f72edd5b06d",
-        // vpcSecurityGroupIds: [securityGroup.id],
-        //userData,
-        // userData: fs.readFileSync(path.join(...directoryArray, "ec2-setup-script.sh"), "utf-8")
-        //     + ` -a ${appName}`
-        //     + ` -r ${repoURL}`
-        //     // + ` -p ${port}`
-        //     ,
+        vpcSecurityGroupIds: [securityGroup.id],
+        userData,
         tags: {
             Name: ec2InstanceName, // Set the name using the "Name" tag
             // Add other tags if needed...
         },
-        launchTemplate: {
-            id: launchTemplate.then(lt => lt.id), // Use the launch template ID
-            version: launchTemplate.then(lt => lt.defaultVersion.toString()), // Optionally, specify the version of the launch template
-        },
+        // launchTemplate: {
+        //     id: launchTemplate.then(lt => lt.id), // Use the launch template ID
+        //     version: launchTemplate.then(lt => lt.defaultVersion.toString()), // Optionally, specify the version of the launch template
+        // },
     });
 
     const { api: { id: restApiId, name: apiName, rootResourceId, executionArn } } = api;
