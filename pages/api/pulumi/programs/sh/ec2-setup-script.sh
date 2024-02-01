@@ -72,7 +72,7 @@ EndOfText
 # Reload NGINX with changes
 sudo systemctl reload nginx
 
-echo "Reloaded NGINX with api.conf"
+echo "<<-- Reloaded NGINX with api.conf -->>"
 
 
 echo "Initializing $NODE_NAME"
@@ -84,11 +84,14 @@ sudo mkdir -p "/var/www/$NODE_NAME"
 # Navigate to the app directory
 cd "/var/www/$NODE_NAME"
 
+echo "<<-- Cloning $NODE_REPO_URL -->>"
 # Clone your app repository
 git clone "$NODE_REPO_URL" .
 
+echo "<<-- Install app dependencies -->>"
 # Install app dependencies
 npm install
 
+echo "<<-- start the Node Server built in repo -->>"
 # start the Node Server built in repo
 (npm run start)
