@@ -303,8 +303,9 @@ const handler = async ({ rid }) => {
     // Read Bash script from file
     const p = path.join(process.cwd(), "pages/api/pulumi/programs/sh/ec2-setup-script.sh");
     const buffer = Buffer.from(fs.readFileSync(p, "binary"));
-    console.log(buffer.toString())
-    const userData = buffer.toString('base64');
+    const injectedBuffer = buffer.toString().replaceAll(/API72_SECRET_ACCESS_ID_INJECT_POINT/g, RID(32));
+    console.log('injectedBuffer: ', injectedBuffer)
+    const userData = injectedBuffer.toString('base64');
     
     // Create an EC2 instance
     const ec2InstanceName = `ec2-instance-${rid}`;
