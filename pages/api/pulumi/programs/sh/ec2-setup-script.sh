@@ -56,8 +56,8 @@ server {
 
     server_name _;
 
-    location / {
-        rewrite ^\/(.*)$ /$1 break;
+    location /server {
+        rewrite ^\/server\/(.*)$ /server/$1 break;
         proxy_pass http://localhost:5000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
