@@ -293,12 +293,10 @@ const handler = async ({ rid }) => {
     // Getting the existing security group by ID
     const securityGroup = aws.ec2.SecurityGroup.get("existingSecurityGroup", existingSecurityGroupId);
 
-    // We can lookup the existing launch template using `aws.ec2.getLaunchTemplate`
-    const launchTemplate = aws.ec2.getLaunchTemplate({
-        name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
-    });
-
-    console.log('launchTemplate: ', launchTemplate);
+    // // We can lookup the existing launch template using `aws.ec2.getLaunchTemplate`
+    // const launchTemplate = aws.ec2.getLaunchTemplate({
+    //     name: "EC2-Amazon-Linux-Base-Launch-Template-v1",
+    // });
 
     // Read Bash script from file
     const p = path.join(process.cwd(), "pages/api/pulumi/programs/sh/ec2-setup-script.sh");
