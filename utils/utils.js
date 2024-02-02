@@ -23,20 +23,35 @@ const deployCRUDAPI = async ({ email }) => {
 
 const createLedgerEntry = async ({ ledger_access_id, data }) => {
     const url = '/api/ledger/create';
-    const res = await axios(url, {
-        method: 'POST',
-        body: JSON.stringify({ ledger_access_id, data }),
+  
+    try {
+      const response = await axios.post(url, {
+        ledger_access_id,
+        data,
+      }, {
         headers: {
-            'Content-Type': 'application/json',
-            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+          'Content-Type': 'application/json',
+          'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
         },
-    });
-    if (res.status === 200) {
-        return Promise.resolve(res.json());
+      });
+  
+      // Axios response.data contains the parsed response body
+      // Axios automatically parses JSON responses
+      return response.data;
+    } catch (error) {
+      // Axios errors are available in the 'response' property of the error object
+      if (error.response) {
+        console.error('Error response from server:', error.response.data);
+        return Promise.reject(`Error ${error.response.status} received from server`);
+      } else if (error.request) {
+        console.error('No response received from server:', error.request);
+        return Promise.reject('No response received from server');
+      } else {
+        console.error('Error setting up request:', error.message);
+        return Promise.reject('Error setting up request');
+      }
     }
-    console.error(res);
-    return Promise.reject(`error ${res.status} received from server`);
-};
+  };
 
 const readLedgerEntry = async ({ ledger_access_id }) => {
     const url = '/api/ledger/read';
