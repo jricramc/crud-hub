@@ -1,4 +1,3 @@
-import unfetch from 'unfetch';
 import axios from 'axios';
 
 import getConfig from 'next/config';
@@ -8,7 +7,7 @@ const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com';
 
 const deployCRUDAPI = async ({ email }) => {
   const url = '/api/deploy/coreAPI';
-  const res = await unfetch(url, {
+  const res = await axios(url, {
       method: 'POST',
       body: JSON.stringify({ email }),
       headers: {
@@ -24,7 +23,7 @@ const deployCRUDAPI = async ({ email }) => {
 
 const createLedgerEntry = async ({ ledger_access_id, data }) => {
     const url = '/api/ledger/create';
-    const res = await unfetch(url, {
+    const res = await axios(url, {
         method: 'POST',
         body: JSON.stringify({ ledger_access_id, data }),
         headers: {
@@ -58,7 +57,7 @@ const readLedgerEntry = async ({ ledger_access_id }) => {
 
 const updateLedgerEntry = async ({ ledger_access_id, data }) => {
     const url = '/api/ledger/update';
-    const res = await unfetch(url, {
+    const res = await axios(url, {
         method: 'POST',
         body: JSON.stringify({ ledger_access_id, data }),
         headers: {
@@ -75,7 +74,7 @@ const updateLedgerEntry = async ({ ledger_access_id, data }) => {
 
 const deleteLedgerEntry = async ({ ledger_access_id }) => {
     const url = '/api/ledger/delete';
-    const res = await unfetch(url, {
+    const res = await axios(url, {
         method: 'POST',
         body: JSON.stringify({ ledger_access_id }),
         headers: {
@@ -92,7 +91,7 @@ const deleteLedgerEntry = async ({ ledger_access_id }) => {
 
 const getUserProjects = async ({ email }) => {
     const url = `${_webhub_db_url}/stage/dynamodb/webhubprojects/read`;
-    const res = await unfetch(url, {
+    const res = await axios(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -106,7 +105,7 @@ const getUserProjects = async ({ email }) => {
 
 const apiRequest = async ({ url, method, data }) => {
 
-    const res = await unfetch('/api/api', {
+    const res = await axios('/api/api', {
         method: 'POST',
         body: JSON.stringify({ url, method, data }),
         headers: {
