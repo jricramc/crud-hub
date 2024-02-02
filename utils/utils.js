@@ -1,9 +1,9 @@
 import unfetch from 'unfetch';
 import axios from 'axios';
 
-// import getConfig from 'next/config';
+import getConfig from 'next/config';
 
-// const { publicRuntimeConfig } = getConfig();
+const { publicRuntimeConfig } = getConfig();
 const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
 
 const deployCRUDAPI = async ({ email }) => {
@@ -20,6 +20,74 @@ const deployCRUDAPI = async ({ email }) => {
   }
   console.error(res);
   return Promise.reject(`error ${res.status} received from server`);
+};
+
+const createLedgerEntry = async ({ ledger_access_id, data }) => {
+    const url = '/api/ledger/create';
+    const res = await unfetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ ledger_access_id, data }),
+        headers: {
+            'Content-Type': 'application/json',
+            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+        },
+    });
+    if (res.status === 200) {
+        return Promise.resolve(res.json());
+    }
+    console.error(res);
+    return Promise.reject(`error ${res.status} received from server`);
+};
+
+const readLedgerEntry = async ({ ledger_access_id }) => {
+    const url = '/api/ledger/read';
+    const res = await unfetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ ledger_access_id }),
+        headers: {
+            'Content-Type': 'application/json',
+            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+        },
+    });
+    if (res.status === 200) {
+        return Promise.resolve(res.json());
+    }
+    console.error(res);
+    return Promise.reject(`error ${res.status} received from server`);
+};
+
+const updateLedgerEntry = async ({ ledger_access_id, data }) => {
+    const url = '/api/ledger/update';
+    const res = await unfetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ ledger_access_id, data }),
+        headers: {
+            'Content-Type': 'application/json',
+            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+        },
+    });
+    if (res.status === 200) {
+        return Promise.resolve(res.json());
+    }
+    console.error(res);
+    return Promise.reject(`error ${res.status} received from server`);
+};
+
+const deleteLedgerEntry = async ({ ledger_access_id }) => {
+    const url = '/api/ledger/delete';
+    const res = await unfetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ ledger_access_id }),
+        headers: {
+            'Content-Type': 'application/json',
+            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+        },
+    });
+    if (res.status === 200) {
+        return Promise.resolve(res.json());
+    }
+    console.error(res);
+    return Promise.reject(`error ${res.status} received from server`);
 };
 
 const getUserProjects = async ({ email }) => {
@@ -96,5 +164,16 @@ const extractRegionAndAccountIdFromExecutionArn = (inputString) => {
 }
 
 
-export { deployCRUDAPI, RID, apiRequest, getUserProjects, extractDomain, extractRegionAndAccountIdFromExecutionArn, sendEmail }
+export {
+    deployCRUDAPI,
+    RID,
+    apiRequest, 
+    getUserProjects,
+    extractDomain, extractRegionAndAccountIdFromExecutionArn,
+    sendEmail,
+    createLedgerEntry,
+    readLedgerEntry,
+    updateLedgerEntry,
+    deleteLedgerEntry,
+}
 

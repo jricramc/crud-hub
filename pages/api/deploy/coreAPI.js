@@ -2,7 +2,7 @@ import axios from 'axios';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
-import { RID, sendEmail } from '../../../utils/utils';
+import { RID, createLedgerEntry, sendEmail } from '../../../utils/utils';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
@@ -10,6 +10,7 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { email } = body;
 
+    const API72_LEDGER_ACCESS_ID = RID(32);
     const rid = RID (12);
     const secretRid = RID(12);
     const apiKey = RID(32);
@@ -25,7 +26,7 @@ const handler = async (req, res) => {
         const stack1 = await LocalWorkspace.createStack({
             stackName: `${stackName}-pt-1`,
             projectName,
-            program: async () => await core_api_pt_1({ rid }),
+            program: async () => await core_api_pt_1({ rid, API72_LEDGER_ACCESS_ID }),
         });
 
         await stack1.workspace.installPlugin("aws", "v4.0.0");
@@ -119,6 +120,13 @@ const handler = async (req, res) => {
               },
               date_created: new Date(),
             };
+
+            const createLedgerEntryRes = await createLedgerEntry({
+              ledger_access_id: API72_LEDGER_ACCESS_ID,
+              data,
+            });
+
+            console.log('createLedgerEntryRes: ', createLedgerEntryRes)
 
             const route = 'ledger/create';
             const ledger_url = `${api_url}${route}`;

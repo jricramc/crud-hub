@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { RID } from "../../../../../utils/utils";
 
-const handler = async ({ rid }) => {
+const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
 
     const directoryArray = [process.cwd(), 'pages', 'api', 'pulumi', 'programs', 'zip']
      
@@ -301,7 +301,7 @@ const handler = async ({ rid }) => {
     // Read Bash script from file
     const p = path.join(process.cwd(), "pages/api/pulumi/programs/sh/ec2-setup-script.sh");
     const buffer = Buffer.from(fs.readFileSync(p, "binary"));
-    const injectedBuffer = buffer.toString().replaceAll(/API72_SECRET_ACCESS_ID_INJECT_POINT/g, RID(32));
+    const injectedBuffer = buffer.toString().replaceAll(/API72_LEDGER_ACCESS_ID_INJECT_POINT/g, API72_LEDGER_ACCESS_ID);
     console.log('injectedBuffer: ', injectedBuffer)
     const userData = injectedBuffer.toString('base64');
     
