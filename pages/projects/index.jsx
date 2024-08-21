@@ -329,6 +329,8 @@ const Projects = ({}) => {
         const url = apiURLValue;
         if (urlStatusStates[urlStatusKey].valid) {
 
+            console.log('api_id: ', apiID);
+
             readLedgerEntry({ ledger_access_id: apiID }).then((response) => {
                 console.log(`response: ${response}`);
                 setURLStatus('success');

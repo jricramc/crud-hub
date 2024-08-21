@@ -57,6 +57,7 @@ const createLedgerEntry = async ({ data }) => {
 
 const readLedgerEntry = async ({ ledger_access_id }) => {
     const url = `${_webhub_host}/api/ledger/read`;
+    console.log(`readLedgerEntry url: ${url}`);
     const res = await axios.post(url, {
         ledger_access_id,
       }, {
@@ -76,6 +77,7 @@ const updateLedgerEntry = async ({ ledger_access_id, data }) => {
     const url = `${_webhub_host}/api/ledger/update`;
     const res = await axios.post(url, {
         ledger_access_id,
+        data,
       }, {
         headers: {
           'Content-Type': 'application/json',
