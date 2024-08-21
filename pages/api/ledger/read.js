@@ -46,12 +46,9 @@ const handler = async (req, res) => {
                 data: requestData,
 
                 }).then((response) => {
-                    console.log('response: ', response);
-                    console.log('keys: ', Object.keys(response));
-                    console.log('data: ', response?.data);
                     return {
                         statusCode: 200,
-                        output: response?.data,
+                        output: { ...(response?.data || {}) },
                     }
                 })
                 .catch((err) => {
@@ -60,6 +57,8 @@ const handler = async (req, res) => {
                         output: { err }
                     };
                 })
+
+            console.log('output: ', output)    
     
             res.status(statusCode).json({ ...output });
     

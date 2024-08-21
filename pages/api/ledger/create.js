@@ -48,8 +48,6 @@ const handler = async (req, res) => {
                 data: requestData,
 
                 }).then((response) => {
-                    console.log('response: ', response);
-                    console.log('keys: ', Object.keys(response));
                     return {
                         statusCode: 200,
                         output: { ...(response?.data || {}), success: true },
@@ -61,8 +59,10 @@ const handler = async (req, res) => {
                         output: { err }
                     };
                 })
+            
+            console.log('output: ', output)
     
-            res.status(statusCode).json({ data: output });
+            res.status(statusCode).json({ ...output });
     
         } else {
             res.status(405).end(`Method ${method} Not Allowed`);
