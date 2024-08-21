@@ -58,7 +58,7 @@ const handler = async (req, res) => {
                     };
                 })
 
-            console.log('output: ', output)    
+            console.log('output: ', JSON.stringify(output))    
     
             res.status(statusCode).json({ ...output });
     
