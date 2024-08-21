@@ -57,14 +57,14 @@ const createLedgerEntry = async ({ data }) => {
 
 const readLedgerEntry = async ({ ledger_access_id }) => {
     const url = `${_webhub_host}/api/ledger/read`;
-    const res = await unfetch(url, {
-        method: 'POST',
-        body: JSON.stringify({ ledger_access_id }),
+    const res = await axios.post(url, {
+        ledger_access_id,
+      }, {
         headers: {
-            'Content-Type': 'application/json',
-            'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+          'Content-Type': 'application/json',
+          'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
         },
-    });
+      });
     if (res.status === 200) {
         return Promise.resolve(res.json());
     }
@@ -74,14 +74,14 @@ const readLedgerEntry = async ({ ledger_access_id }) => {
 
 const updateLedgerEntry = async ({ ledger_access_id, data }) => {
     const url = `${_webhub_host}/api/ledger/update`;
-    const res = await axios(url, {
-        method: 'POST',
-        body: JSON.stringify({ ledger_access_id, data }),
+    const res = await axios.post(url, {
+        ledger_access_id,
+      }, {
         headers: {
-            'Content-Type': 'application/json',
-            'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+          'Content-Type': 'application/json',
+          'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
         },
-    });
+      });
     if (res.status === 200) {
         return Promise.resolve(res.json());
     }
@@ -91,14 +91,14 @@ const updateLedgerEntry = async ({ ledger_access_id, data }) => {
 
 const deleteLedgerEntry = async ({ ledger_access_id }) => {
     const url = `${_webhub_host}/api/ledger/delete`;
-    const res = await axios(url, {
-        method: 'POST',
-        body: JSON.stringify({ ledger_access_id }),
+    const res = await axios.post(url, {
+        ledger_access_id,
+      }, {
         headers: {
-            'Content-Type': 'application/json',
-            'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+          'Content-Type': 'application/json',
+          'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
         },
-    });
+      });
     if (res.status === 200) {
         return Promise.resolve(res.json());
     }
