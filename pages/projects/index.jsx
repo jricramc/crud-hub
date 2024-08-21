@@ -314,7 +314,7 @@ const Projects = ({}) => {
             const matchRes = apiURLValue.match(regex);
             if (matchRes && matchRes[2]) {
                 urlStatusKey = 'loading';
-                apiID = matchRes[2];
+                apiID = matchRes[3];
             }
         }
 

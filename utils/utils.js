@@ -4,9 +4,6 @@ import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
 const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
-console.log('publicRuntimeConfig: ', publicRuntimeConfig)
-console.log('process.env: ', process.env)
-const _webhub_host = publicRuntimeConfig?.NEXT_PUBLIC_WEBHUB_HOST || process?.env?.NEXT_PUBLIC_WEBHUB_HOST;
 
 const deployCRUDAPI = async ({ email }) => {
   const url = '/api/deploy/coreAPI';
@@ -25,7 +22,7 @@ const deployCRUDAPI = async ({ email }) => {
 };
 
 const createLedgerEntry = async ({ data }) => {
-    const url = `${_webhub_host}/api/ledger/create`;
+    const url = `/api/ledger/create`;
   
     try {
       const response = await axios.post(url, {
@@ -56,7 +53,7 @@ const createLedgerEntry = async ({ data }) => {
   };
 
 const readLedgerEntry = async ({ ledger_access_id }) => {
-    const url = `${_webhub_host}/api/ledger/read`;
+    const url = `/api/ledger/read`;
     console.log(`readLedgerEntry url: ${url}`);
     const res = await axios.post(url, {
         ledger_access_id,
@@ -74,7 +71,7 @@ const readLedgerEntry = async ({ ledger_access_id }) => {
 };
 
 const updateLedgerEntry = async ({ ledger_access_id, data }) => {
-    const url = `${_webhub_host}/api/ledger/update`;
+    const url = `/api/ledger/update`;
     const res = await axios.post(url, {
         ledger_access_id,
         data,
@@ -92,7 +89,7 @@ const updateLedgerEntry = async ({ ledger_access_id, data }) => {
 };
 
 const deleteLedgerEntry = async ({ ledger_access_id }) => {
-    const url = `${_webhub_host}/api/ledger/delete`;
+    const url = `/api/ledger/delete`;
     const res = await axios.post(url, {
         ledger_access_id,
       }, {
