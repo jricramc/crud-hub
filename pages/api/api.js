@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const { publicRuntimeConfig } = getConfig();
+
 const handler = async (req, res) => {
   try {
     
@@ -13,6 +15,7 @@ const handler = async (req, res) => {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
+          'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
         },
         data,
       });
@@ -21,7 +24,7 @@ const handler = async (req, res) => {
     } else res.status(405).end(`Method ${method} Not Allowed`);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred' });
+    res.status(500).json({ error: 'An error occurred', apiKey: publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY });
   }
 };
 
