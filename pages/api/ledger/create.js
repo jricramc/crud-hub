@@ -6,9 +6,9 @@ const { publicRuntimeConfig } = getConfig();
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
-    const { ledger_access_id, data } = body;
+    const { data } = body;
 
-    if (headers['api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
+    if (headers['ledger-api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
 
@@ -26,7 +26,7 @@ const handler = async (req, res) => {
                                 {
                                     "method": ".insertOne()",
                                     "args": [
-                                        { "ledger_access_id": ledger_access_id, "data": data },
+                                        { "ledger_access_id": data.api_id, "data": data },
                                     ],
                                 }
                             ]

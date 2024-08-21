@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { Modal, Button, Spinner, ProgressBar, OverlayTrigger, Tooltip, Form } from 'react-bootstrap';
 import $ from 'jquery';
 import { BoxArrowRight } from 'react-bootstrap-icons';
-import { RID, apiRequest, deployCRUDAPI, getUserProjects } from '../../utils/utils';
+import { RID, apiRequest, deployCRUDAPI, getUserProjects, readLedgerEntry } from '../../utils/utils';
 import styles from './index.module.scss';
 
 import getConfig from 'next/config';
@@ -310,14 +310,18 @@ const Projects = ({}) => {
 
     useEffect(() => {
         setP();
-        let urlStatusKey = 'invalid'
+        let urlStatusKey = 'invalid';
+        let apiID = undefined;
 
         if (!apiURLValue?.length) {
             urlStatusKey = 'none'
-        } else if(apiURLValue.includes('https://') && apiURLValue.includes('execute-api.us-east-2.amazonaws.com')) {
-            urlStatusKey = 'loading'
         } else {
-            urlStatusKey = 'invalid'
+            const regex = /(https?:(\/\/))?([a-z0-9]*)\.execute-api\.[a-z0-9-]+\.amazonaws\.com/;
+            const matchRes = apiURLValue.match(regex);
+            if (matchRes[2]) {
+                urlStatusKey = 'loading';
+                apiID = matchRes[2];
+            }
         }
 
         setURLStatus(urlStatusKey);
@@ -325,74 +329,82 @@ const Projects = ({}) => {
         const url = apiURLValue;
         if (urlStatusStates[urlStatusKey].valid) {
 
-            apiRequest({ url: `${url}/ledger/read`, method: 'POST' })
-                .then((raw_items) => {
-                    console.log('raw_items: ', raw_items)
-                    const items = raw_items.map(({ name }) => {
-                        let obj = {};
-                        try {
-                            obj = JSON.parse(name);
-                        } catch (err) {
-                            obj = {};
-                        }
-                        return obj;
-                    });
+            readLedgerEntry({ ledger_access_id: apiID }).then((response) => {
+                console.log(`response: ${response}`);
+                setURLStatus('success');
+            }).catch((err) => {
+                console.log(`err: ${err}`);
+                setURLStatus('error');
+            })
 
-                    const p_obj = {
-                        core: {
-                            date_created: undefined,
-                        },
-                        resources: [],
-                    };
+            // apiRequest({ url: `${url}/ledger/read`, method: 'POST' })
+            //     .then((raw_items) => {
+            //         console.log('raw_items: ', raw_items)
+            //         const items = raw_items.map(({ name }) => {
+            //             let obj = {};
+            //             try {
+            //                 obj = JSON.parse(name);
+            //             } catch (err) {
+            //                 obj = {};
+            //             }
+            //             return obj;
+            //         });
 
-                    const r = [];
+            //         const p_obj = {
+            //             core: {
+            //                 date_created: undefined,
+            //             },
+            //             resources: [],
+            //         };
 
-                    for (let i = 0; i < items.length; i += 1) {
-                        const {
-                            api_id,
-                            api_key,
-                            date_created,
-                            resource_type,
-                            db_name, unique_dbname,
-                            bucketName, uniqueBucketName,
-                            cloudfrontS3Name, uniqueCloudfrontS3Name,
-                            lambdaName, unique_lambda_name,
-                            socketName, unique_socket_name, websocket_endpoint, websocket_stage_name,
-                        } = items[i]
+            //         const r = [];
 
-                        if (api_id) {
-                            p_obj.core.date_created = date_created;
-                        } else if (resource_type === 'db/dynamodb') {
-                            r.push({ resource_name: 'AWS DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
-                        } else if (resource_type === 'db/mongodb') {
-                            r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
-                        } else if (resource_type === 'db/s3') {
-                            r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
-                        } else if (resource_type === 'cloudfrontS3') {
-                            // cloudfrontS3Name: name, uniqueCloudfrontS3Name: unique_cloudfrontS3Name, iam_user, iam_user_access_keys, cloudfront_distribution, s3_bucket
-                            r.push({ resource_name: 'Cloudfront S3 Distribution', resource_type, name: cloudfrontS3Name, unique_name: uniqueCloudfrontS3Name, date_created })
-                        } else if (resource_type === 'lambda') {
-                            r.push({ resource_name: 'AWS Lambda', resource_type, name: lambdaName, unique_name: unique_lambda_name, date_created })
-                        } else if (resource_type === 'websocket') {
-                            r.push({ resource_name: 'Websocket', resource_type, name: socketName, unique_name: unique_socket_name, websocket_endpoint, websocket_stage_name, date_created })
-                        } else {
-                            console.log('items[i]: ', items[i])
-                        }
-                    }
+            //         for (let i = 0; i < items.length; i += 1) {
+            //             const {
+            //                 api_id,
+            //                 api_key,
+            //                 date_created,
+            //                 resource_type,
+            //                 db_name, unique_dbname,
+            //                 bucketName, uniqueBucketName,
+            //                 cloudfrontS3Name, uniqueCloudfrontS3Name,
+            //                 lambdaName, unique_lambda_name,
+            //                 socketName, unique_socket_name, websocket_endpoint, websocket_stage_name,
+            //             } = items[i]
 
-                    p_obj.resources = r.sort((a, b) => {
-                        // Turn your strings into dates, and then subtract them
-                        // to get a value that is either negative, positive, or zero.
-                        return b.date_created - a.date_created;
-                    })
+            //             if (api_id) {
+            //                 p_obj.core.date_created = date_created;
+            //             } else if (resource_type === 'db/dynamodb') {
+            //                 r.push({ resource_name: 'AWS DynamoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
+            //             } else if (resource_type === 'db/mongodb') {
+            //                 r.push({ resource_name: 'MongoDB', resource_type, name: db_name, unique_name: unique_dbname, date_created })
+            //             } else if (resource_type === 'db/s3') {
+            //                 r.push({ resource_name: 'AWS S3 Bucket', resource_type, name: bucketName, unique_name: uniqueBucketName, date_created })
+            //             } else if (resource_type === 'cloudfrontS3') {
+            //                 // cloudfrontS3Name: name, uniqueCloudfrontS3Name: unique_cloudfrontS3Name, iam_user, iam_user_access_keys, cloudfront_distribution, s3_bucket
+            //                 r.push({ resource_name: 'Cloudfront S3 Distribution', resource_type, name: cloudfrontS3Name, unique_name: uniqueCloudfrontS3Name, date_created })
+            //             } else if (resource_type === 'lambda') {
+            //                 r.push({ resource_name: 'AWS Lambda', resource_type, name: lambdaName, unique_name: unique_lambda_name, date_created })
+            //             } else if (resource_type === 'websocket') {
+            //                 r.push({ resource_name: 'Websocket', resource_type, name: socketName, unique_name: unique_socket_name, websocket_endpoint, websocket_stage_name, date_created })
+            //             } else {
+            //                 console.log('items[i]: ', items[i])
+            //             }
+            //         }
 
-                    console.log('p_obj: ', p_obj);
-                    setP(p_obj);
-                    setURLStatus('success');
-                }).catch((err) => {
-                    console.log('err: ', err)
-                    setURLStatus('error');
-                })
+            //         p_obj.resources = r.sort((a, b) => {
+            //             // Turn your strings into dates, and then subtract them
+            //             // to get a value that is either negative, positive, or zero.
+            //             return b.date_created - a.date_created;
+            //         })
+
+            //         console.log('p_obj: ', p_obj);
+            //         setP(p_obj);
+            //         setURLStatus('success');
+            //     }).catch((err) => {
+            //         console.log('err: ', err)
+            //         setURLStatus('error');
+            //     })
         }
 
     }, [apiURLValue]);

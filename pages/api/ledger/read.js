@@ -8,7 +8,7 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { ledger_access_id } = body;
 
-    // if (headers['api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
+    if (headers['ledger-api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
 
@@ -64,9 +64,9 @@ const handler = async (req, res) => {
             res.status(405).end(`Method ${method} Not Allowed`);
         }
 
-    // } else {
-    //     res.status(405).end(`Not Allowed: api-key incorrect`);
-    // }
+    } else {
+        res.status(405).end(`Not Allowed: api-key incorrect`);
+    }
   } catch (error) {
     console.error(error);
     if (error.message.includes('already exists')) {

@@ -8,7 +8,7 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { ledger_access_id, data } = body;
 
-    if (headers['api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
+    if (headers['ledger-api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
 

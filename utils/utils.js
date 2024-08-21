@@ -24,17 +24,16 @@ const deployCRUDAPI = async ({ email }) => {
   return Promise.reject(`error ${res.status} received from server`);
 };
 
-const createLedgerEntry = async ({ ledger_access_id, data }) => {
+const createLedgerEntry = async ({ data }) => {
     const url = `${_webhub_host}/api/ledger/create`;
   
     try {
       const response = await axios.post(url, {
-        ledger_access_id,
         data,
       }, {
         headers: {
           'Content-Type': 'application/json',
-          'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
+          'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY,
         },
       });
   
@@ -63,7 +62,7 @@ const readLedgerEntry = async ({ ledger_access_id }) => {
         body: JSON.stringify({ ledger_access_id }),
         headers: {
             'Content-Type': 'application/json',
-            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+            'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
         },
     });
     if (res.status === 200) {
@@ -80,7 +79,7 @@ const updateLedgerEntry = async ({ ledger_access_id, data }) => {
         body: JSON.stringify({ ledger_access_id, data }),
         headers: {
             'Content-Type': 'application/json',
-            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+            'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
         },
     });
     if (res.status === 200) {
@@ -97,7 +96,7 @@ const deleteLedgerEntry = async ({ ledger_access_id }) => {
         body: JSON.stringify({ ledger_access_id }),
         headers: {
             'Content-Type': 'application/json',
-            'api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
+            'ledger-api-key': publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY
         },
     });
     if (res.status === 200) {
