@@ -416,7 +416,7 @@ const handler = async ({
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120, 
         }
     );
@@ -816,7 +816,7 @@ exports.handler = async (event) => {
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120, 
         }
     );
@@ -992,7 +992,7 @@ exports.handler = async (event) => {
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120, 
         }
     );

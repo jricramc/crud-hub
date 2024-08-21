@@ -349,7 +349,7 @@ const handler = async ({
 //             }),
 //             role: lam_role_arn,
 //             handler: "index.handler",
-//             runtime: "nodejs14.x",
+//             runtime: "nodejs20.x",
 //             timeout: 120, 
 //         }
 //     );
@@ -749,7 +749,7 @@ const handler = async ({
 //             }),
 //             role: lam_role_arn,
 //             handler: "index.handler",
-//             runtime: "nodejs14.x",
+//             runtime: "nodejs20.x",
 //             timeout: 120, 
 //         }
 //     );
@@ -925,7 +925,7 @@ const handler = async ({
 //             }),
 //             role: lam_role_arn,
 //             handler: "index.handler",
-//             runtime: "nodejs14.x",
+//             runtime: "nodejs20.x",
 //             timeout: 120, 
 //         }
 //     );

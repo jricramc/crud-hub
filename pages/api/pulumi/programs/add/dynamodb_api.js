@@ -66,7 +66,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
     // Define a new Lambda function
     const createFunc = new aws.lambda.Function(`create-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "handler.zip")),
-        runtime: "nodejs14.x",
+        runtime: "nodejs20.x",
         handler: "handler.createHandler",
         role: lam_role.arn,
         environment: {
@@ -81,7 +81,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
     
     const readAllFunc = new aws.lambda.Function(`read-all-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
-        runtime: "nodejs14.x",
+        runtime: "nodejs20.x",
         handler: "read.readHandler",
         role: lam_role.arn,
         environment: {
@@ -200,7 +200,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120,
             environment: {
                 variables: {
@@ -301,7 +301,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120,
             environment: {
                 variables: {
@@ -396,7 +396,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
             }),
             role: lam_role_arn,
             handler: "index.handler",
-            runtime: "nodejs14.x",
+            runtime: "nodejs20.x",
             timeout: 120,
             environment: {
                 variables: {
@@ -409,7 +409,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
 
     const updateFunc = new aws.lambda.Function(`update-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
-        runtime: "nodejs14.x",
+        runtime: "nodejs20.x",
         handler: "update.updateHandler",
         role: lam_role.arn,
         environment: {
@@ -421,7 +421,7 @@ const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, execut
     
     const deleteFunc = new aws.lambda.Function(`delete-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
-        runtime: "nodejs14.x",
+        runtime: "nodejs20.x",
         handler: "delete.deleteHandler",
         role: lam_role.arn,
         environment: {
