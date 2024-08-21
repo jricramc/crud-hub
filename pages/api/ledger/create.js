@@ -8,6 +8,8 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { data } = body;
 
+    console.log('data: ', data);
+
     if (headers['ledger-api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
@@ -57,6 +59,8 @@ const handler = async (req, res) => {
                         output: { err }
                     };
                 })
+
+            console.log('output: ', output)
     
             res.status(statusCode).json({ ...output });
     
