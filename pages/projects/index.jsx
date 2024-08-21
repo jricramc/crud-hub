@@ -318,7 +318,7 @@ const Projects = ({}) => {
         } else {
             const regex = /(https?:(\/\/))?([a-z0-9]*)\.execute-api\.[a-z0-9-]+\.amazonaws\.com/;
             const matchRes = apiURLValue.match(regex);
-            if (matchRes[2]) {
+            if (matchRes && matchRes[2]) {
                 urlStatusKey = 'loading';
                 apiID = matchRes[2];
             }
