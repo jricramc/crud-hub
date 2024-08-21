@@ -71,7 +71,7 @@ const handler = async ({ socketName, apiUrl, apiKey, rid, executionArn }) => {
             code: new pulumi.asset.FileArchive(path.join(...directoryArray, "websocketHandler.zip")),
             role: lambdaRole.arn,
             handler: "websocketHandler.handler",
-            runtime: "nodejs16.x",
+            runtime: "nodejs18.x",
             timeout: 120,
             environment: {
                 variables: {

@@ -26,7 +26,7 @@ const handler = async ({ apiID, apiKey, apiName, mongodbResourceId, dbName, rid,
     // Define a new Lambda function
     const requestFunc = new aws.lambda.Function(`request-func-lambda-${unique_db_name}-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mongodbRequestHandler.zip")),
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         handler: "mongodbRequestHandler.requestHandler",
         role: lam_role_arn,
         environment: {

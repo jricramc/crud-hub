@@ -181,7 +181,7 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     // Define a new Lambda function
     const createFunc = new aws.lambda.Function(`ledger-create-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "handler.zip")),
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         handler: "handler.createHandler",
         role: lam_role.arn,
         environment: {
@@ -198,7 +198,7 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     
     const readFunc = new aws.lambda.Function(`ledger-read-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         handler: "read.readHandler",
         role: lam_role.arn,
         environment: {
@@ -214,7 +214,7 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     
     const updateFunc = new aws.lambda.Function(`ledger-update-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         handler: "update.updateHandler",
         role: lam_role.arn,
         environment: {
@@ -230,7 +230,7 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     
     const deleteFunc = new aws.lambda.Function(`ledger-delete-function-${rid}`, {
         code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
-        runtime: "nodejs20.x",
+        runtime: "nodejs18.x",
         handler: "delete.deleteHandler",
         role: lam_role.arn,
         environment: {
@@ -246,7 +246,7 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
 
     // const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
     //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mintlify.zip")),
-    //     runtime: "nodejs20.x",
+    //     runtime: "nodejs18.x",
     //     handler: "mintlify.handler",
     //     role: lam_s3_role.arn,
     //     environment: {

@@ -136,7 +136,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
             }),
             role: lam_role.arn,
             handler: "index.handler",
-            runtime: "nodejs20.x",
+            runtime: "nodejs18.x",
             timeout: 30,
             environment: {
                 variables: {
@@ -228,7 +228,7 @@ const handler = async ({ apiID, apiName, s3ResourceId, bucketName, rid, executio
             }),
             role: lam_role.arn,
             handler: "index.handler",
-            runtime: "nodejs20.x",
+            runtime: "nodejs18.x",
             timeout: 30,
             environment: {
                 variables: {
