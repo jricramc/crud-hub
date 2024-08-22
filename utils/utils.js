@@ -65,7 +65,7 @@ const readLedgerEntry = async ({ ledger_access_id }) => {
       });
     if (res.status === 200) {
         console.log('readLedgerEntry res: ', res)
-        return Promise.resolve(res);
+        return Promise.resolve(res.data.response.variables);
     }
     console.error(res);
     return Promise.reject(`error ${res.status} received from server`);

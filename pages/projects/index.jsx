@@ -325,8 +325,8 @@ const Projects = ({}) => {
 
             console.log('api_id: ', apiID);
 
-            readLedgerEntry({ ledger_access_id: apiID }).then((response) => {
-                console.log(`response: ${response}`);
+            readLedgerEntry({ ledger_access_id: apiID }).then(({ ledger_entry }) => {
+                console.log('ledger_entry: ', ledger_entry);
                 setURLStatus('success');
             }).catch((err) => {
                 console.log(`err: ${err}`);
