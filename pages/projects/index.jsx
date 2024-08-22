@@ -325,9 +325,17 @@ const Projects = ({}) => {
 
             console.log('api_id: ', apiID);
 
-            readLedgerEntry({ ledger_access_id: apiID }).then(({ ledger_entry }) => {
+            readLedgerEntry({ api_id: apiID }).then(({ ledger_entry }) => {
                 console.log('ledger_entry: ', ledger_entry);
                 setURLStatus('success');
+
+                const p_obj = {
+                    core: {
+                        date_created: undefined,
+                    },
+                    resources: [],
+                };
+
             }).catch((err) => {
                 console.log(`err: ${err}`);
                 setURLStatus('error');

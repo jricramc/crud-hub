@@ -6,7 +6,7 @@ const { publicRuntimeConfig } = getConfig();
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
-    const { ledger_access_id } = body;
+    const { query } = body;
 
     if (headers['ledger-api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
 
@@ -26,7 +26,7 @@ const handler = async (req, res) => {
                                 {
                                     "method": ".deleteOne()",
                                     "args": [
-                                        { "ledger_access_id": ledger_access_id },
+                                        query,
                                     ],
                                 }
                             ]
@@ -57,6 +57,8 @@ const handler = async (req, res) => {
                         output: { err }
                     };
                 })
+
+            // console.log('output: ', JSON.stringify(output))   
     
             res.status(statusCode).json({ ...output });
     

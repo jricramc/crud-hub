@@ -126,8 +126,6 @@ const handler = async (req, res) => {
               data,
             });
 
-            console.log('createLedgerEntryRes: ', createLedgerEntryRes)
-
             const route = 'ledger/create';
             const ledger_url = `${api_url}${route}`;
 

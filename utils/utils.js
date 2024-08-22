@@ -21,11 +21,12 @@ const deployCRUDAPI = async ({ email }) => {
   return Promise.reject(`error ${res.status} received from server`);
 };
 
-const createLedgerEntry = async ({ data }) => {
+const createLedgerEntry = async ({ ledger_access_id, data }) => {
     const url = `/api/ledger/create`;
   
     try {
       const response = await axios.post(url, {
+        ledger_access_id,
         data,
       }, {
         headers: {
@@ -52,11 +53,11 @@ const createLedgerEntry = async ({ data }) => {
     }
   };
 
-const readLedgerEntry = async ({ ledger_access_id }) => {
+const readLedgerEntry = async ({ api_id, ledger_access_id }) => {
     const url = `/api/ledger/read`;
-    console.log(`readLedgerEntry url: ${url}`);
+
     const res = await axios.post(url, {
-        ledger_access_id,
+        query: { $or: [ { "data.api_id": api_id }, { "ledger_access_id": ledger_access_id} ] },
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -71,10 +72,10 @@ const readLedgerEntry = async ({ ledger_access_id }) => {
     return Promise.reject(`error ${res.status} received from server`);
 };
 
-const updateLedgerEntry = async ({ ledger_access_id, data }) => {
+const updateLedgerEntry = async ({ api_id, ledger_access_id, data }) => {
     const url = `/api/ledger/update`;
     const res = await axios.post(url, {
-        ledger_access_id,
+        query: { $or: [ { "data.api_id": api_id }, { "ledger_access_id": ledger_access_id} ] },
         data,
       }, {
         headers: {
@@ -89,10 +90,10 @@ const updateLedgerEntry = async ({ ledger_access_id, data }) => {
     return Promise.reject(`error ${res.status} received from server`);
 };
 
-const deleteLedgerEntry = async ({ ledger_access_id }) => {
+const deleteLedgerEntry = async ({ api_id, ledger_access_id }) => {
     const url = `/api/ledger/delete`;
     const res = await axios.post(url, {
-        ledger_access_id,
+        query: { $or: [ { "data.api_id": api_id }, { "ledger_access_id": ledger_access_id} ] },
       }, {
         headers: {
           'Content-Type': 'application/json',
