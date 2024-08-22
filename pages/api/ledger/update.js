@@ -58,7 +58,7 @@ const handler = async (req, res) => {
                 }).then((response) => {
                     return {
                         statusCode: 200,
-                        output: response,
+                        output: { ...(response?.data || {}) },
                     }
                 })
                 .catch((err) => {

@@ -28,6 +28,10 @@ const handler = async (req, res) => {
                                     "args": [
                                         { "ledger_access_id": ledger_access_id },
                                     ],
+                                    "variable": {
+                                        "name": "ledger_entry",
+                                        "return": true
+                                    }
                                 }
                             ]
                         },

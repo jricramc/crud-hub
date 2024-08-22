@@ -36,7 +36,7 @@ const createLedgerEntry = async ({ data }) => {
   
       // Axios response.data contains the parsed response body
       // Axios automatically parses JSON responses
-      return response.data;
+      return Promise.resolve(response.data);
     } catch (error) {
       // Axios errors are available in the 'response' property of the error object
       if (error.response) {
