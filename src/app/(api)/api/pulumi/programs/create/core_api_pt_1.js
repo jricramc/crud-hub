@@ -6,7 +6,7 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
-import { RID } from "../../../../../utils/utils";
+import { RID } from '@/utils/utils';
 
 const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
 

@@ -10,8 +10,10 @@ import { Tag } from "primereact/tag";
 import { useContext, useEffect, useRef, useState } from "react";
 import { LayoutContext } from "@/layout/context/layoutcontext";
 import CountdownTimer from "@/demo/components/apps/countdowntimer";
+import { randomUsernameGenerator } from '@/utils/utils';
 
 const Portal = () => {
+    const [username, setUserName] = useState('');
     const [chartOptions, setChartOptions] = useState({});
     const [chartData, setChartData] = useState({});
     const [price, setPrice] = useState(0);
@@ -168,6 +170,10 @@ const Portal = () => {
         );
     };
 
+    useEffect(() => {
+        setUserName(randomUsernameGenerator());
+    }, [])
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -180,7 +186,7 @@ const Portal = () => {
                         />
                         <div className="flex flex-column align-items-center sm:align-items-start">
                             <span className="text-900 font-bold text-4xl">
-                                Welcome Joshua
+                                {`${username}-xxxx.xxxx`}
                             </span>
                             <p className="text-600 m-0">
                                 @mbogo-mit

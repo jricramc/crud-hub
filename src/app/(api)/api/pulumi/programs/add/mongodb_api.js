@@ -6,11 +6,7 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
-import { RID } from "../../../../../utils/utils";
-
-import getConfig from 'next/config';
-
-const { publicRuntimeConfig } = getConfig();
+import { RID } from '@/utils/utils';
 
 const handler = async ({ apiID, apiKey, apiName, mongodbResourceId, dbName, rid, secretRid, executionArn, lam_role_arn }) => {
 
@@ -31,7 +27,7 @@ const handler = async ({ apiID, apiKey, apiName, mongodbResourceId, dbName, rid,
         role: lam_role_arn,
         environment: {
             variables: {
-                MONGODB_API_KEY: publicRuntimeConfig.NEXT_PUBLIC_MONGODB_API_KEY || 'no-api-key',
+                MONGODB_API_KEY: process.env.NEXT_PUBLIC_MONGODB_API_KEY || 'no-api-key',
                 MONGODB_NAME: mongodb_name,
                 API_KEY: apiKey,
             },

@@ -1,8 +1,5 @@
 import NextAuth from 'next-auth/next';
 import GoogleProvider from 'next-auth/providers/google';
-import getConfig from 'next/config';
-
-const { publicRuntimeConfig } = getConfig();
 
 export default NextAuth({
 
@@ -11,9 +8,9 @@ export default NextAuth({
 
   providers: [
     GoogleProvider({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || publicRuntimeConfig.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || publicRuntimeConfig.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
     })
   ],
-  secret: process.env.NEXT_PUBLIC_JWT_SECRET || publicRuntimeConfig.NEXT_PUBLIC_JWT_SECRET,
+  secret: process.env.NEXT_PUBLIC_JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET,
 });

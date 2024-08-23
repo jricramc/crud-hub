@@ -6,7 +6,7 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
-import { RID } from "../../../../../utils/utils";
+import { RID } from '@/utils/utils';
 const handler = async ({ apiID, apiName, dynamodbResourceId, dbName, rid, executionArn, lam_role_arn }) => {
 
     // const restApi = aws.apigateway.getRestApi({ id: apiID, name: apiName });

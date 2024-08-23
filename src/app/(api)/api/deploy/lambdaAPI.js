@@ -1,4 +1,4 @@
-import { RID } from '../../../utils/utils';
+import { RID } from '@/utils/utils';
 import add_lambda_api from '../pulumi/programs/add/lambda_api'
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 

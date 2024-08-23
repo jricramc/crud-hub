@@ -1,4 +1,4 @@
-import { RID } from '../../../utils/utils';
+import { RID } from '@/utils/utils';
 import add_cloudfront_s3 from '../pulumi/programs/add/cloudfront_s3'
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 

@@ -1,4 +1,4 @@
-import { RID } from '../../../utils/utils';
+import { RID } from '@/utils/utils';
 import add_stripe_api from '../pulumi/programs/add/stripe_api'
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 

@@ -6,7 +6,7 @@ import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import fs from 'fs';
-import { RID, extractRegionAndAccountIdFromExecutionArn } from "../../../../../utils/utils";
+import { RID, extractRegionAndAccountIdFromExecutionArn } from '@/utils/utils';
 const handler = async ({ name, rid, executionArn }) => {
 
     const { region, accountId } = extractRegionAndAccountIdFromExecutionArn(executionArn);

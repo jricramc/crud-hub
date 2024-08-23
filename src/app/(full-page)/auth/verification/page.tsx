@@ -3,7 +3,7 @@ import type { Page } from "@/types";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 
 const Verification: Page = () => {
@@ -11,6 +11,10 @@ const Verification: Page = () => {
     const [value2, setValue2] = useState<number | null>();
     const [value3, setValue3] = useState<number | null>();
     const [value4, setValue4] = useState<number | null>();
+    const [value5, setValue5] = useState<number | null>();
+    const [value6, setValue6] = useState<number | null>();
+    const [value7, setValue7] = useState<number | null>();
+    const [value8, setValue8] = useState<number | null>();
     const router = useRouter();
     const { layoutConfig } = useContext(LayoutContext);
     const dark = layoutConfig.colorScheme !== "light";
@@ -74,17 +78,17 @@ const Verification: Page = () => {
                 <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
                     <div className="mb-4">
                         <div className="text-900 text-xl font-bold mb-2">
-                            Verification
+                            Hello, compulsory-pink-fowl-xxxx.xxxx
                         </div>
                         <span className="text-600 font-medium">
-                            We have sent code to you email:
+                            Please type in your 8 digit user passkey
                         </span>
-                        <div className="flex align-items-center mt-1">
-                            <i className="pi pi-envelope text-600"></i>
+                        {/* <div className="flex align-items-center mt-1">
+                            <i className="pi pi-user text-600"></i>
                             <span className="text-900 font-bold ml-2">
-                                dm**@gmail.com
+                                compulsory-pink-fowl-xxxx.xxxx
                             </span>
-                        </div>
+                        </div> */}
                     </div>
                     <div className="flex flex-column">
                         <div className="flex justify-content-between w-full align-items-center mb-4 gap-3">
@@ -124,18 +128,55 @@ const Verification: Page = () => {
                                 maxLength={1}
                                 onKeyUp={(e) => onDigitInput(e, 4)}
                             ></InputNumber>
+                            <InputNumber
+                                id="input5"
+                                inputId="val5"
+                                value={value5}
+                                onValueChange={(e) => setValue5(e.value)}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                onKeyUp={(e) => onDigitInput(e, 5)}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input6"
+                                inputId="val6"
+                                value={value6}
+                                onValueChange={(e) => setValue6(e.value)}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                onKeyUp={(e) => onDigitInput(e, 6)}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input7"
+                                inputId="val7"
+                                value={value7}
+                                onValueChange={(e) => setValue7(e.value)}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                onKeyUp={(e) => onDigitInput(e, 7)}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input8"
+                                inputId="val8"
+                                value={value8}
+                                onValueChange={(e) => setValue8(e.value)}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                onKeyUp={(e) => onDigitInput(e, 8)}
+                            ></InputNumber>
                         </div>
                         <div className="flex flex-wrap gap-2 justify-content-between">
-                            <Button
+                            {/* <Button
                                 label="Cancel"
                                 outlined
                                 className="flex-auto"
                                 onClick={() => router.push("/")}
-                            ></Button>
+                            ></Button> */}
                             <Button
                                 label="Verify"
                                 className="flex-auto"
                                 onClick={() => router.push("/")}
+                                disabled={[value1, value2, value3, value4, value5, value6, value7, value8].some((v) => (v === null || v === undefined))}
                             ></Button>
                         </div>
                     </div>

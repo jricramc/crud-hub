@@ -5,12 +5,9 @@ import * as apigateway from "@pulumi/aws-apigateway";
 import * as dynamodb from "@pulumi/aws/dynamodb";
 import * as iam from "@pulumi/aws/iam";
 import fetch from "node-fetch"
-import { RID, extractDomain } from "../../../../../utils/utils";
+import { RID, extractDomain } from '@/utils/utils';
 
-import getConfig from 'next/config';
-
-const { publicRuntimeConfig } = getConfig();
-const _webhub_host = extractDomain(publicRuntimeConfig.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
+const _webhub_host = extractDomain(process.env.NEXT_PUBLIC_WEBHUB_HOST || publicRuntimeConfig.NEXTAUTH_URL);
 
 const handler = async ({
     apiID, apiUrl, apiName,

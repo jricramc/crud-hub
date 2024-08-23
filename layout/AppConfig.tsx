@@ -8,6 +8,7 @@ import { Sidebar } from "primereact/sidebar";
 import { classNames } from "primereact/utils";
 import { useContext, useEffect } from "react";
 import { LayoutContext } from "./context/layoutcontext";
+import { API72_COLORS } from '@/utils/utils';
 
 const AppConfig = (props: AppConfigProps) => {
     const {
@@ -21,16 +22,6 @@ const AppConfig = (props: AppConfigProps) => {
     } = useContext(LayoutContext);
     const { changeTheme } = useContext(PrimeReactContext);
     const scales = [12, 13, 14, 15, 16];
-    const componentThemes = [
-        { name: "indigo", color: "#6366F1" },
-        { name: "blue", color: "#3B82F6" },
-        { name: "purple", color: "#8B5CF6" },
-        { name: "teal", color: "#14B8A6" },
-        { name: "cyan", color: "#06b6d4" },
-        { name: "green", color: "#10b981" },
-        { name: "orange", color: "#f59e0b" },
-        { name: "pink", color: "#d946ef" },
-    ];
 
     useEffect(() => {
         if ((isSlim && isSlim()) || isSlimPlus() || isHorizontal()) {
@@ -130,7 +121,7 @@ const AppConfig = (props: AppConfigProps) => {
             >
                 <h5>Themes</h5>
                 <div className="flex flex-wrap row-gap-3">
-                    {componentThemes.map((theme, i) => {
+                    {API72_COLORS.map((theme, i) => {
                         return (
                             <div key={i} className="w-3">
                                 <button

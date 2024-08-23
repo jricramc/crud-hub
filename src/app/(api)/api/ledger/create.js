@@ -1,15 +1,12 @@
 import axios from 'axios';
 
-import getConfig from 'next/config';
-const { publicRuntimeConfig } = getConfig();
-
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
     const { ledger_access_id, data } = body;
 
 
-    if (headers['ledger-api-key'] === publicRuntimeConfig.NEXT_PUBLIC_LEDGER_API_KEY) {
+    if (headers['ledger-api-key'] === process.env.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
 
@@ -42,7 +39,7 @@ const handler = async (req, res) => {
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Content-Type': 'application/json',
-                    'api-key': publicRuntimeConfig.NEXT_PUBLIC_MONGODB_API_KEY || 'no-api-key',
+                    'api-key': process.env.NEXT_PUBLIC_MONGODB_API_KEY || 'no-api-key',
                 },
                 data: requestData,
 

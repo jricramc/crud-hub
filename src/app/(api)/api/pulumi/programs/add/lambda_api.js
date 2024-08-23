@@ -7,7 +7,7 @@ import * as iam from "@pulumi/aws/iam";
 import path from 'path';
 import * as fs from "fs";
 import * as archiver from 'archiver'; 
-import { RID } from "../../../../../utils/utils";
+import { RID } from '@/utils/utils';
 
 const handler = async ({ apiID, apiName, lambdaResourceId, lambdaName, rid, code, executionArn }) => {
 
