@@ -1,0 +1,123 @@
+.product-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-light {
+        background: var(--surface-800);
+        color: var(--surface-200);
+    }
+
+    &.status-green {
+        background: var(--green-200);
+        color: var(--green-800);
+    }
+
+    &.status-pink {
+        background: var(--pink-200);
+        color: var(--pink-800);
+    }
+
+    &.status-yellow {
+        background: var(--yellow-200);
+        color: var(--yellow-800);
+    }
+}
+
+.product-badge-text {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-light {
+        color: var(--surface-500);
+    }
+
+    &.status-green {
+        color: var(--green-500);
+    }
+
+    &.status-pink {
+        color: var(--pink-500);
+    }
+
+    &.status-yellow {
+        color: var(--yellow-500);
+    }
+}
+
+.customer-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-light {
+        background: var(--surface-800);
+        color: var(--surface-200);
+    }
+
+    &.status-green {
+        background: var(--green-200);
+        color: var(--green-800);
+    }
+
+    &.status-pink {
+        background: var(--pink-200);
+        color: var(--pink-800);
+    }
+
+    &.status-yellow {
+        background: var(--yellow-200);
+        color: var(--yellow-800);
+    }
+
+    &.status-blue {
+        background: var(--blue-200);
+        color: var(--blue-800);
+    }
+
+    &.status-purple {
+        background: var(--purple-200);
+        color: var(--purple-800);
+    }
+
+    &.status-orange {
+        background: var(--orange-200);
+        color: var(--orange-800);
+    }
+}
+
+.order-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.order-delivered {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.order-cancelled {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+
+    &.order-pending {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+
+    &.order-returned {
+        background: #ECCFFF;
+        color: #694382;
+    }
+}

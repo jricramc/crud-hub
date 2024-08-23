@@ -1,0 +1,57 @@
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 1000;
+    }
+}
+
+@-webkit-keyframes dash {
+    to {
+        stroke-dashoffset: 1000;
+    }
+}
+  
+.path-static {
+    stroke-dasharray: 8;
+}
+
+.path-active {
+    animation: dash 15s linear infinite;
+    animation-direction: reverse;
+    stroke-dasharray: 8;
+}
+
+.vert-move {
+    -webkit-animation: mover 1s infinite  alternate;
+    animation: mover 1s infinite  alternate;
+}
+.vert-move {
+    -webkit-animation: mover 1s infinite  alternate;
+    animation: mover 1s infinite  alternate;
+}
+@-webkit-keyframes mover {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+@keyframes mover {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+.pulse-opacity {
+    animation-name: color;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+  }
+  
+  @keyframes color {
+    0% {
+      opacity: 1.0;
+    }
+    50% {
+      opacity: 0.4;
+    }
+    100% {
+      opacity: 1.0;
+    }
+  }
