@@ -12,10 +12,13 @@ const VerifyAPI: Page = () => {
     const { layoutConfig } = useContext(LayoutContext);
     const dark = layoutConfig.colorScheme !== "light";
 
-    const [username, setUserName] = useState('');
+    const [username, setUserName] = useState('...');
 
     useEffect(() => {
-        setUserName(randomUsernameGenerator());
+        setTimeout(() => {
+            setUserName(randomUsernameGenerator());
+        }, 5000)
+        
     }, [])
 
     return (
@@ -51,23 +54,20 @@ const VerifyAPI: Page = () => {
             <div className="px-5 min-h-screen flex justify-content-center align-items-center">
                 <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
                     <div className="mb-6 flex flex-column align-items-center">
-                        <div className="text-900 text-xl font-bold mb-2">
-                            Verify API
+                        <div className="text-900 text-xl font-bold mb-4">
+                            Verify your API
                         </div>
-                        <span className="text-600 font-medium mb-5">
-                            Please enter your API72 url
-                        </span>
-                        <img
+                        {/* <img
                             src="/layout/images/avatar/avatar.png"
                             className="w-3rem h-3rem mb-2"
                             alt="Avatar"
-                        />
-                        <span className="font-medium text-900 font-medium">
+                        /> */}
+                        <span className="font-large text-yellow-500 text-bold" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
                             {username}
                         </span>
                     </div>
                     <div className="flex flex-column">
-                        <span className="p-input-icon-left w-full mb-4">
+                        <span className="p-input-icon-left w-full mb-1">
                             <i className="pi pi-lock"></i>
                             <InputText
                                 id="password"
@@ -76,9 +76,12 @@ const VerifyAPI: Page = () => {
                                 placeholder="https://xxxxxxxxxx.execute-api.us-east-2.amazonaws.com/v3/"
                             />
                         </span>
+                        <span className="text-green-500 font-medium mb-4">
+                            Please enter your API72 url
+                        </span>
                         <Button
                             icon="pi pi-lock-open"
-                            label="Unlock"
+                            label="Continue"
                             className="w-full"
                             onClick={() => router.push("/")}
                         ></Button>

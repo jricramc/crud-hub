@@ -46,16 +46,16 @@ const Register: Page = () => {
             </svg>
             <div className="px-5 min-h-screen flex justify-content-center align-items-center">
                 <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
-                    <div className="mb-4">
+                    <div className="mb-4 w-full md:w-25rem">
                         <div className="text-900 text-xl font-bold mb-2">
-                            Register
+                            Let&lsquo;s get started
                         </div>
                         <span className="text-600 font-medium">
-                            Let&lsquo;s get started
+                            Please enter your email so we can send you your API72 information and credentials once its built and deployed.
                         </span>
                     </div>
                     <div className="flex flex-column">
-                        <span className="p-input-icon-left w-full mb-4">
+                        {/* <span className="p-input-icon-left w-full mb-4">
                             <i className="pi pi-user"></i>
                             <InputText
                                 id="username"
@@ -63,7 +63,7 @@ const Register: Page = () => {
                                 className="w-full md:w-25rem"
                                 placeholder="Username"
                             />
-                        </span>
+                        </span> */}
                         <span className="p-input-icon-left w-full mb-4">
                             <i className="pi pi-envelope"></i>
                             <InputText
@@ -73,7 +73,7 @@ const Register: Page = () => {
                                 placeholder="Email"
                             />
                         </span>
-                        <span className="p-input-icon-left w-full mb-4">
+                        {/* <span className="p-input-icon-left w-full mb-4">
                             <i className="pi pi-lock z-2"></i>
                             <Password
                                 id="password"
@@ -84,8 +84,8 @@ const Register: Page = () => {
                                 toggleMask
                                 inputStyle={{ paddingLeft: "2.5rem" }}
                             />
-                        </span>
-                        <div className="mb-4 flex flex-wrap">
+                        </span> */}
+                        {/* <div className="mb-4 flex flex-wrap">
                             <Checkbox
                                 name="checkbox"
                                 checked={confirmed}
@@ -103,14 +103,14 @@ const Register: Page = () => {
                             <a className="text-600 cursor-pointer hover:text-primary cursor-pointer">
                                 Terms and Conditions
                             </a>
-                        </div>
+                        </div> */}
                         <Button
-                            label="Sign Up"
+                            label="Start deployment"
                             className="w-full mb-4"
                             onClick={() => router.push("/")}
                         ></Button>
                         <span className="font-medium text-600">
-                            Already have an account?{" "}
+                            Already have an API72 url?{" "}
                             <a className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
                                 Login
                             </a>

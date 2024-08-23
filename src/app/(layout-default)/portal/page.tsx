@@ -179,17 +179,17 @@ const Portal = () => {
             <div className="col-12">
                 <div className="flex flex-column sm:flex-row align-items-center gap-4">
                     <div className="flex flex-column sm:flex-row align-items-center gap-3">
-                        <img
+                        {/* <img
                             alt="avatar"
                             src={`/demo/images/avatar/circle/avatar-f-1.png`}
                             className="w-4rem h-4rem flex-shrink-0"
-                        />
+                        /> */}
                         <div className="flex flex-column align-items-center sm:align-items-start">
                             <span className="text-900 font-bold text-4xl">
                                 {`${username}-xxxx.xxxx`}
                             </span>
                             <p className="text-600 m-0">
-                                @mbogo-mit
+                                https://fed62ks9a8.execute-api.us-east-2.amazonaws.com/v3/
                             </p>
                         </div>
                     </div>
