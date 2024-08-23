@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import React from "react";
+import { Suspense } from "react";
 import Layout from "@/layout/layout";
 
 import { LayoutProvider } from "@/layout/context/layoutcontext";
@@ -39,8 +40,13 @@ export const metadata: Metadata = {
 export default function MainLayout({ children }: MainLayoutProps) {
     return (
         <React.Fragment>
-            {<Layout>{children}</Layout> }
-            <AppConfig minimal />
+            <Suspense fallback={<>Loading...</>}>
+                <>
+                    {<Layout>{children}</Layout> }
+                    <AppConfig minimal />
+                </>
+            </Suspense>
+            
         </React.Fragment>
     );
 }
