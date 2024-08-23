@@ -15,6 +15,7 @@ export const initialData: InitialData = {
       id: 'my-api',
       iconId: '4',
       label: 'Nexus',
+      /* @ts-ignore */
       width: 100,
       position: {
         x: 0,
