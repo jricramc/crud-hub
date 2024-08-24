@@ -22,7 +22,7 @@ const MenuDemo = ({ children }: any) => {
     const pathname = usePathname();
 
     const checkActiveIndex = useCallback(() => {
-        const paths = pathname.split("/");
+        const paths = pathname?.split("/") || [];
         const currentPath = paths[paths.length - 1];
 
         switch (currentPath) {

@@ -11,7 +11,7 @@ const AppBreadcrumb = (props: AppBreadcrumbProps) => {
 
     useEffect(() => {
         const filteredBreadcrumbs = breadcrumbs?.find((crumb: Breadcrumb) => {
-            return crumb.to?.replace(/\/$/, "") === pathname.replace(/\/$/, "");
+            return crumb.to?.replace(/\/$/, "") === pathname?.replace(/\/$/, "");
         });
         setBreadcrumb(filteredBreadcrumbs ?? null);
     }, [pathname, breadcrumbs]);
