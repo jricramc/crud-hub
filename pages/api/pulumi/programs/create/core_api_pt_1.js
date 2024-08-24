@@ -118,61 +118,61 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     // ]});
 
 
-    // // Define a policy to access DynamoDB
-    // const lam_policy = {
-    //     Version: "2012-10-17",
-    //     Statement: [
-    //         {
-    //             Effect: "Allow",
-    //             Action: [
-    //                 // DynamoDB actions
-    //                 "dynamodb:PutItem",     // Create
-    //                 "dynamodb:GetItem",     // Read
-    //                 "dynamodb:UpdateItem",  // Update
-    //                 "dynamodb:DeleteItem",  // Delete
-    //                 "dynamodb:Scan",        // Scan is often used to read all items
-    //                 "dynamodb:Query",       // Query is often used with indexes
-    //             ],
-    //             Resource: "*",
-    //         },
-    //         {
-    //             Effect: "Allow",
-    //             Action: [
-    //                 // CloudWatch Logs actions
-    //                 "logs:CreateLogGroup",
-    //                 "logs:CreateLogStream",
-    //                 "logs:PutLogEvents",
-    //             ],
-    //             Resource: "*",
-    //         },
-    //     ],
-    // };
+    // Define a policy to access DynamoDB
+    const lam_policy = {
+        Version: "2012-10-17",
+        Statement: [
+            {
+                Effect: "Allow",
+                Action: [
+                    // DynamoDB actions
+                    "dynamodb:PutItem",     // Create
+                    "dynamodb:GetItem",     // Read
+                    "dynamodb:UpdateItem",  // Update
+                    "dynamodb:DeleteItem",  // Delete
+                    "dynamodb:Scan",        // Scan is often used to read all items
+                    "dynamodb:Query",       // Query is often used with indexes
+                ],
+                Resource: "*",
+            },
+            {
+                Effect: "Allow",
+                Action: [
+                    // CloudWatch Logs actions
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                ],
+                Resource: "*",
+            },
+        ],
+    };
     
-    // // Create a role and attach our new policy
-    // const lam_role = new iam.Role(`lam-role-${rid}`, {
-    //     assumeRolePolicy: JSON.stringify({
-    //         Version: "2012-10-17",
-    //         Statement: [
-    //             {
-    //                 Action: "sts:AssumeRole",
-    //                 Principal: {
-    //                     Service: "lambda.amazonaws.com",
-    //                 },
-    //                 Effect: "Allow",
-    //             },
-    //         ],
-    //     }),
-    // });
+    // Create a role and attach our new policy
+    const lam_role = new iam.Role(`lam-role-${rid}`, {
+        assumeRolePolicy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+                {
+                    Action: "sts:AssumeRole",
+                    Principal: {
+                        Service: "lambda.amazonaws.com",
+                    },
+                    Effect: "Allow",
+                },
+            ],
+        }),
+    });
 
-    // new iam.RolePolicy(`role-policy-${rid}`, {
-    //     role: lam_role.id,
-    //     policy: JSON.stringify(lam_policy)
-    // },
-    // { dependsOn: [
-    //     // lam_role,
-    //     // lam_policy,
-    // ]}
-    // );
+    new iam.RolePolicy(`role-policy-${rid}`, {
+        role: lam_role.id,
+        policy: JSON.stringify(lam_policy)
+    },
+    { dependsOn: [
+        // lam_role,
+        // lam_policy,
+    ]}
+    );
 
 
 
