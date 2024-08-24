@@ -70,7 +70,7 @@ const Register: Page = () => {
     const handleDeploy = async () => {
         setDeployStageProgress(10);
         setButtonStatus(1);
-        await axios.post('https://webhub.up.railway.app/api/deploy/coreAPI', {}, {
+        await axios.post('https://webhub.up.railway.app/api/deploy/coreAPI', { email }, {
             headers: {
               'Content-Type': 'application/json',
               // 'ledger-api-key': process.env.NEXT_PUBLIC_LEDGER_API_KEY,

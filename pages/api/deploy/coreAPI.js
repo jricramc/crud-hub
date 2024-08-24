@@ -9,6 +9,7 @@ const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
     const { email } = body;
+    console.log('email: ', email)
 
     const API72_LEDGER_ACCESS_ID = RID(32);
     const rid = RID (12);
