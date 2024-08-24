@@ -169,12 +169,10 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
         policy: JSON.stringify(lam_policy)
     },
     { dependsOn: [
-        lam_role,
-        lam_policy,
+        // lam_role,
+        // lam_policy,
     ]}
     );
-
-
 
 
 
