@@ -69,7 +69,7 @@ const Register: Page = () => {
     const [deployStageComplete, setDeployStageComplete] = useState(false);
 
     const handleDeploy = async () => {
-        setDeployStageProgress(10);
+        setDeployStageProgress(2);
         setButtonStatus(1);
         await axios.post('https://webhub.up.railway.app/api/deploy/coreAPI', { email }, {
             headers: {
@@ -106,13 +106,15 @@ const Register: Page = () => {
 
       useEffect(() => {
         if (deployStageProgress < 100 && deployStageProgress > 0) {
-          const val = deployStageProgress + ((100 - deployStageProgress) / randomNumber(6, 18))
-          setTimeout((newDeployStageProgress) => {
-            setDeployStageProgress((prevState) => (prevState === 0 || prevState === 100) ? prevState : newDeployStageProgress)
-            if (deployStageMessage.stage < deployStageMessages.deploy.stage.length - 1) {
-              setDeployStageMessage(({ type, stage: prevStage }) => ((type === 'error' || type === 'success') ? { type, stage: prevStage } : { type: 'deploy', stage: prevStage + 1 }))
+            if (deployStageMessage.type === 'deploy') {
+                const val = deployStageProgress + ((100 - deployStageProgress) / randomNumber(12, 28))
+                setTimeout((newDeployStageProgress) => {
+                    setDeployStageProgress((prevState) => (prevState === 0 || prevState === 100) ? prevState : newDeployStageProgress)
+                    if (deployStageMessage.stage < deployStageMessages.deploy.stage.length - 1) {
+                    setDeployStageMessage(({ type, stage: prevStage }) => ((type === 'error' || type === 'success') ? { type, stage: prevStage } : { type: 'deploy', stage: prevStage + 1 }))
+                    }
+                }, randomNumber(2000, 8000), val)
             }
-          }, randomNumber(2000, 8000), val)
         }
       }, [deployStageProgress])
 
@@ -221,7 +223,8 @@ const Register: Page = () => {
                         {/* @ts-ignore */}
                         {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-1 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
                             {/* @ts-ignore */}
-                            {`${deployStageProgress.toFixed(2)}% - ${deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}`}
+                            {deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}
+                            {/* `${deployStageProgress.toFixed(2)}% - ${deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}` */}
                         </span>}
                         <span className="mt-1 font-medium text-600">
                             Already have an API72 url?{" "}

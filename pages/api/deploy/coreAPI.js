@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { randomUsernameGenerator } from '@/utils/utils';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
@@ -9,7 +10,6 @@ const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
     const { email } = body;
-    console.log('email: ', email)
 
     const API72_LEDGER_ACCESS_ID = RID(32);
     const rid = RID (12);
@@ -94,9 +94,15 @@ const handler = async (req, res) => {
               ec2CloudfrontDistribution: { value: ec2_cloud_front_distribution }
             } = upRes2.output;
 
-            
+            const api_username = randomUsernameGenerator();
+            const api_user_passkey = randomNumber(10000000, 99999999);
+            console.log('api_username: ', api_username);
+            console.log('api_user_passkey: ', api_user_passkey);
+
             const data = {
               email,
+              api_username,
+              api_user_passkey,
               r_id: rid,
               secret_rid: secretRid,
               api_url,

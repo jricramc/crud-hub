@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
-import { randomUsernameGenerator } from "@/utils/utils";
+import { randomUsernameGenerator, readLedgerEntry } from "@/utils/utils";
 
 const VerifyAPI: Page = () => {
     const router = useRouter();
@@ -14,12 +14,94 @@ const VerifyAPI: Page = () => {
 
     const [username, setUserName] = useState('...');
 
+    const urlStatusStates = {
+        none: {
+            valid: false,
+            msg: 'Please enter your API72 URL.',
+            variant: 'secondary',
+            style: {},
+            textColor: 'text-600'
+        },
+        invalid: {
+            valid: false,
+            msg: 'Invalid URL',
+            variant: 'warning',
+            style: {},
+            textColor: 'text-orange-500'
+        },
+        loading: {
+            valid: true,
+            msg: 'Loading...',
+            variant: 'secondary',
+            style: {},
+            textColor: 'text-blue-500'
+        },
+        success: {
+            valid: true,
+            msg: 'Verified API72 URL!',
+            variant: 'success',
+            style: {},
+            textColor: 'text-green-500'
+        },
+        error: {
+            valid: false,
+            msg: 'Error loading URL',
+            variant: 'danger',
+            style: {},
+            textColor: 'text-red-500'
+        },
+    }
+
+    // @ts-ignore
+    const [apiURLValue, setApiURLValue] = useState(router?.query?.url);
+    const [URLStatus, setURLStatus] = useState('none');
+
     useEffect(() => {
         setTimeout(() => {
             setUserName(randomUsernameGenerator());
         }, 5000)
         
     }, [])
+
+    useEffect(() => {
+
+        let urlStatusKey = 'invalid';
+        let apiID = undefined;
+
+        if (!apiURLValue?.length) {
+            urlStatusKey = 'none'
+        } else {
+            const regex = /(https?:(\/\/))?([a-z0-9]*)\.execute-api\.[a-z0-9-]+\.amazonaws\.com/;
+            const matchRes = apiURLValue.match(regex);
+            if (matchRes && matchRes[2]) {
+                urlStatusKey = 'loading';
+                apiID = matchRes[3];
+            }
+        }
+
+        setURLStatus(urlStatusKey);
+
+        const url = apiURLValue;
+
+        // @ts-ignore
+        if (urlStatusStates[urlStatusKey]?.valid) {
+
+            console.log('api_id: ', apiID);
+
+            // @ts-ignore
+            readLedgerEntry({ api_id: apiID }).then(({ ledger_entry }) => {
+                console.log('ledger_entry: ', ledger_entry);
+                setURLStatus('success');
+
+
+            }).catch((err) => {
+                console.log(`err: ${err}`);
+                setURLStatus('error');
+            });
+
+        }
+
+    }, [apiURLValue]);
 
     return (
         <>
@@ -76,8 +158,10 @@ const VerifyAPI: Page = () => {
                                 placeholder="https://xxxxxxxxxx.execute-api.us-east-2.amazonaws.com/v3/"
                             />
                         </span>
-                        <span className="text-green-500 font-medium mb-4">
-                            Please enter your API72 url
+                        {/* @ts-ignore */}
+                        <span className={`${urlStatusStates[URLStatus].textColor} font-medium mb-4`}>
+                            {/* @ts-ignore */}
+                            {urlStatusStates[URLStatus].msg}
                         </span>
                         <Button
                             icon="pi pi-lock-open"
