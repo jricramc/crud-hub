@@ -16,7 +16,6 @@ import "@/styles/layout/layout.scss";
 
 interface MainLayoutProps {
     children: React.ReactNode;
-    session: Session | null;
 }
 
 // export const metadata: Metadata = {
@@ -39,26 +38,24 @@ interface MainLayoutProps {
 //     },
 // };
 
-export default function MainLayout({ children, session }: MainLayoutProps) {
+export default function MainLayout({ children }: MainLayoutProps) {
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
                 <link
                     id="theme-link"
-                    href={`/theme/theme-dim/orange/theme.css`}
+                    href={`/theme/theme-light/orange/theme.css`}
                     rel="stylesheet"
                 ></link>
             </head>
             <body>
-                <SessionProvider session={session}>
+                <SessionProvider>
                     <PrimeReactProvider>
                         <LayoutProvider>
                             {children}
-                            {/* <Layout>{children}</Layout> */}
                         </LayoutProvider>
                     </PrimeReactProvider>
                 </SessionProvider>
-                
             </body>
         </html>
     );
