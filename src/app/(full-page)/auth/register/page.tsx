@@ -5,14 +5,115 @@ import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
+import axios from "axios";
 
 const Register: Page = () => {
     const [confirmed, setConfirmed] = useState(false);
     const router = useRouter();
     const { layoutConfig } = useContext(LayoutContext);
     const dark = layoutConfig.colorScheme !== "light";
+
+    const [email, setEmail] = useState('');
+
+    const [buttonStatus, setButtonStatus] = useState(0);
+    const [deployStage, setDeployStage] = useState<number | null>(null);
+    const [deployStageProgress, setDeployStageProgress] = useState(0);
+    const deployStageMessages = {
+        deploy: {
+            stage: [
+                'Initializing deployment',
+                'Building:: stacks',
+                'Waiting for AWS...',
+                'Syncing:: payload',
+                'Retry AWS...',
+                'Syncing:: resources',
+                'Retry AWS...',
+                'Waiting for server',
+                'Handling endpoints...',
+                'Checking permissions',
+                'Generating link...',
+                '[Warning]: slow server response',
+                'Generating link...',
+                '[Warning]: slow server response',
+                'Generating link...',
+            ],
+            variant: 'outline',
+            textColor: 'text-blue-500'
+        },
+        error: {
+            stage: [
+                'Error deploying API'
+            ],
+            variant: 'destructive',
+            textColor: 'text-red-500'
+        },
+        timeout: {
+            stage: [
+                'Stream timeout: your service may still deploy, but it took to long to respond',
+            ],
+            variant: 'destructive',
+            textColor: 'text-orange-500'
+        },
+        success: {
+            stage: [
+                'API Successfully Deployed'
+            ],
+            variant: 'primary',
+            textColor: 'text-green-500'
+        },
+    };
+    const [deployStageMessage, setDeployStageMessage] = useState({ type: 'deploy', stage: 0 });
+    const [deployStageComplete, setDeployStageComplete] = useState(false);
+
+    const handleDeploy = async () => {
+        setDeployStageProgress(10);
+        setButtonStatus(1);
+        await axios.post('https://webhub.up.railway.app/api/deploy/coreAPI', {}, {
+            headers: {
+              'Content-Type': 'application/json',
+              // 'ledger-api-key': process.env.NEXT_PUBLIC_LEDGER_API_KEY,
+            },
+          }).then(async (response) => {
+            console.log('response: ', response)
+            // const body = await response.json();
+            // console.log(body);
+            // if (body.err) {
+            //   console.log('error occured ', body.err);
+            //   setDeployStageProgress(0)
+            //   setDeployStageMessage({ type: 'error', stage: 0 })
+            // } else {
+            //   // const { upRes: { data: { r_id, api_url } } } = body;
+            //   console.log('body: ', body);
+            //   const { api_url, r_id } = body;
+            //   console.log('api_url: ', api_url)
+            //   setDeployedAPIURL(api_url.slice(-1) === '/' ? api_url.slice(0, -1) : api_url);
+            //   setDeployStageProgress(100);
+            //   setDeployStageMessage({ type: 'success', stage: 0 })
+            //   setDeployStage(0);
+            // }
+          })
+          .catch((err) => {
+              console.log('err: ', err);
+            //   setDeployStageMessage({ type: 'timeout', stage: 0 });
+            //   setDeployStageProgress(0)
+            setButtonStatus(2);
+            setDeployStageMessage({ type: 'error', stage: 0 });
+          });
+      };
+
+      useEffect(() => {
+        if (deployStageProgress < 100 && deployStageProgress > 0) {
+          const val = deployStageProgress + ((100 - deployStageProgress) / 12)
+          setTimeout((newDeployStageProgress) => {
+            setDeployStageProgress((prevState) => (prevState === 0 || prevState === 100) ? prevState : newDeployStageProgress)
+            if (deployStageMessage.stage < deployStageMessages.deploy.stage.length - 1) {
+              setDeployStageMessage(({ type, stage: prevStage }) => ((type === 'error' || type === 'success') ? { type, stage: prevStage } : { type: 'deploy', stage: prevStage + 1 }))
+            }
+          }, 5000, val)
+        }
+      }, [deployStageProgress])
 
     return (
         <>
@@ -71,6 +172,8 @@ const Register: Page = () => {
                                 type="text"
                                 className="w-full md:w-25rem"
                                 placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         </span>
                         {/* <span className="p-input-icon-left w-full mb-4">
@@ -105,11 +208,21 @@ const Register: Page = () => {
                             </a>
                         </div> */}
                         <Button
-                            label="Start deployment"
-                            className="w-full mb-4"
-                            onClick={() => router.push("/")}
+                            label={["Start deployment", "Building...", "Try again"][buttonStatus]}
+                            className="w-full mb-3"
+                            onClick={() => {
+                                if (buttonStatus === 0 || buttonStatus === 2) {
+                                    handleDeploy();
+                                }
+                            }}
+                            disabled={email.length === 0 || buttonStatus === 1}
                         ></Button>
-                        <span className="font-medium text-600">
+                        {/* @ts-ignore */}
+                        {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-1 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
+                            {/* @ts-ignore */}
+                            {deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}
+                        </span>}
+                        <span className="mt-1 font-medium text-600">
                             Already have an API72 url?{" "}
                             <a className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
                                 Login
