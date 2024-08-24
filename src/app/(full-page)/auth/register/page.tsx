@@ -221,7 +221,7 @@ const Register: Page = () => {
                             disabled={email.length === 0 || buttonStatus === 1}
                         ></Button>
                         {/* @ts-ignore */}
-                        {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-1 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
+                        {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-3 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
                             {/* @ts-ignore */}
                             {deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}
                             {/* `${deployStageProgress.toFixed(2)}% - ${deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}` */}

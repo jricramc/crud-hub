@@ -1,16 +1,43 @@
-import NextAuth from 'next-auth/next';
-import GoogleProvider from 'next-auth/providers/google';
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 export default NextAuth({
-
-  // Configure the base URL
-  // baseUrl: process.env.NEXTAUTH_URL || publicRuntimeConfig.NEXTAUTH_URL, // Replace with your actual base URL
-
   providers: [
-    GoogleProvider({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
-    })
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        // Replace this with your own authentication logic
+        if (credentials.LEDGER_API_KEY === process.env.NEXT_PUBLIC_LEDGER_API_KEY) {
+          console.log(credentials?.ledger_entry);
+          return JSON.parse(credentials?.ledger_entry);
+        } else {
+          return null;
+        }
+      },
+    }),
   ],
-  secret: process.env.NEXT_PUBLIC_JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      console.log("JWT Callback: ", { token, user });
+      if (user) {
+        token.user = user
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      console.log("Session Callback: ", { session, token });
+      session.user = token.user;
+      return session;
+    },
+  },
+  pages: {
+    signIn: "/auth/register",
+  },
 });

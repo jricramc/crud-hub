@@ -1,7 +1,11 @@
+"use client"; // Mark this file as a Client Component
 import { Metadata } from "next";
 import Layout from "@/layout/layout";
 
 import { LayoutProvider } from "@/layout/context/layoutcontext";
+import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
+import { Session } from 'next-auth';
+import { useState } from "react";
 
 import "primeflex/primeflex.css";
 import "primeicons/primeicons.css";
@@ -12,29 +16,30 @@ import "@/styles/layout/layout.scss";
 
 interface MainLayoutProps {
     children: React.ReactNode;
+    session: Session | null;
 }
 
-export const metadata: Metadata = {
-    title: "PrimeReact APOLLO",
-    description:
-        "The ultimate collection of design-agnostic, flexible and accessible React UI Components.",
-    robots: { index: false, follow: false },
-    viewport: { initialScale: 1, width: "device-width" },
-    openGraph: {
-        type: "website",
-        title: "PrimeReact APOLLO-REACT",
-        url: "https://www.primefaces.org/apollo-react",
-        description:
-            "The ultimate collection of design-agnostic, flexible and accessible React UI Components.",
-        images: ["https://www.primefaces.org/static/social/apollo-react.png"],
-        ttl: 604800,
-    },
-    icons: {
-        icon: "/favicon.ico",
-    },
-};
+// export const metadata: Metadata = {
+//     title: "PrimeReact APOLLO",
+//     description:
+//         "The ultimate collection of design-agnostic, flexible and accessible React UI Components.",
+//     robots: { index: false, follow: false },
+//     viewport: { initialScale: 1, width: "device-width" },
+//     openGraph: {
+//         type: "website",
+//         title: "PrimeReact APOLLO-REACT",
+//         url: "https://www.primefaces.org/apollo-react",
+//         description:
+//             "The ultimate collection of design-agnostic, flexible and accessible React UI Components.",
+//         images: ["https://www.primefaces.org/static/social/apollo-react.png"],
+//         ttl: 604800,
+//     },
+//     icons: {
+//         icon: "/favicon.ico",
+//     },
+// };
 
-export default function MainLayout({ children }: MainLayoutProps) {
+export default function MainLayout({ children, session }: MainLayoutProps) {
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
@@ -45,12 +50,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 ></link>
             </head>
             <body>
-                <PrimeReactProvider>
-                    <LayoutProvider>
-                        {children}
-                        {/* <Layout>{children}</Layout> */}
-                    </LayoutProvider>
-                </PrimeReactProvider>
+                <SessionProvider session={session}>
+                    <PrimeReactProvider>
+                        <LayoutProvider>
+                            {children}
+                            {/* <Layout>{children}</Layout> */}
+                        </LayoutProvider>
+                    </PrimeReactProvider>
+                </SessionProvider>
+                
             </body>
         </html>
     );

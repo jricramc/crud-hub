@@ -1,18 +1,25 @@
 "use client";
 import type { Page } from "@/types";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
 import { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 import { randomUsernameGenerator, readLedgerEntry } from "@/utils/utils";
 
 const VerifyAPI: Page = () => {
+    const { data: session } = useSession();
+
     const router = useRouter();
     const { layoutConfig } = useContext(LayoutContext);
     const dark = layoutConfig.colorScheme !== "light";
 
+    const [verificationStep, setVerificationStep] = useState(0);
     const [username, setUserName] = useState('...');
+    const [userPasskey, setUserPasskey] = useState<number | null>(null);
+    const [ledgerEntry, setLedgerEntry] = useState();
 
     const urlStatusStates = {
         none: {
@@ -56,6 +63,110 @@ const VerifyAPI: Page = () => {
     const [apiURLValue, setApiURLValue] = useState(router?.query?.url);
     const [URLStatus, setURLStatus] = useState('none');
 
+    const [passkey, setPasskey] = useState<Array<number | null>>([null, null, null, null, null, null, null, null]);
+    const [autoFocusIndex, setAutoFocusIndex] = useState<number | null>(0);
+    const [backspacePressed, setBackspacePressed] = useState<boolean>(false);
+    const [verificationStatus, setVerificationStatus] = useState(0);
+    const [redirectCountdown, setRedirectCountdown] = useState<number>(5);
+
+    const setPasskeyValue = (val: number | null, index: number) => {
+        setPasskey((prevState) => {
+            const newState = prevState.slice();
+            newState[index] = val;
+
+            return newState;
+        })
+    }
+
+    const onDigitInput = (
+        event: React.KeyboardEvent<HTMLInputElement>,
+        index: number
+    ) => {
+        console.log('event: ', event);
+        // @ts-ignore
+        const { code, key } = event;
+        const isDigit = code.includes("Numpad") || code.includes("Digit");
+        const isBackspace = code === "Backspace";
+        let nextInputId: number | null = null;
+
+        let backspace = false;
+
+        if (isDigit) {
+            nextInputId = index + 1;
+        } else if (isBackspace) {
+            console.log('passkey[index]: ', passkey[index]);
+            if (passkey[index] === null || passkey[index] === undefined) {
+                nextInputId = index - 1;
+                backspace = true;
+            }
+        }
+
+        if (isDigit || isBackspace) {
+            const value = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key) ? parseInt(key) : null;
+            setPasskeyValue(value, index)
+
+            setAutoFocusIndex(nextInputId);
+            if (backspace) {
+                setBackspacePressed(true);
+            }
+        }
+
+    };
+
+    const autoFocus = () => {
+        const element =
+            autoFocusIndex !== null
+                ? document.getElementById("val" + autoFocusIndex)
+                : null;
+
+        if (element) {
+            element.focus();
+        }
+    };
+
+    const verifyUserPasskey = async () => {
+        if (passkey.join('') === userPasskey?.toString()) {
+            const result = await signIn("credentials", {
+                redirect: false,
+                LEDGER_API_KEY: process.env.NEXT_PUBLIC_LEDGER_API_KEY,
+                ledger_entry: JSON.stringify(ledgerEntry),
+              });
+          
+              if (result?.ok) {
+                console.log('session created: ', result);
+              } else {
+                console.log('error in creating session');
+              }
+            setVerificationStatus(2);
+        } else {
+            setVerificationStatus(1)
+        }
+        
+    };
+
+    useEffect(() => {
+        if (verificationStatus === 2) {
+            if (redirectCountdown === 0) {
+                router.push('/portal');
+            } else {
+                setTimeout(() => {
+                    setRedirectCountdown((prevState) => prevState - 1);
+                }, 1000);
+            }
+        }
+    }, [verificationStatus, redirectCountdown])
+
+    useEffect(() => {
+        if(backspacePressed) {
+            setBackspacePressed(false);
+            autoFocus();
+        }
+    }, [backspacePressed])
+
+    useEffect(() => {
+        setVerificationStatus(0);
+    }, [passkey])
+
     useEffect(() => {
 
         let urlStatusKey = 'invalid';
@@ -82,12 +193,15 @@ const VerifyAPI: Page = () => {
             console.log('api_id: ', apiID);
 
             // @ts-ignore
-            readLedgerEntry({ api_id: apiID }).then(({ ledger_entry }) => {
+            readLedgerEntry('', { api_id: apiID }).then(({ ledger_entry }) => {
                 console.log('ledger_entry: ', ledger_entry);
                 const api_username = ledger_entry?.value?.data.api_username;
+                const api_user_passkey = ledger_entry?.value?.data.api_user_passkey;
                 setURLStatus('success');
                 setUserName(api_username || '{unknown}');
-
+                setUserPasskey(api_user_passkey);
+                console.log('ledger_entry:::: ', ledger_entry?.value);
+                setLedgerEntry(ledger_entry?.value);
 
             }).catch((err) => {
                 console.log(`err: ${err}`);
@@ -129,7 +243,7 @@ const VerifyAPI: Page = () => {
                 />
             </svg>
             <div className="px-5 min-h-screen flex justify-content-center align-items-center">
-                <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
+                {verificationStep === 0 ? <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
                     <div className="mb-6 flex flex-column align-items-center">
                         <div className="text-900 text-xl font-bold mb-4">
                             Verify your API
@@ -164,10 +278,140 @@ const VerifyAPI: Page = () => {
                             icon="pi pi-lock-open"
                             label="Continue"
                             className="w-full"
-                            onClick={() => router.push("/")}
+                            onClick={() => setVerificationStep(1)}
                         ></Button>
                     </div>
-                </div>
+                </div> : <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
+                    <div className="mb-4">
+                        <div className="text-900 text-xl font-bold mb-3">
+                            {`Hello, ${username}-xxxx.xxxx`}
+                        </div>
+                        <span className="text-600 font-medium">
+                            Please enter your 8 digit user passkey for your API72 url.
+                        </span>
+                        <div className="text-600 font-medium mt-1 mb-4" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-green-500" style={{ fontWeight: 'bold' }}>Verified API:&nbsp;</span>https://u0thn4gdw3.execute-api.us-east-2.amazonaws.com/v3/
+                        </div>
+                        {/* <div className="flex align-items-center mt-1">
+                            <i className="pi pi-user text-600"></i>
+                            <span className="text-900 font-bold ml-2">
+                                compulsory-pink-fowl-xxxx.xxxx
+                            </span>
+                        </div> */}
+                    </div>
+                    <div className="flex flex-column">
+                        <div className="flex justify-content-between w-full align-items-center mb-4 gap-3">
+                            <InputNumber
+                                id="input0"
+                                inputId="val0"
+                                value={passkey[0]}
+                                onKeyDown={(e) => onDigitInput(e, 0)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                autoFocus
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input1"
+                                inputId="val1"
+                                value={passkey[1]}
+                                onKeyDown={(e) => onDigitInput(e, 1)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input2"
+                                inputId="val2"
+                                value={passkey[2]}
+                                onKeyDown={(e) => onDigitInput(e, 2)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input3"
+                                inputId="val3"
+                                value={passkey[3]}
+                                onKeyDown={(e) => onDigitInput(e, 3)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input4"
+                                inputId="val4"
+                                value={passkey[4]}
+                                onKeyDown={(e) => onDigitInput(e, 4)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input5"
+                                inputId="val5"
+                                value={passkey[5]}
+                                onKeyDown={(e) => onDigitInput(e, 5)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input6"
+                                inputId="val6"
+                                value={passkey[6]}
+                                onKeyDown={(e) => onDigitInput(e, 6)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                            <InputNumber
+                                id="input7"
+                                inputId="val7"
+                                value={passkey[7]}
+                                onKeyDown={(e) => onDigitInput(e, 7)}
+                                onKeyUp={() => autoFocus()}
+                                inputClassName="w-3rem text-center"
+                                maxLength={1}
+                                disabled={verificationStatus === 2}
+                            ></InputNumber>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 justify-content-between">
+                            {/* <Button
+                                label="Cancel"
+                                outlined
+                                className="flex-auto"
+                                onClick={() => router.push("/")}
+                            ></Button> */}
+                            <Button
+                                label={['Verify', 'Try again', 'Continue'][verificationStatus]}
+                                className="flex-auto"
+                                onClick={() => {
+                                    if (verificationStatus === 2) {
+                                        router.push('/portal')
+                                    } else {
+                                        verifyUserPasskey();
+                                    }
+                                }}
+                                disabled={passkey.some((v) => (v === null || v === undefined))}
+                            ></Button>
+                        </div>
+                        {verificationStatus === 1 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-red-500" style={{ fontWeight: 'bold' }}>Incorrect passkey:&nbsp;</span>check the email sent to you with your passkey.
+                        </div>}
+                        {verificationStatus === 2 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Successfull:&nbsp;</span>{`redirecting in ${redirectCountdown} seconds`}
+                        </div>}
+                    </div>
+                </div>}
             </div>
         </>
     );

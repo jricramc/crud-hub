@@ -28,7 +28,7 @@ const TreeDemo = () => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <h5>Network</h5>
+                    <h5>Network Architecture</h5>
                     <TreeTable
                         value={files2}
                         selectionMode="single"
@@ -36,10 +36,9 @@ const TreeDemo = () => {
                         onSelectionChange={(e) => setSelectedFileKeys2(e.value)}
                     >
                         <Column field="name" header="Name" expander />
-                        <Column field="description" header="Description" />
                         <Column field="type" header="Resource Type" />
+                        <Column field="description" header="Description" />
                         <Column field="status" header="Status" />
-                        <Column field="created" header="Created" />
                     </TreeTable>
                 </div>
             </div>

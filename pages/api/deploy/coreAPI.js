@@ -99,6 +99,8 @@ const handler = async (req, res) => {
             console.log('api_username: ', api_username);
             console.log('api_user_passkey: ', api_user_passkey);
 
+            const date = new Date();
+
             const data = {
               email,
               api_username,
@@ -125,10 +127,11 @@ const handler = async (req, res) => {
               ec2_cloud_front_distribution: {
                 domainName: ec2_cloud_front_distribution.domainName,
               },
-              date_created: new Date(),
+              date_created: date,
+              date_renewed: date,
             };
 
-            const createLedgerEntryRes = await createLedgerEntry({
+            const createLedgerEntryRes = await createLedgerEntry(process.env.NEXT_PUBLIC_WEBHUB_HOST, {
               ledger_access_id: API72_LEDGER_ACCESS_ID,
               data,
             }).then((response) => {

@@ -1,9 +1,12 @@
+import { useSession } from "next-auth/react";
 import { Badge } from "primereact/badge";
 import { Sidebar } from "primereact/sidebar";
 import { useContext } from "react";
 import { LayoutContext } from "./context/layoutcontext";
 
 const AppProfileSidebar = () => {
+    const { data: session } = useSession();
+
     const { layoutState, setLayoutState } = useContext(LayoutContext);
 
     const onProfileSidebarHide = () => {
@@ -21,13 +24,14 @@ const AppProfileSidebar = () => {
             className="layout-profile-sidebar w-full sm:w-25rem"
         >
             <div className="flex flex-column mx-auto md:mx-0">
-                <span className="mb-2 font-semibold">Welcome</span>
+                <span className="mb-2 font-semibold">Hello,</span>
                 <span className="text-color-secondary font-medium mb-5">
-                    Isabella Andolini
+                    {/* @ts-ignore */}
+                    {session?.user?.data?.api_username}
                 </span>
 
                 <ul className="list-none m-0 p-0">
-                    <li>
+                    {/* <li>
                         <a className="cursor-pointer flex surface-border mb-3 p-3 align-items-center border-1 surface-border border-round hover:surface-hover transition-colors transition-duration-150">
                             <span>
                                 <i className="pi pi-user text-xl text-primary"></i>
@@ -71,7 +75,7 @@ const AppProfileSidebar = () => {
                                 </p>
                             </div>
                         </a>
-                    </li>
+                    </li> */}
                     <li>
                         <a className="cursor-pointer flex surface-border mb-3 p-3 align-items-center border-1 surface-border border-round hover:surface-hover transition-colors transition-duration-150">
                             <span>
@@ -81,16 +85,16 @@ const AppProfileSidebar = () => {
                                 <span className="mb-2 font-semibold">
                                     Sign Out
                                 </span>
-                                <p className="text-color-secondary m-0">
+                                {/* <p className="text-color-secondary m-0">
                                     Sed ut perspiciatis
-                                </p>
+                                </p> */}
                             </div>
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <div className="flex flex-column mt-5 mx-auto md:mx-0">
+            {/* <div className="flex flex-column mt-5 mx-auto md:mx-0">
                 <span className="mb-2 font-semibold">Notifications</span>
                 <span className="text-color-secondary font-medium mb-5">
                     You have 3 notifications
@@ -213,7 +217,7 @@ const AppProfileSidebar = () => {
                         </a>
                     </li>
                 </ul>
-            </div>
+            </div> */}
         </Sidebar>
     );
 };

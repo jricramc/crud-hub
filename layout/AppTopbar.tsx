@@ -35,7 +35,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
 
             <div className="topbar-end">
                 <ul className="topbar-menu">
-                    <li className="topbar-search">
+                    {/* <li className="topbar-search">
                         <span className="p-input-icon-left">
                             <i className="pi pi-search"></i>
                             <InputText
@@ -55,8 +55,19 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                             className="flex-shrink-0"
                             onClick={onConfigButtonClick}
                         ></Button>
+                    </li> */}
+                    <li className="ml-3">
+                        <Button
+                            type="button"
+                            icon="pi pi-cog"
+                            text
+                            rounded
+                            severity="secondary"
+                            className="flex-shrink-0"
+                            onClick={showProfileSidebar}
+                        ></Button>
                     </li>
-                    <li className="topbar-profile">
+                    {/* <li className="topbar-profile">
                         <button
                             type="button"
                             className="p-link"
@@ -67,7 +78,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                                 alt="Profile"
                             />
                         </button>
-                    </li>
+                    </li> */}
                 </ul>
             </div>
         </div>

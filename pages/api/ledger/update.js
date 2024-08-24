@@ -3,7 +3,7 @@ import axios from 'axios';
 const handler = async (req, res) => {
   try {
     const { method, body, headers } = req;
-    const { query, data } = body;
+    const { query, $set } = body;
 
     if (headers['ledger-api-key'] === process.env.NEXT_PUBLIC_LEDGER_API_KEY) {
 
@@ -25,9 +25,7 @@ const handler = async (req, res) => {
                                     "args": [
                                         query,
                                         {
-                                            "$set": {
-                                                "data": data,
-                                            }
+                                            "$set": $set,
                                         }, // Update to set the data property
                                         { "upsert": true, "returnNewDocument": true } // Options: upsert to insert if document doesn't exist, returnOriginal: false to return the updated document
                                     ],

@@ -3,7 +3,6 @@ import axios from 'axios';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 const _webhub_db_url = 'https://7lgnkvykt8.execute-api.us-east-2.amazonaws.com'; // publicRuntimeConfig.WEBHUB_DB_URL;
-const WEBHUB_HOST_URL = process.env.NEXT_PUBLIC_WEBHUB_HOST;
 
 const API72_COLORS = [
     { name: "indigo", color: "#6366F1" },
@@ -25,8 +24,8 @@ const randomUsernameGenerator = () => uniqueNamesGenerator({
 
 
 // @ts-ignore
-const createLedgerEntry = async ({ ledger_access_id, data }) => {
-    const url = `${WEBHUB_HOST_URL}/api/ledger/create`;
+const createLedgerEntry = async (baseUrl = '', { ledger_access_id, data }) => {
+    const url = `${baseUrl}/api/ledger/create`;
   
     try {
       const response = await axios.post(url, {
@@ -64,8 +63,8 @@ const createLedgerEntry = async ({ ledger_access_id, data }) => {
   };
 
 // @ts-ignore
-const readLedgerEntry = async ({ api_id, ledger_access_id }) => {
-    const url = `${WEBHUB_HOST_URL}/api/ledger/read`;
+const readLedgerEntry = async (baseUrl = '', { api_id, ledger_access_id }) => {
+    const url = `${baseUrl}/api/ledger/read`;
 
     const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
     const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
@@ -88,8 +87,8 @@ const readLedgerEntry = async ({ api_id, ledger_access_id }) => {
 };
 
 // @ts-ignore
-const updateLedgerEntry = async ({ api_id, ledger_access_id, data }) => {
-    const url = `${WEBHUB_HOST_URL}/api/ledger/update`;
+const updateLedgerEntry = async (baseUrl = '', { api_id, ledger_access_id, data }) => {
+    const url = `${baseUrl}/api/ledger/update`;
 
     const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
     const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
@@ -113,8 +112,8 @@ const updateLedgerEntry = async ({ api_id, ledger_access_id, data }) => {
 };
 
 // @ts-ignore
-const deleteLedgerEntry = async ({ api_id, ledger_access_id }) => {
-    const url = `${WEBHUB_HOST_URL}/api/ledger/delete`;
+const deleteLedgerEntry = async (baseUrl = '', { api_id, ledger_access_id }) => {
+    const url = `${baseUrl}/api/ledger/delete`;
 
     const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
     const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];

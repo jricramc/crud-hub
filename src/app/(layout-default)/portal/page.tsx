@@ -1,4 +1,6 @@
 "use client";
+import { useSession, signIn } from "next-auth/react";
+
 import type { Demo } from "@/types";
 import { ChartData, ChartOptions } from "chart.js";
 import { Button } from "primereact/button";
@@ -11,9 +13,13 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { LayoutContext } from "@/layout/context/layoutcontext";
 import CountdownTimer from "@/demo/components/apps/countdowntimer";
 import { randomUsernameGenerator } from '@/utils/utils';
+import moment from 'moment';
 
 const Portal = () => {
+    const { data: session, status } = useSession();
+
     const [username, setUserName] = useState('');
+    const [userAPIURL, setUserAPIURL] = useState('');
     const [chartOptions, setChartOptions] = useState({});
     const [chartData, setChartData] = useState({});
     const [price, setPrice] = useState(0);
@@ -170,9 +176,22 @@ const Portal = () => {
         );
     };
 
+    // @ts-ignore
+    const expirationDate = session?.user?.data?.date_renewed || session?.user?.data?.date_created;
+    const expirationDateMsg = expirationDate ? `on ${moment(expirationDate).add(72, 'hours').calendar()}` : 'on...'
+
     useEffect(() => {
-        setUserName(randomUsernameGenerator());
-    }, [])
+        // @ts-ignore
+        if (session?.user?.data) {
+            // @ts-ignore
+            setUserName(session?.user?.data?.api_username);
+            // @ts-ignore
+            setUserAPIURL(session?.user?.data?.api_url);
+            // @ts-ignore
+            console.log(moment(session?.user?.data?.date_created).add(72, 'hours').calendar())
+        }
+        
+    }, [session])
 
     return (
         <div className="grid">
@@ -189,7 +208,7 @@ const Portal = () => {
                                 {`${username}-xxxx.xxxx`}
                             </span>
                             <p className="text-600 m-0">
-                                https://fed62ks9a8.execute-api.us-east-2.amazonaws.com/v3/
+                                {userAPIURL}
                             </p>
                         </div>
                     </div>
@@ -260,7 +279,8 @@ const Portal = () => {
                         </div>
                         
                         <div className="flex align-items-center justify-content-between">
-                            <span className="text-lg">@ 01/26/2024 23:24:56</span>
+                            {/* @ts-ignore */}
+                            <span className="text-lg">{expirationDateMsg}</span>
                             <span className="product-badge status-yellow">
                                 RENEW
                             </span>
@@ -268,7 +288,7 @@ const Portal = () => {
                     </div>
                 </div>
             </div>
-            <div className="col-12 md:col-6 xl:col-4">
+            {/* <div className="col-12 md:col-6 xl:col-4">
                 <div className="card h-full">
                     <div className="flex align-items-center justify-content-between mb-3">
                         <div className="text-900 text-xl font-semibold">
@@ -321,9 +341,9 @@ const Portal = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
-            <div className="col-12 xl:col-12">
+            {/* <div className="col-12 xl:col-12">
                 <div className="card" style={{ maxHeight: 600, overflowY: 'scroll' }}>
                     <div className="text-900 text-xl font-semibold mb-3">
                         Recent Event Logs
@@ -411,7 +431,7 @@ const Portal = () => {
                         </li>
                     </ul>
                 </div>
-            </div>
+            </div> */}
             {/* <div className="col-12 xl:col-8">
                 <div className="card">
                     <div className="text-900 text-xl font-semibold mb-3">

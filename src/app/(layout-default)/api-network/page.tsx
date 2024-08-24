@@ -1,4 +1,6 @@
 "use client";
+import { useSession } from "next-auth/react";
+import moment from 'moment';
 import type { ChartDataState, ChartOptionsState, Demo } from "@/types";
 import { ChartData, ChartOptions } from "chart.js";
 import { FilterMatchMode, FilterOperator } from "primereact/api";
@@ -17,6 +19,14 @@ import { LayoutContext } from "../../../../layout/context/layoutcontext";
 import TreeDemo from "./tree";
 
 export default function APINetwork() {
+    const { data: session, status } = useSession();
+
+    // @ts-ignore
+    const apiCreatedDate = session?.user?.data?.date_created;
+    const apiCreatedDateMsg = apiCreatedDate
+        ? `Created on ${moment(apiCreatedDate).format('ll')}`
+        : 'Created on...';
+
     const [products, setProducts] = useState<Demo.Product[]>([]);
     const [chartOptions, setChartOptions] = useState<ChartOptionsState>({});
     const [weeks] = useState([
@@ -309,7 +319,8 @@ export default function APINetwork() {
             
             <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
-                    <span className="font-semibold text-md">Automatically Deployed</span>
+                    {/* @ts-ignore */}
+                    <span className="font-semibold text-md">{apiCreatedDateMsg}</span>
                     <div className="flex justify-content-between align-items-start mt-3">
                         <div className="w-12">
                             <span className="text-4xl font-bold text-900">
@@ -362,8 +373,8 @@ export default function APINetwork() {
                                     <span className="font-medium">No Integration</span>
                                     {/* <i className="pi pi-arrow-up text-xs ml-2"></i> */}
                                 </div>
-                                <span className="product-badge status-green">
-                                    LAUNCH
+                                <span className="product-badge status-light">
+                                    Coming soon
                                 </span>
                             </div>
                         </div>
@@ -375,7 +386,7 @@ export default function APINetwork() {
                 <TreeDemo />
             </div>
 
-            <div className="col-12">
+            {/* <div className="col-12">
                 <div className="card h-auto">
                     <div className="flex align-items-start justify-content-between mb-6">
                         <span className="text-900 text-xl font-semibold">
@@ -396,7 +407,7 @@ export default function APINetwork() {
                         options={chartOptions.barOptions}
                     ></Chart>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 }
