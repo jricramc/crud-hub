@@ -216,6 +216,10 @@ const extractRegionAndAccountIdFromExecutionArn = (inputString: String) => {
     return { region, accountId };
 }
 
+const randomNumber = (min: number, max: number) => {
+  return (Math.random() * (max - min)) + min;
+};
+
 export {
     API72_COLORS,
     randomUsernameGenerator,
@@ -229,4 +233,5 @@ export {
     readLedgerEntry,
     updateLedgerEntry,
     deleteLedgerEntry,
+    randomNumber,
 };

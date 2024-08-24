@@ -169,8 +169,8 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
         policy: JSON.stringify(lam_policy)
     },
     { dependsOn: [
-        // lam_role,
-        // lam_policy,
+        lam_role,
+        lam_policy,
     ]}
     );
 
@@ -178,71 +178,71 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
 
 
 
-    // // Define a new Lambda function
-    // const createFunc = new aws.lambda.Function(`ledger-create-function-${rid}`, {
-    //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "handler.zip")),
-    //     runtime: "nodejs18.x",
-    //     handler: "handler.createHandler",
-    //     role: lam_role.arn,
-    //     environment: {
-    //         variables: {
-    //             TABLE_NAME: table.name,
-    //         },
-    //     },
-    // },
-    // { dependsOn: [
-    //     // lam_role,
-    // ]}
-    // );
+    // Define a new Lambda function
+    const createFunc = new aws.lambda.Function(`ledger-create-function-${rid}`, {
+        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "handler.zip")),
+        runtime: "nodejs18.x",
+        handler: "handler.createHandler",
+        role: lam_role.arn,
+        environment: {
+            variables: {
+                TABLE_NAME: table.name,
+            },
+        },
+    },
+    { dependsOn: [
+        // lam_role,
+    ]}
+    );
 
     
-    // const readFunc = new aws.lambda.Function(`ledger-read-function-${rid}`, {
-    //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
-    //     runtime: "nodejs18.x",
-    //     handler: "read.readHandler",
-    //     role: lam_role.arn,
-    //     environment: {
-    //         variables: {
-    //             TABLE_NAME: table.name,
-    //         },
-    //     },
-    // },
-    // { dependsOn: [
-    //     // lam_role,
-    // ]}
-    // );
+    const readFunc = new aws.lambda.Function(`ledger-read-function-${rid}`, {
+        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "read.zip")),
+        runtime: "nodejs18.x",
+        handler: "read.readHandler",
+        role: lam_role.arn,
+        environment: {
+            variables: {
+                TABLE_NAME: table.name,
+            },
+        },
+    },
+    { dependsOn: [
+        // lam_role,
+    ]}
+    );
     
-    // const updateFunc = new aws.lambda.Function(`ledger-update-function-${rid}`, {
-    //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
-    //     runtime: "nodejs18.x",
-    //     handler: "update.updateHandler",
-    //     role: lam_role.arn,
-    //     environment: {
-    //         variables: {
-    //             TABLE_NAME: table.name,
-    //         },
-    //     },
-    // },
-    // { dependsOn: [
-    //     // lam_role
-    // ]}
-    // );
+    const updateFunc = new aws.lambda.Function(`ledger-update-function-${rid}`, {
+        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "update.zip")),
+        runtime: "nodejs18.x",
+        handler: "update.updateHandler",
+        role: lam_role.arn,
+        environment: {
+            variables: {
+                TABLE_NAME: table.name,
+            },
+        },
+    },
+    { dependsOn: [
+        // lam_role
+    ]}
+    );
     
-    // const deleteFunc = new aws.lambda.Function(`ledger-delete-function-${rid}`, {
-    //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
-    //     runtime: "nodejs18.x",
-    //     handler: "delete.deleteHandler",
-    //     role: lam_role.arn,
-    //     environment: {
-    //         variables: {
-    //             TABLE_NAME: table.name,
-    //         },
-    //     },
-    // },
-    // { dependsOn: [
-    //     // lam_role
-    // ]}
-    // );
+    const deleteFunc = new aws.lambda.Function(`ledger-delete-function-${rid}`, {
+        code: new pulumi.asset.FileArchive(path.join(...directoryArray, "delete.zip")),
+        runtime: "nodejs18.x",
+        handler: "delete.deleteHandler",
+        role: lam_role.arn,
+        environment: {
+            variables: {
+                TABLE_NAME: table.name,
+            },
+        },
+    },
+    { dependsOn: [
+        // lam_role
+    ]}
+    );
 
     // const generateMintlifyDocsFunc = new aws.lambda.Function(generateMintlifyDocsLambdaName, {
     //     code: new pulumi.asset.FileArchive(path.join(...directoryArray, "mintlify.zip")),
@@ -267,18 +267,18 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     const api = new apigateway.RestAPI(`ledger-crud-api-${rid}`, {
         stageName: "v3",
         routes: [
-            // { path: "/ledger/create", method: "POST", eventHandler: createFunc },
-            // { path: "/ledger/read", method: "POST", eventHandler: readFunc },
-            // { path: "/ledger/update", method: "POST", eventHandler: updateFunc },
-            // { path: "/ledger/delete", method: "POST", eventHandler: deleteFunc },
+            { path: "/ledger/create", method: "POST", eventHandler: createFunc },
+            { path: "/ledger/read", method: "POST", eventHandler: readFunc },
+            { path: "/ledger/update", method: "POST", eventHandler: updateFunc },
+            { path: "/ledger/delete", method: "POST", eventHandler: deleteFunc },
             // { path: "/ledger/generate/mintlify-docs", method: "POST", eventHandler: generateMintlifyDocsFunc },
         ],
     },
     { dependsOn: [
-        // createFunc,
-        // readFunc,
-        // updateFunc,
-        // deleteFunc,
+        createFunc,
+        readFunc,
+        updateFunc,
+        deleteFunc,
         // generateMintlifyDocsFunc,
     ]}
     );
