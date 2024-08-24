@@ -275,10 +275,10 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
         ],
     },
     { dependsOn: [
-        createFunc,
-        readFunc,
-        updateFunc,
-        deleteFunc,
+        // createFunc,
+        // readFunc,
+        // updateFunc,
+        // deleteFunc,
         // generateMintlifyDocsFunc,
     ]}
     );
