@@ -20,13 +20,13 @@ const handler = async ({ rid, API72_LEDGER_ACCESS_ID }) => {
     });
 
 
-    // const table = new dynamodb.Table(`ledger-table-${rid}`, {
-    //     attributes: [
-    //         { name: "id", type: "S" },
-    //     ],
-    //     hashKey: "id",
-    //     billingMode: "PAY_PER_REQUEST",
-    // });
+    const table = new dynamodb.Table(`ledger-table-${rid}`, {
+        attributes: [
+            { name: "id", type: "S" },
+        ],
+        hashKey: "id",
+        billingMode: "PAY_PER_REQUEST",
+    });
 
     // Currently not using ledge_s3_bucket (comented out resource and related policies and roles)
 
