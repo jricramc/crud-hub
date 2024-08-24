@@ -155,6 +155,8 @@ const VerifyAPI: Page = () => {
                                 id="password"
                                 type="text"
                                 className="w-full md:w-25rem"
+                                value={apiURLValue}
+                                onChange={(e) => setApiURLValue(e.target.value)}
                                 placeholder="https://xxxxxxxxxx.execute-api.us-east-2.amazonaws.com/v3/"
                             />
                         </span>

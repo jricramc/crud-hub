@@ -84,8 +84,12 @@ const createLedgerEntry = async ({ ledger_access_id, data }) => {
 const readLedgerEntry = async ({ api_id, ledger_access_id }) => {
     const url = `/api/ledger/read`;
 
+    const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
+    const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
+    const query = { $or: [ ...api_id_query, ...ledger_access_id_query ] };
+
     const res = await axios.post(url, {
-        query: { $or: [ { "data.api_id": api_id }, { "ledger_access_id": ledger_access_id} ] },
+        query,
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -103,8 +107,13 @@ const readLedgerEntry = async ({ api_id, ledger_access_id }) => {
 // @ts-ignore
 const updateLedgerEntry = async ({ api_id, ledger_access_id, data }) => {
     const url = `/api/ledger/update`;
+
+    const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
+    const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
+    const query = { $or: [ ...api_id_query, ...ledger_access_id_query ] };
+
     const res = await axios.post(url, {
-        query: { $or: [ { "data.api_id": api_id }, { "ledger_access_id": ledger_access_id} ] },
+        query,
         data,
       }, {
         headers: {
@@ -123,8 +132,13 @@ const updateLedgerEntry = async ({ api_id, ledger_access_id, data }) => {
 // @ts-ignore
 const deleteLedgerEntry = async ({ api_id, ledger_access_id }) => {
     const url = `/api/ledger/delete`;
+
+    const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
+    const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
+    const query = { $or: [ ...api_id_query, ...ledger_access_id_query ] };
+
     const res = await axios.post(url, {
-        query: { $or: [ { "data.api_id": api_id }, { "ledger_access_id": ledger_access_id} ] },
+        query,
       }, {
         headers: {
           'Content-Type': 'application/json',
