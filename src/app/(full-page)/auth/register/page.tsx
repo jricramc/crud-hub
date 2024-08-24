@@ -113,7 +113,7 @@ const Register: Page = () => {
                     if (deployStageMessage.stage < deployStageMessages.deploy.stage.length - 1) {
                     setDeployStageMessage(({ type, stage: prevStage }) => ((type === 'error' || type === 'success') ? { type, stage: prevStage } : { type: 'deploy', stage: prevStage + 1 }))
                     }
-                }, randomNumber(2000, 8000), val)
+                }, randomInteger(2000, 8000), val)
             }
         }
       }, [deployStageProgress])

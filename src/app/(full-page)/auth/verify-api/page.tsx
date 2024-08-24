@@ -57,13 +57,6 @@ const VerifyAPI: Page = () => {
     const [URLStatus, setURLStatus] = useState('none');
 
     useEffect(() => {
-        setTimeout(() => {
-            setUserName(randomUsernameGenerator());
-        }, 5000)
-        
-    }, [])
-
-    useEffect(() => {
 
         let urlStatusKey = 'invalid';
         let apiID = undefined;
@@ -91,7 +84,9 @@ const VerifyAPI: Page = () => {
             // @ts-ignore
             readLedgerEntry({ api_id: apiID }).then(({ ledger_entry }) => {
                 console.log('ledger_entry: ', ledger_entry);
+                const api_username = ledger_entry?.value?.data.api_username;
                 setURLStatus('success');
+                setUserName(api_username || '{unknown}');
 
 
             }).catch((err) => {
