@@ -228,7 +228,7 @@ const Register: Page = () => {
                         </span>}
                         <span className="mt-1 font-medium text-600">
                             Already have an API72 url?{" "}
-                            <a className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
+                            <a href="/auth/verify-api" className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
                                 Login
                             </a>
                         </span>
