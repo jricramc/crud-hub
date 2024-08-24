@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { randomUsernameGenerator, randomNumber } from '@/utils/utils';
+import { randomUsernameGenerator, randomInteger } from '@/utils/utils';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
@@ -95,7 +95,7 @@ const handler = async (req, res) => {
             } = upRes2.output;
 
             const api_username = randomUsernameGenerator();
-            const api_user_passkey = randomNumber(10000000, 99999999);
+            const api_user_passkey = randomInteger(10000000, 99999999);
             console.log('api_username: ', api_username);
             console.log('api_user_passkey: ', api_user_passkey);
 

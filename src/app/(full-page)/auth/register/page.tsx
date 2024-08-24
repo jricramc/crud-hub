@@ -8,7 +8,7 @@ import { Password } from "primereact/password";
 import { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 import axios from "axios";
-import { randomNumber } from "@/utils/utils";
+import { randomInteger } from "@/utils/utils";
 
 const Register: Page = () => {
     const [confirmed, setConfirmed] = useState(false);
@@ -107,7 +107,7 @@ const Register: Page = () => {
       useEffect(() => {
         if (deployStageProgress < 100 && deployStageProgress > 0) {
             if (deployStageMessage.type === 'deploy') {
-                const val = deployStageProgress + ((100 - deployStageProgress) / randomNumber(12, 28))
+                const val = deployStageProgress + ((100 - deployStageProgress) / randomInteger(12, 28))
                 setTimeout((newDeployStageProgress) => {
                     setDeployStageProgress((prevState) => (prevState === 0 || prevState === 100) ? prevState : newDeployStageProgress)
                     if (deployStageMessage.stage < deployStageMessages.deploy.stage.length - 1) {

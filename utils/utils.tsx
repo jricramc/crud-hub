@@ -230,8 +230,8 @@ const extractRegionAndAccountIdFromExecutionArn = (inputString: String) => {
     return { region, accountId };
 }
 
-const randomNumber = (min: number, max: number) => {
-  return (Math.random() * (max - min)) + min;
+const randomInteger = (min: number, max: number) => {
+  return Math.floor((Math.random() * (max - min)) + min);
 };
 
 export {
@@ -247,5 +247,5 @@ export {
     readLedgerEntry,
     updateLedgerEntry,
     deleteLedgerEntry,
-    randomNumber,
+    randomInteger,
 };
