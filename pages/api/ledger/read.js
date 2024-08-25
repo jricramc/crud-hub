@@ -5,6 +5,9 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { query } = body;
 
+    console.log('ledger-api-key: ', headers['ledger-api-key']);
+    console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY: ', process.env.NEXT_PUBLIC_LEDGER_API_KEY);
+
     if (headers['ledger-api-key'] === process.env.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
