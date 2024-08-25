@@ -169,9 +169,6 @@ const VerifyAPI: Page = () => {
 
     useEffect(() => {
 
-        console.log('process.env ::: ', process.env);
-        console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY: ', process.env.NEXT_PUBLIC_LEDGER_API_KEY)
-
         let urlStatusKey = 'invalid';
         let apiID = undefined;
 

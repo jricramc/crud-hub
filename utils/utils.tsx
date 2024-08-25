@@ -1,4 +1,9 @@
 import axios from 'axios';
+import getConfig from 'next/config';
+const _CONFIG = getConfig();
+
+console.log('_CONFIG:: ', _CONFIG);
+console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY!!! ', process.env.NEXT_PUBLIC_LEDGER_API_KEY);
 
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
@@ -69,6 +74,8 @@ const readLedgerEntry = async (baseUrl = '', { api_id, ledger_access_id }) => {
     const api_id_query = api_id ? [{ "data.api_id": api_id }] : [];
     const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
     const query = { $or: [ ...api_id_query, ...ledger_access_id_query ] };
+
+    console.log('_CONFIG :: ', _CONFIG);
 
     console.log('process.env :: ', process.env);
     console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY: ', process.env.NEXT_PUBLIC_LEDGER_API_KEY);
