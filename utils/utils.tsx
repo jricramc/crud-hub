@@ -70,6 +70,7 @@ const readLedgerEntry = async (baseUrl = '', { api_id, ledger_access_id }) => {
     const ledger_access_id_query = ledger_access_id ? [{ "ledger_access_id": ledger_access_id }] : [];
     const query = { $or: [ ...api_id_query, ...ledger_access_id_query ] };
 
+    console.log('process.env :: ', process.env);
     console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY: ', process.env.NEXT_PUBLIC_LEDGER_API_KEY);
 
     const res = await axios.post(url, {
