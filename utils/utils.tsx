@@ -4,6 +4,7 @@ const _CONFIG = getConfig();
 
 console.log('_CONFIG:: ', _CONFIG);
 console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY!!! ', process.env.NEXT_PUBLIC_LEDGER_API_KEY);
+console.log('process.env :::: ', process.env);
 
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 

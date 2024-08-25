@@ -19,4 +19,8 @@ module.exports = {
         NEXT_PUBLIC_MONGODB_API_KEY: process.env.NEXT_PUBLIC_MONGODB_API_KEY,
         NEXT_PUBLIC_LEDGER_API_KEY: process.env.NEXT_PUBLIC_LEDGER_API_KEY,
     },
+
+    env: {
+        test: 'test',
+    },
 };

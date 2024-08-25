@@ -124,6 +124,9 @@ const VerifyAPI: Page = () => {
         }
     };
 
+    console.log('process.env.AUTH_SECRET ???? ', process.env.AUTH_SECRET)
+    console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY ???? ', process.env.NEXT_PUBLIC_LEDGER_API_KEY)
+
     const verifyUserPasskey = async () => {
         if (passkey.join('') === userPasskey?.toString()) {
             const result = await signIn("credentials", {
