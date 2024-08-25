@@ -20,9 +20,18 @@ export default NextAuth({
       },
     }),
   ],
+
+  secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
+
+  jwt: {
+    secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
+    raw: true,
+  },
+
   session: {
     strategy: "jwt",
   },
+
   callbacks: {
     async jwt({ token, user }) {
       console.log("JWT Callback: ", { token, user });
@@ -37,7 +46,9 @@ export default NextAuth({
       return session;
     },
   },
+
   pages: {
     signIn: "/auth/register",
   },
+
 });

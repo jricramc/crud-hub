@@ -44,7 +44,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <head>
                 <link
                     id="theme-link"
-                    href={`/theme/theme-light/orange/theme.css`}
+                    href={`/theme/theme-dim/orange/theme.css`}
                     rel="stylesheet"
                 ></link>
             </head>
