@@ -129,7 +129,7 @@ const VerifyAPI: Page = () => {
         const result = await signIn("credentials", {
             redirect: false,
             api_id: verifiedAPIID,
-            api_user_passkey: passkey,
+            api_user_passkey: passkey.join(''),
         });
     
         if (result?.ok) {
