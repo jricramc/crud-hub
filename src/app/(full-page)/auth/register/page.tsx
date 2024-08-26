@@ -5,10 +5,12 @@ import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
+import { Timeline } from "primereact/timeline";
 import { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 import axios from "axios";
 import { randomInteger } from "@/utils/utils";
+import type { CustomEvent } from "@/types";
 
 const Register: Page = () => {
     const [confirmed, setConfirmed] = useState(false);
@@ -25,19 +27,34 @@ const Register: Page = () => {
         deploy: {
             stage: [
                 'Initializing deployment',
-                'Building:: stacks',
+                'Downloading provider: aws',
+                'Downloading provider: aws-apigateway',
                 'Waiting for AWS...',
+                'Initializing AWS permissions',
                 'Syncing:: payload',
                 'Retry AWS...',
                 'Syncing:: resources',
                 'Retry AWS...',
                 'Waiting for server',
-                'Handling endpoints...',
-                'Checking permissions',
-                'Generating link...',
-                '[Warning]: slow server response',
-                'Generating link...',
-                '[Warning]: slow server response',
+                'Configuring server instance: aws:ec2',
+                'Handling Resource: aws:apigateway',
+                'Handling Integration: aws:apigateway',
+                'Handling Deployment: aws:apigateway',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Creating  API ID...',
+                'Creating  API ID...',
+                'Generating API username...',
+                'Generating API username...',
+                'Generating API username...',
+                'Generating API username...',
+                'Generating API passkey...',
+                'Generating API passkey...',
+                'Generating API passkey...',
+                'Generating API passkey...',
                 'Generating link...',
             ],
             variant: 'outline',
@@ -67,6 +84,45 @@ const Register: Page = () => {
     };
     const [deployStageMessage, setDeployStageMessage] = useState({ type: 'deploy', stage: 0 });
     const [deployStageComplete, setDeployStageComplete] = useState(false);
+
+    const customEvents: CustomEvent[] = [
+        {
+            status: "Ordered",
+            date: "15/09/2022 10:30",
+            icon: "pi pi-shopping-cart",
+            color: "#9C27B0",
+            image: "game-controller.jpg",
+        },
+        {
+            status: "Processing",
+            date: "15/09/2022 14:00",
+            icon: "pi pi-cog",
+            color: "#673AB7",
+        },
+        {
+            status: "Shipped",
+            date: "15/09/2022 16:15",
+            icon: "pi pi-envelope",
+            color: "#FF9800",
+        },
+        {
+            status: "Delivered",
+            date: "16/09/2022 10:00",
+            icon: "pi pi-check",
+            color: "#607D8B",
+        },
+    ];
+
+    const customizedMarker = (item: CustomEvent) => {
+        return (
+            <span
+                className="flex z-1 w-2rem h-2rem align-items-center justify-content-center text-white border-circle shadow-2"
+                style={{ backgroundColor: item.color }}
+            >
+                <i className={item.icon}></i>
+            </span>
+        );
+    };
 
     const handleDeploy = async () => {
         setDeployStageProgress(2);
@@ -107,13 +163,13 @@ const Register: Page = () => {
       useEffect(() => {
         if (deployStageProgress < 100 && deployStageProgress > 0) {
             if (deployStageMessage.type === 'deploy') {
-                const val = deployStageProgress + ((100 - deployStageProgress) / randomInteger(12, 28))
+                const val = deployStageProgress + ((100 - deployStageProgress) / randomInteger(20, 30))
                 setTimeout((newDeployStageProgress) => {
                     setDeployStageProgress((prevState) => (prevState === 0 || prevState === 100) ? prevState : newDeployStageProgress)
                     if (deployStageMessage.stage < deployStageMessages.deploy.stage.length - 1) {
                     setDeployStageMessage(({ type, stage: prevStage }) => ((type === 'error' || type === 'success') ? { type, stage: prevStage } : { type: 'deploy', stage: prevStage + 1 }))
                     }
-                }, randomInteger(2000, 8000), val)
+                }, randomInteger(2000, 10000), val)
             }
         }
       }, [deployStageProgress])
@@ -177,6 +233,7 @@ const Register: Page = () => {
                                 placeholder="Email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                disabled={buttonStatus === 1}
                             />
                         </span>
                         {/* <span className="p-input-icon-left w-full mb-4">
@@ -210,7 +267,20 @@ const Register: Page = () => {
                                 Terms and Conditions
                             </a>
                         </div> */}
-                        <Button
+                        {/* {(buttonStatus === 1 || buttonStatus === 2) && <div className="mt-3 mb-6">
+                            <Timeline
+                                value={customEvents}
+                                className="customized-timeline"
+                                opposite={(item) => item.status}
+                                marker={customizedMarker}
+                                content={(item) => (
+                                    <small className="p-text-secondary">
+                                        {item.date}
+                                    </small>
+                                )}
+                            />
+                        </div>} */}
+                        {buttonStatus !== 1 && <Button
                             label={["Start deployment", "Building...", "Try again"][buttonStatus]}
                             className="w-full mb-3"
                             onClick={() => {
@@ -219,19 +289,18 @@ const Register: Page = () => {
                                 }
                             }}
                             disabled={email.length === 0 || buttonStatus === 1}
-                        ></Button>
+                        ></Button>}
                         {/* @ts-ignore */}
                         {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-3 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
                             {/* @ts-ignore */}
-                            {deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}
                             {/* `${deployStageProgress.toFixed(2)}% - ${deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}` */}
                         </span>}
-                        <span className="mt-1 font-medium text-600">
+                        {buttonStatus === 0 && <span className="mt-1 font-medium text-600">
                             Already have an API72 url?{" "}
                             <a href="/auth/verify-api" className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
                                 Login
                             </a>
-                        </span>
+                        </span>}
                     </div>
                 </div>
             </div>
