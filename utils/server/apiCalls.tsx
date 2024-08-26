@@ -62,8 +62,13 @@ const authorizeAPIUserPasskey = async ({ api_id, api_user_passkey } : AuthorizeA
       },
     });
   if (res.status === 200) {
-      console.log('authorizeAPIUserPasskey res: ', res?.data?.response?.variables?.ledger_entry?.value)
-      return Promise.resolve(res?.data?.response?.variables?.ledger_entry?.value);
+      const ledger_entry = res?.data;
+      if (ledger_entry?.data?.api_id === api_id && ledger_entry?.data?.api_user_passkey === api_user_passkey) {
+        return Promise.resolve({ authorized: true, user: ledger_entry });
+      } else {
+        return Promise.resolve({ authorized: false });
+      }
+      
   }
   console.error(res);
   return Promise.reject(`error ${res.status} received from server`);

@@ -84,7 +84,6 @@ const VerifyAPI: Page = () => {
         event: React.KeyboardEvent<HTMLInputElement>,
         index: number
     ) => {
-        console.log('event: ', event);
         // @ts-ignore
         const { code, key } = event;
         const isDigit = code.includes("Numpad") || code.includes("Digit");
@@ -126,6 +125,7 @@ const VerifyAPI: Page = () => {
     };
 
     const verifyUserPasskey = async () => {
+        setVerificationStatus(1);
         const result = await signIn("credentials", {
             redirect: false,
             api_id: verifiedAPIID,
@@ -134,8 +134,10 @@ const VerifyAPI: Page = () => {
     
         if (result?.ok) {
             console.log('session created: ', result);
+            setVerificationStatus(3);
         } else {
             console.log('error in creating session');
+            setVerificationStatus(2);
         }
 
         // if (passkey.join('') === userPasskey?.toString()) {
@@ -157,7 +159,7 @@ const VerifyAPI: Page = () => {
     };
 
     useEffect(() => {
-        if (verificationStatus === 2) {
+        if (verificationStatus === 3) {
             if (redirectCountdown === 0) {
                 router.push('/portal');
             } else {
@@ -173,11 +175,7 @@ const VerifyAPI: Page = () => {
             setBackspacePressed(false);
             autoFocus();
         }
-    }, [backspacePressed])
-
-    useEffect(() => {
-        setVerificationStatus(0);
-    }, [passkey])
+    }, [backspacePressed]);
 
     useEffect(() => {
 
@@ -306,7 +304,7 @@ const VerifyAPI: Page = () => {
                             {urlStatusStates[URLStatus].msg}
                         </span>
                         <Button
-                            icon={`pi pi-lock${verifiedAPIID ? '-open' : ''}`}
+                            icon="pi pi-unlock"
                             label="Continue"
                             className="w-full"
                             onClick={verifiedAPIID ? () => setVerificationStep(1) : () => {}}
@@ -342,7 +340,7 @@ const VerifyAPI: Page = () => {
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
                                 autoFocus
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input1"
@@ -352,7 +350,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input2"
@@ -362,7 +360,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input3"
@@ -372,7 +370,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input4"
@@ -382,7 +380,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input5"
@@ -392,7 +390,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input6"
@@ -402,7 +400,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                             <InputNumber
                                 id="input7"
@@ -412,7 +410,7 @@ const VerifyAPI: Page = () => {
                                 onKeyUp={() => autoFocus()}
                                 inputClassName="w-3rem text-center"
                                 maxLength={1}
-                                disabled={verificationStatus === 2}
+                                disabled={verificationStatus === 3}
                             ></InputNumber>
                         </div>
                         
@@ -423,23 +421,26 @@ const VerifyAPI: Page = () => {
                                 className="flex-auto"
                                 onClick={() => router.push("/")}
                             ></Button> */}
-                            <Button
-                                label={['Verify', 'Try again', 'Continue'][verificationStatus]}
+                            {verificationStatus !== 1 && <Button
+                                label={{ 0: 'Verify', 2: 'Try again', 3: 'Continue' }[verificationStatus]}
                                 className="flex-auto"
                                 onClick={() => {
-                                    if (verificationStatus === 2) {
+                                    if (verificationStatus === 3) {
                                         router.push('/portal')
                                     } else {
                                         verifyUserPasskey();
                                     }
                                 }}
-                                disabled={passkey.some((v) => (v === null || v === undefined))}
-                            ></Button>
+                                disabled={passkey.some((v) => (v === null || v === undefined)) || verificationStatus === 1}
+                            ></Button>}
                         </div>
                         {verificationStatus === 1 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
-                            <span className="text-red-500" style={{ fontWeight: 'bold' }}>Incorrect passkey:&nbsp;</span>check the email sent to you with your passkey.
+                            <span className="text-600" style={{ fontWeight: 'bold' }}>Authenticating...&nbsp;</span>
                         </div>}
                         {verificationStatus === 2 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-red-500" style={{ fontWeight: 'bold' }}>Incorrect passkey:&nbsp;</span>check the email sent to you with your passkey.
+                        </div>}
+                        {verificationStatus === 3 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
                             <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Successfull:&nbsp;</span>{`redirecting in ${redirectCountdown} seconds`}
                         </div>}
                     </div>

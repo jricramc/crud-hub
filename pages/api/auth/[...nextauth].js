@@ -12,14 +12,14 @@ export default NextAuth({
       },
       async authorize(credentials) {
         try {
-          const user = await authorizeAPIUserPasskey({
+          const res = await authorizeAPIUserPasskey({
             api_id: credentials?.api_id,
             api_user_passkey: credentials?.api_user_passkey,
           });
 
-          console.log('authorization response: ', user);
+          const { authorized, user } = res || {};
 
-          if (user) {
+          if (authorized) {
             return user;
           } else {
             return null;
