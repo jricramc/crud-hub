@@ -3,7 +3,7 @@ import { randomUsernameGenerator, randomInteger } from '@/utils/utils';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
-import { RID } from '@/utils/utils';
+import { RID, randomIntegerID } from '@/utils/utils';
 import { createLedgerEntry, sendEmail } from '@/utils/server/apiCalls';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
