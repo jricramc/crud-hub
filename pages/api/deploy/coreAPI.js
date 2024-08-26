@@ -3,7 +3,8 @@ import { randomUsernameGenerator, randomInteger } from '@/utils/utils';
 import core_api_pt_1 from '../pulumi/programs/create/core_api_pt_1';
 import core_api_pt_2 from '../pulumi/programs/create/core_api_pt_2';
 import core_api_pt_3 from '../pulumi/programs/create/core_api_pt_3';
-import { RID, createLedgerEntry, sendEmail } from '@/utils/utils';
+import { RID } from '@/utils/utils';
+import { createLedgerEntry, sendEmail } from '@/utils/server/apiCalls';
 const { LocalWorkspace } = require("@pulumi/pulumi/automation");
 
 const handler = async (req, res) => {
@@ -95,7 +96,7 @@ const handler = async (req, res) => {
             } = upRes2.output;
 
             const api_username = randomUsernameGenerator();
-            const api_user_passkey = randomInteger(10000000, 99999999);
+            const api_user_passkey = randomIntegerID(8);
             console.log('api_username: ', api_username);
             console.log('api_user_passkey: ', api_user_passkey);
 
@@ -131,7 +132,7 @@ const handler = async (req, res) => {
               date_renewed: date,
             };
 
-            const createLedgerEntryRes = await createLedgerEntry(process.env.NEXT_PUBLIC_WEBHUB_HOST, {
+            const createLedgerEntryRes = await createLedgerEntry({
               ledger_access_id: API72_LEDGER_ACCESS_ID,
               data,
             }).then((response) => {

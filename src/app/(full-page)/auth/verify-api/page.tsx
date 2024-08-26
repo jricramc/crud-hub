@@ -8,6 +8,7 @@ import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
 import { useContext, useState, useEffect } from "react";
 import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 import { randomUsernameGenerator, readLedgerEntry } from "@/utils/utils";
+import { verifyAPIID } from "@/utils/client/apiCalls";
 
 const VerifyAPI: Page = () => {
     const { data: session } = useSession();
@@ -17,7 +18,8 @@ const VerifyAPI: Page = () => {
     const dark = layoutConfig.colorScheme !== "light";
 
     const [verificationStep, setVerificationStep] = useState(0);
-    const [username, setUserName] = useState('...');
+    const [username, setUserName] = useState<String | null>(null);
+    const [verifiedAPIID, setVerifiedAPIID] = useState<String | null>(null);
     const [userPasskey, setUserPasskey] = useState<number | null>(null);
     const [ledgerEntry, setLedgerEntry] = useState();
 
@@ -94,7 +96,6 @@ const VerifyAPI: Page = () => {
         if (isDigit) {
             nextInputId = index + 1;
         } else if (isBackspace) {
-            console.log('passkey[index]: ', passkey[index]);
             if (passkey[index] === null || passkey[index] === undefined) {
                 nextInputId = index - 1;
                 backspace = true;
@@ -124,27 +125,35 @@ const VerifyAPI: Page = () => {
         }
     };
 
-    console.log('process.env.AUTH_SECRET ???? ', process.env.AUTH_SECRET)
-    console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY ???? ', process.env.NEXT_PUBLIC_LEDGER_API_KEY)
-
     const verifyUserPasskey = async () => {
-        if (passkey.join('') === userPasskey?.toString()) {
-            const result = await signIn("credentials", {
-                redirect: false,
-                LEDGER_API_KEY: process.env.NEXT_PUBLIC_LEDGER_API_KEY,
-                ledger_entry: JSON.stringify(ledgerEntry),
-              });
-          
-              if (result?.ok) {
-                console.log('session created: ', result);
-              } else {
-                console.log('error in creating session');
-              }
-            setVerificationStatus(2);
+        const result = await signIn("credentials", {
+            redirect: false,
+            api_id: verifiedAPIID,
+            api_user_passkey: passkey,
+        });
+    
+        if (result?.ok) {
+            console.log('session created: ', result);
         } else {
-            setVerificationStatus(1)
+            console.log('error in creating session');
         }
-        
+
+        // if (passkey.join('') === userPasskey?.toString()) {
+        //     const result = await signIn("credentials", {
+        //         redirect: false,
+        //         api_id: verifiedAPIID,
+        //         api_user_passkey: passkey,
+        //       });
+          
+        //       if (result?.ok) {
+        //         console.log('session created: ', result);
+        //       } else {
+        //         console.log('error in creating session');
+        //       }
+        //     setVerificationStatus(2);
+        // } else {
+        //     setVerificationStatus(1)
+        // }
     };
 
     useEffect(() => {
@@ -196,20 +205,39 @@ const VerifyAPI: Page = () => {
             console.log('api_id: ', apiID);
 
             // @ts-ignore
-            readLedgerEntry('', { api_id: apiID }).then(({ ledger_entry }) => {
-                console.log('ledger_entry: ', ledger_entry);
-                const api_username = ledger_entry?.value?.data.api_username;
-                const api_user_passkey = ledger_entry?.value?.data.api_user_passkey;
-                setURLStatus('success');
-                setUserName(api_username || '{unknown}');
-                setUserPasskey(api_user_passkey);
-                console.log('ledger_entry:::: ', ledger_entry?.value);
-                setLedgerEntry(ledger_entry?.value);
-
+            verifyAPIID(apiID).then(({ verified, api_username }) => {
+                if (verified) {
+                    setUserName(api_username || '{unknown}');
+                    setURLStatus('success');
+                    setVerifiedAPIID(apiID);
+                } else {
+                    setUserName(null);
+                    setURLStatus('invalid');
+                    setVerifiedAPIID(null);
+                }
+                
             }).catch((err) => {
                 console.log(`err: ${err}`);
+                setUserName(null);
                 setURLStatus('error');
+                setVerifiedAPIID(null);
             });
+
+            // @ts-ignore
+            // readLedgerEntry({ api_id: apiID }).then(({ ledger_entry }) => {
+            //     console.log('ledger_entry: ', ledger_entry);
+            //     const api_username = ledger_entry?.value?.data.api_username;
+            //     const api_user_passkey = ledger_entry?.value?.data.api_user_passkey;
+            //     setURLStatus('success');
+            //     setUserName(api_username || '{unknown}');
+            //     setUserPasskey(api_user_passkey);
+            //     console.log('ledger_entry:::: ', ledger_entry?.value);
+            //     setLedgerEntry(ledger_entry?.value);
+
+            // }).catch((err) => {
+            //     console.log(`err: ${err}`);
+            //     setURLStatus('error');
+            // });
 
         }
 
@@ -257,7 +285,7 @@ const VerifyAPI: Page = () => {
                             alt="Avatar"
                         /> */}
                         <span className="font-large text-yellow-500 text-bold" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                            {username}
+                            {username || '...'}
                         </span>
                     </div>
                     <div className="flex flex-column">
@@ -278,10 +306,11 @@ const VerifyAPI: Page = () => {
                             {urlStatusStates[URLStatus].msg}
                         </span>
                         <Button
-                            icon="pi pi-lock-open"
+                            icon={`pi pi-lock${verifiedAPIID ? '-open' : ''}`}
                             label="Continue"
                             className="w-full"
-                            onClick={() => setVerificationStep(1)}
+                            onClick={verifiedAPIID ? () => setVerificationStep(1) : () => {}}
+                            disabled={!verifiedAPIID}
                         ></Button>
                     </div>
                 </div> : <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">

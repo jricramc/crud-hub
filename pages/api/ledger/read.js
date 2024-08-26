@@ -5,9 +5,6 @@ const handler = async (req, res) => {
     const { method, body, headers } = req;
     const { query } = body;
 
-    console.log('ledger-api-key: ', headers['ledger-api-key']);
-    console.log('process.env.NEXT_PUBLIC_LEDGER_API_KEY: ', process.env.NEXT_PUBLIC_LEDGER_API_KEY);
-
     if (headers['ledger-api-key'] === process.env.NEXT_PUBLIC_LEDGER_API_KEY) {
 
         if (method === 'POST') {
@@ -50,9 +47,10 @@ const handler = async (req, res) => {
                 data: requestData,
 
                 }).then((response) => {
+                    const ledger_entry = response?.data?.response?.variables?.ledger_entry?.value || {};
                     return {
                         statusCode: 200,
-                        output: { ...(response?.data || {}) },
+                        output: ledger_entry,
                     }
                 })
                 .catch((err) => {
@@ -60,11 +58,9 @@ const handler = async (req, res) => {
                         statusCode: 409,
                         output: { err }
                     };
-                })
-
-            // console.log('output: ', JSON.stringify(output))    
+                }) 
     
-            res.status(statusCode).json({ ...output });
+            res.status(statusCode).json(output);
     
         } else {
             res.status(405).end(`Method ${method} Not Allowed`);

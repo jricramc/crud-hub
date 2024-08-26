@@ -1,20 +1,31 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { authorizeAPIUserPasskey } from "@/utils/server/apiCalls";
 
 export default NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" },
+        api_id: { label: "API ID", type: "text" },
+        api_user_passkey: { label: "API User Passkey", type: "password" },
       },
       async authorize(credentials) {
-        // Replace this with your own authentication logic
-        if (credentials.LEDGER_API_KEY === process.env.NEXT_PUBLIC_LEDGER_API_KEY) {
-          console.log(credentials?.ledger_entry);
-          return JSON.parse(credentials?.ledger_entry);
-        } else {
+        try {
+          const user = await authorizeAPIUserPasskey({
+            api_id: credentials?.api_id,
+            api_user_passkey: credentials?.api_user_passkey,
+          });
+
+          console.log('authorization response: ', user);
+
+          if (user) {
+            return user;
+          } else {
+            return null;
+          }
+        } catch (error) {
+          console.error("Login failed:", error);
           return null;
         }
       },
@@ -34,15 +45,14 @@ export default NextAuth({
 
   callbacks: {
     async jwt({ token, user }) {
-      console.log("JWT Callback: ", { token, user });
       if (user) {
         token.user = user
       }
       return token;
     },
     async session({ session, token }) {
-      console.log("Session Callback: ", { session, token });
       session.user = token.user;
+      session.LEDGER_API_KEY = process.env.NEXT_PUBLIC_LEDGER_API_KEY;
       return session;
     },
   },
