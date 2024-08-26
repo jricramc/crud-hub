@@ -27,26 +27,46 @@ const Register: Page = () => {
         deploy: {
             stage: [
                 'Initializing deployment',
+                'Initializing deployment',
+                'Initializing deployment',
                 'Downloading provider: aws',
-                'Downloading provider: aws-apigateway',
+                'Downloading provider: aws',
+                'Downloading provider: aws',
+                'Downloading provider: aws',
+                'Downloading provider: aws',
                 'Waiting for AWS...',
-                'Initializing AWS permissions',
+                'Waiting for AWS...',
+                'Syncing:: payload',
+                'Syncing:: payload',
                 'Syncing:: payload',
                 'Retry AWS...',
                 'Syncing:: resources',
+                'Syncing:: resources',
+                'Syncing:: resources',
                 'Retry AWS...',
-                'Waiting for server',
-                'Configuring server instance: aws:ec2',
-                'Handling Resource: aws:apigateway',
-                'Handling Integration: aws:apigateway',
-                'Handling Deployment: aws:apigateway',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
+                'Configuring server...',
                 'Building endpoints...',
                 'Building endpoints...',
                 'Building endpoints...',
                 'Building endpoints...',
                 'Building endpoints...',
-                'Creating  API ID...',
-                'Creating  API ID...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Building endpoints...',
+                'Generating API username...',
                 'Generating API username...',
                 'Generating API username...',
                 'Generating API username...',
@@ -292,8 +312,12 @@ const Register: Page = () => {
                         ></Button>}
                         {/* @ts-ignore */}
                         {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-3 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
+                        {/* @ts-ignore */}
+                        <div>
+                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>{deployStageProgress.toFixed(2)}%&nbsp;&nbsp;</span>
                             {/* @ts-ignore */}
-                            {/* `${deployStageProgress.toFixed(2)}% - ${deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}` */}
+                            <span className="text-500">{deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}</span>
+                        </div>
                         </span>}
                         {buttonStatus === 0 && <span className="mt-1 font-medium text-600">
                             Already have an API72 url?{" "}
