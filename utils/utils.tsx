@@ -150,4 +150,5 @@ export {
     updateLedgerEntry,
     deleteLedgerEntry,
     randomInteger,
+    randomIntegerID,
 };
