@@ -17,8 +17,6 @@ import moment from "moment";
 const Register: Page = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    console.log("searchParams?.get('email'): ", searchParams?.get('email'))
-    console.log("searchParams?.get('code'): ", searchParams?.get('code'))
     const [confirmed, setConfirmed] = useState(false);
     
     const { layoutConfig } = useContext(LayoutContext);

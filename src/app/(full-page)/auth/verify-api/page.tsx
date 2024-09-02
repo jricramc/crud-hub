@@ -133,10 +133,8 @@ const VerifyAPI: Page = () => {
         });
     
         if (result?.ok) {
-            console.log('session created: ', result);
             setVerificationStatus(3);
         } else {
-            console.log('error in creating session');
             setVerificationStatus(2);
         }
 

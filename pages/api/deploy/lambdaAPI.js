@@ -8,10 +8,6 @@ const handler = async (req, res) => {
   const { apiID, apiName,lambdaResourceId, lambdaName, rid, code, executionArn} = body;
   const stackName = `add-lambda-api--${lambdaResourceId}-apiID-${apiID}-${RID()}`;
   try {
-    // console.log('body: ', body)
-    // console.log('stackName: ', stackName);
-    // console.log('dbname', dbName)
-    // console.log("puLUMI_ACCESS_TOKEN: ", process.env.PULUMI_ACCESS_TOKEN)
 
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({

@@ -17,7 +17,6 @@ const verifyAPIID = async (api_id: String) => {
         },
       });
     if (res.status === 200) {
-        console.log('res.data: ', res.data);
         return Promise.resolve(res.data);
     }
     console.error(res);
@@ -35,7 +34,6 @@ const sendVerificationEmail = async (email: String) => {
     },
   });
   if (res.status === 200) {
-    console.log('res.data: ', res.data);
     return Promise.resolve(res.data);
   }
   console.error(res);
@@ -58,7 +56,6 @@ const checkEmailVerificationCode = async ({ email, code } : CheckEmailVerificati
     },
   });
   if (res.status === 200) {
-    console.log('res.data: ', res.data);
     return Promise.resolve(res.data);
   }
   console.error(res);

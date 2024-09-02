@@ -1489,7 +1489,6 @@ const mongodb_classes = {
         const match = rt.match(regex_order[i].regex);
         if (match) {
             matchFound = true;
-            console.log('match: ', match)
 
             switch (i) {
                 case 0:
@@ -1526,7 +1525,6 @@ const mongodb_classes = {
   
       if (match) {
         const [, key, paramType, params, , returnType] = match;
-        // console.log('match: ', match);
         // const isPromise = returnType.includes('Promise');
         const regex_promise_parsing = /^((?:Promise\<))(.*)(\>)/;  
         const regex_is_promise_match = returnType.match(regex_promise_parsing);  
@@ -1543,8 +1541,6 @@ const mongodb_classes = {
         const types = {};
 
         res_types.map((a) => {
-
-            console.log('rt: ', a[1]);
             Object.assign(types, parse_return_type_string_to_obj(a[1]))
             return null;
         });
@@ -1582,13 +1578,9 @@ const mongodb_classes = {
         const regex_get_types = /([^\s\|][^\|\n]+[^\s\|])/g;
         const res_types = [...returnType.matchAll(regex_get_types)];
 
-        console.log({ key, accessor_type, res_types });
-
         const types = {};
 
         res_types.map((a) => {
-
-            console.log('rt: ', a[1]);
             Object.assign(types, parse_return_type_string_to_obj(a[1]))
             return null;
         });
@@ -1628,5 +1620,3 @@ let testAccessors = [
     'set session(clientSession): void',
     'get AVAILABLE(): "available" | "not available"',
 ];
-
-console.log(convertAccessorStringsToObjects(testAccessors));

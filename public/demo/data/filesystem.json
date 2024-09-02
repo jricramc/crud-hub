@@ -1,24 +1,94 @@
 {
     "data":
-    [  
-        {
+    [
+        {  
             "key": "0",
+            "data": {  
+                "name":"Websocket",
+                "description": "Manage your AWS API Websocket integration",
+                "type": "AWS Websocket",
+                "status": "Online"
+            }
+        },
+        {  
+            "key": "1",
             "data":{  
-                "name":"Core API",
-                "description": "Resource endpoint to access all of the API's functionality",
-                "type": "AWS EC2",
+                "name":"Databases",
+                "description": "View all of your database integrations here",
+                "type": "Folder",
                 "status": "Online"
             },
             "children":[  
                 {  
-                    "key": "0-0",
+                    "key": "1-0",
+                    "data":{  
+                        "name":"MongoDB API",
+                        "type": "REST API",
+                        "description": "Manage and query MongoDB database through a REST API interface",
+                        "status":"No integration"
+                    }
+                }
+            ]
+        },
+        {  
+            "key": "2",
+            "data":{  
+                "name":"Ledger",
+                "description": "View all of your API's architecture, event logs, and metadata",
+                "type": "Folder",
+                "status": "Online"
+            },
+            "children":[
+                {  
+                    "key": "2-0",
+                    "data":{  
+                        "name":"Architecture",
+                        "type":"Documentation"
+                    }
+                },
+                {  
+                    "key": "2-1",
+                    "data":{  
+                        "name":"Event log",
+                        "type":"Application"
+                    }
+                },
+                {  
+                    "key": "2-2",
+                    "data":{  
+                        "name":"Metadata",
+                        "type":"Document"
+                    }
+                }
+            ]
+        },
+        {  
+            "key": "3",
+            "data": {  
+                "name":"Next.js",
+                "description": "Manage Next.js frontend website integration",
+                "type": "React App",
+                "status": "Coming soon"
+            }
+        },
+        {
+            "key": "4",
+            "data":{  
+                "name":"DevOps Portal",
+                "description": "Resource endpoint to access all of the API's functionality",
+                "type": "AWS EC2",
+                "status": "Coming soon"
+            },
+            "children":[  
+                {  
+                    "key": "4-0",
                     "data":{
                         "name":"GraphQL IDE",
                         "type":"Interface"
                     }
                 },
                 {  
-                    "key": "0-1",
+                    "key": "4-1",
                     "data":{  
                         "name":"Node.js",
                         "type":"Server"
@@ -27,50 +97,16 @@
             ]
         },
         {  
-            "key": "1",
-            "data":{  
-                "name":"Databases",
-                "description": "View all of your database integrations here",
-                "type": "Folder"
-            },
-            "children":[  
-                {  
-                    "key": "1-0",
-                    "data":{  
-                        "name":"MongoDB Integration",
-                        "status":"Online"
-                    }
-                }
-            ]
-        },
-        {  
-            "key": "2",
-            "data": {  
-                "name":"Next.js",
-                "description": "Manage Next.js frontend website integration",
-                "type": "React App",
-                "status": "No Integration"
-            }
-        },
-        {  
-            "key": "3",
-            "data": {  
-                "name":"Websocket",
-                "description": "Manage your websocket integration",
-                "type": "AWS Websocket",
-                "status": "No Integration"
-            }
-        },
-        {  
-            "key": "4",
+            "key": "5",
             "data": {  
                 "name":"ApiGateway",
-                "description": "Manage your API's AWS ApiGateway integration",
-                "type": "AWS ApiGateway"
+                "description": "Manage AWS resources and deploy new endpoints to your API72 url",
+                "type": "AWS ApiGateway",
+                "status": "Coming soon"
             },
             "children":[  
                 {  
-                    "key": "4-0",
+                    "key": "5-0",
                     "data":{  
                         "name":"DynamoDB",
                         "description": "Manage your AWS DynamoDB Integration",
@@ -79,7 +115,7 @@
                     }
                 },
                 { 
-                    "key": "4-1", 
+                    "key": "5-1", 
                     "data":{  
                         "name":"S3 Bucket",
                         "description": "Manage your AWS S3 bucket Integrations",
@@ -88,44 +124,12 @@
                     }
                 },
                 {  
-                    "key": "4-2",
+                    "key": "5-2",
                     "data":{  
                         "name":"Lambda",
                         "description": "Manage your AWS Lambda Integrations",
                         "type": "AWS Lambda",
                         "status": "No Integrations"
-                    }
-                }
-            ]
-        },
-        {  
-            "key": "5",
-            "data":{  
-                "name":"Ledger",
-                "description": "View all of your API's architecture, event logs, and metadata",
-                "type": "Folder",
-                "status": "-"
-            },
-            "children":[
-                {  
-                    "key": "5-0",
-                    "data":{  
-                        "name":"Architecture",
-                        "type":"Documentation"
-                    }
-                },
-                {  
-                    "key": "5-1",
-                    "data":{  
-                        "name":"Event log",
-                        "type":"Application"
-                    }
-                },
-                {  
-                    "key": "5-2",
-                    "data":{  
-                        "name":"Metadata",
-                        "type":"Document"
                     }
                 }
             ]

@@ -126,8 +126,6 @@ const handler = async (req, res) => {
                 if (new_date_verified) {
                     date_verified = new_date_verified
                 }
-
-                console.log('new email_list_entry :: ', email_list_entry);
             }
 
             return {

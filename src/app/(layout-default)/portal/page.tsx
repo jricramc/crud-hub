@@ -187,8 +187,6 @@ const Portal = () => {
             setUserName(session?.user?.data?.api_username);
             // @ts-ignore
             setUserAPIURL(session?.user?.data?.api_url);
-            // @ts-ignore
-            console.log(moment(session?.user?.data?.date_created).add(72, 'hours').calendar())
         }
         
     }, [session])

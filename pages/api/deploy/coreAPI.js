@@ -41,8 +41,6 @@ const handler = async (req, res) => {
             output: { err, level: 'err_1' }
           }));
 
-        console.log('<<stage 1.0 complete>>');
-
         if (upRes1.statusCode === 200 && upRes1.output) {
           
 
@@ -86,7 +84,6 @@ const handler = async (req, res) => {
           
 
           if (upRes2.statusCode === 200 && upRes2.output) {
-            console.log('<<stage 2.1 complete>>');
 
             const {
               lambdaResourceId: { value: lambda_resource_id },
@@ -97,8 +94,6 @@ const handler = async (req, res) => {
 
             const api_username = randomUsernameGenerator();
             const api_user_passkey = randomIntegerID(8);
-            console.log('api_username: ', api_username);
-            console.log('api_user_passkey: ', api_user_passkey);
 
             const date = new Date();
 
@@ -148,7 +143,6 @@ const handler = async (req, res) => {
             });
 
             if (createLedgerEntryRes.statusCode === 200) {
-              console.log('<<stage 2.2 complete>>');
 
               const stack3 = await LocalWorkspace.createStack({
                 projectName,
@@ -173,7 +167,6 @@ const handler = async (req, res) => {
 
               const upRes3 = await stack3.up({ onOutput: () => {} })
               .then((upRes) => {
-                  console.log('<<stage 3.0 complete>>');
                   return {
                     statusCode: 200,
                     output: upRes?.outputs,

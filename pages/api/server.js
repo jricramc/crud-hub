@@ -4,8 +4,6 @@ const handler = async (req, res) => {
     try {
       const { method, body: { arn } } = req;
 
-      console.log('arrn: ', arn);
-
       if (method === 'POST') {
         // Assume the role
         const sts = new AWS.STS();
@@ -17,8 +15,6 @@ const handler = async (req, res) => {
           .promise();
     
         const assumedRoleUser = assumeRoleResponse.AssumedRoleUser;
-
-        console.log('Assumed Role User:', assumedRoleUser);
   
         res.status(200).json('Role assumed successfully');
       } else res.status(405).end(`Method ${method} Not Allowed`);

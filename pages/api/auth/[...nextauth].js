@@ -45,9 +45,7 @@ export default NextAuth({
   },
 
   callbacks: {
-    async jwt(args) {
-      console.log('jwt args: ', args);
-      const { token, user, trigger, session } = args;
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.user = user
       }
@@ -56,17 +54,12 @@ export default NextAuth({
         const targetUser = token.user;
         const sourceUser = session?.user;
         const mergeDeepRes = mergeDeep(targetUser, sourceUser);
-        console.log('mergeDeepRes: ', mergeDeepRes);
-        console.log("targetUser: ", targetUser);
         token.user = targetUser;
       }
-
-      console.log('new token: ', token);
 
       return token;
     },
     async session(args) {
-      console.log('session args: ', args);
       const { session, token } = args;
       session.user = token.user;
       session.LEDGER_API_KEY = process.env.NEXT_PUBLIC_LEDGER_API_KEY;

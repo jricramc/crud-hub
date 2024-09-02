@@ -8,10 +8,6 @@ const handler = async (req, res) => {
   const { apiID, apiUrl, apiKey, websocketResourceId, socketName, rid, lam_role_arn } = body;
   const stackName = `add-websocket-api-websocketResourceId-${websocketResourceId}-apiID-${apiID}-${RID()}`;
   try {
-    // console.log('body: ', body)
-    // console.log('stackName: ', stackName);
-    // console.log('socketName', socketName)
-    // console.log("puLUMI_ACCESS_TOKEN: ", process.env.PULUMI_ACCESS_TOKEN)
 
     if (method === 'POST') {
         const stack = await LocalWorkspace.createStack({
