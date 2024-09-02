@@ -198,7 +198,6 @@ export default function APINetwork() {
     const handleRenewLedgerEntry = async () => {
         setRenewingAPI(1);
         const res = await renewLedgerEntry(session);
-        console.log('res: ', res);
 
         updateSession({
             user: {
@@ -351,7 +350,7 @@ export default function APINetwork() {
             // @ts-ignore
             setUserAPIURL(session?.user?.data?.api_url);
             // @ts-ignore
-            setApiDateRenewed((prevState) => { console.log(prevState, session?.user?.data?.date_renewed); return session?.user?.data?.date_renewed; });
+            setApiDateRenewed(session?.user?.data?.date_renewed);
 
             // @ts-ignore
             const endTime = moment(session?.user?.data?.date_renewed).add(72, 'hours');
@@ -359,7 +358,6 @@ export default function APINetwork() {
 
             const differenceInHours = endTime.diff(startTime, 'hours', true);
             const roundedDifference = Math.round(differenceInHours * 100) / 100;
-            console.log('roundedDifference: ', roundedDifference);
             setInitHours(roundedDifference);
         }
         
@@ -493,9 +491,8 @@ export default function APINetwork() {
                     </div>
                 </div>
             </div>
-            <div className="col-12 md:col-4 xl:col4">
+            {/* <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
-                    {/* @ts-ignore */}
                     <span className="font-semibold text-md">{apiCreatedDateMsg}</span>
                     <div className="flex justify-content-between align-items-start mt-3">
                         <div className="w-12">
@@ -505,17 +502,33 @@ export default function APINetwork() {
                             <div className="flex flex-row">
                                 <div className="text-green-500 flex-1">
                                     <span className="font-medium">Online</span>
-                                    {/* <i className="pi pi-arrow-up text-xs ml-2"></i> */}
                                 </div>
-                                {/* <span className="product-badge status-light">
-                                    VIEW
-                                </span> */}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex align-items-center justify-content-between mt-4">
+                        <span className="text-sm">d3zua21hwcw3v.cloudfront.net</span>
+                    </div>
+                </div>
+            </div> */}
+            <div className="col-12 md:col-4 xl:col4">
+                <div className="card h-full">
+                    <span className="font-semibold text-md">AWS Websocket API</span>
+                    <div className="flex justify-content-between align-items-start mt-3">
+                        <div className="w-12">
+                            <span className="text-4xl font-bold text-900">
+                                Websocket
+                            </span>
+                            <div className="flex flex-row">
+                                <div className="text-green-500 flex-1">
+                                    <span className="font-medium">Online</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div className="flex align-items-center justify-content-between mt-4">
                         {/* @ts-ignore */}
-                        <span className="text-sm">d3zua21hwcw3v.cloudfront.net</span>
+                        <span className="text-sm">wss://a7uirjun9k.execute-api.us-east-2...</span>
                     </div>
                 </div>
             </div>
