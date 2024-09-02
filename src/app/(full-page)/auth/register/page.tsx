@@ -11,6 +11,8 @@ import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 import axios from "axios";
 import { randomInteger } from "@/utils/utils";
 import type { CustomEvent } from "@/types";
+import { sendVerificationEmail } from "@/utils/client/apiCalls";
+import moment from "moment";
 
 const Register: Page = () => {
     const [confirmed, setConfirmed] = useState(false);
@@ -19,6 +21,12 @@ const Register: Page = () => {
     const dark = layoutConfig.colorScheme !== "light";
 
     const [email, setEmail] = useState('');
+
+    // 0: default, 1: sending verification email, 2: waiting for verification code, 3: checking verification code, 4: verified, 5: building api
+    const [registrationStep, setRegistrationStep] = useState<0 | 1 | 2 | 3 | 4 | 5>(0);
+    const [submittedVerificationCode, setSubmittedVerificationCode] = useState(false);
+    const [emailVerificationCode, setEmailVerificationCode] = useState('');
+    const [invalidVerificationCode, setInvalidVerificationCode] = useState<boolean>(false);
 
     const [buttonStatus, setButtonStatus] = useState(0);
     const [deployStage, setDeployStage] = useState<number | null>(null);
@@ -144,6 +152,27 @@ const Register: Page = () => {
         );
     };
 
+    const verifyVerificationCode = async () => {
+        setRegistrationStep(3);
+    };
+
+    const verifyEmailAddress = async () => {
+        // verifying email and or sending verfication email
+        setRegistrationStep(1);
+        const res = await sendVerificationEmail(email).then((data) => data).catch((err) => ({ err }));
+        const {
+            verified,
+            emailSent,
+            err,
+        } = res || {};
+
+        if (verified) {
+            setRegistrationStep(4);
+        } else if (emailSent) {
+            setRegistrationStep(2);
+        }
+    };
+
     const handleDeploy = async () => {
         setDeployStageProgress(2);
         setButtonStatus(1);
@@ -225,7 +254,100 @@ const Register: Page = () => {
                 />
             </svg>
             <div className="px-5 min-h-screen flex justify-content-center align-items-center">
-                <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
+                {[0, 1, 2, 3].includes(registrationStep) && <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
+                    {registrationStep !== 0 && <Button
+                        className="mb-4"
+                        icon="pi pi-chevron-left"
+                        rounded outlined
+                        onClick={() => setRegistrationStep(0)}
+                    />}
+                    <div className="mb-4 w-full md:w-25rem">
+                        <div className="text-900 text-xl font-bold mb-2">
+                            {registrationStep === 0 ? "Let's get started" : "Enter email verificaion code"}
+                        </div>
+                        <span className="text-600 font-medium">
+                            {registrationStep === 0
+                                ? "Please enter your email so we can send you your API72 information and credentials once its built and deployed."
+                                : "Please enter the verification code sent to your email."
+                            }
+                            
+                        </span>
+                    </div>
+                    <div className="flex flex-column">
+                        <span className="p-input-icon-left w-full mb-2">
+                            <i className="pi pi-envelope"></i>
+                            <InputText
+                                id="email"
+                                type="text"
+                                className="w-full md:w-25rem"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={[1, 2, 3, 4].includes(registrationStep)}
+                            />
+                        </span>
+                        {[2, 3, 4].includes(registrationStep) && <span className="p-input-icon-left w-full mb-2">
+                            <i className="pi pi-lock z-2"></i>
+                            <InputText
+                                id="verification-code"
+                                type="text"
+                                className="w-full md:w-25rem"
+                                placeholder="Verification code"
+                                value={emailVerificationCode}
+                                onChange={(e) => setEmailVerificationCode(e.target.value)}
+                                disabled={registrationStep === 3 || registrationStep === 4}
+                            />
+                        </span>}
+                        {(registrationStep === 0 || registrationStep === 2 && emailVerificationCode.length >= 4) && <Button
+                            label={{ 0: "Send", 2: "Submit code", }[registrationStep]}
+                            className="w-full md:w-25rem mt-2 mb-1"
+                            onClick={() => {
+                                if (registrationStep === 0) {
+                                    verifyEmailAddress();
+                                } else if (registrationStep === 2) {
+                                    verifyVerificationCode();
+                                }
+                                
+                            }}
+                            disabled={email.length === 0}
+                        ></Button>}
+                        {registrationStep === 1 && <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-600" style={{ fontWeight: 'bold' }}>Sending verification email...&nbsp;</span>
+                        </div>}
+                        {registrationStep === 2 && (invalidVerificationCode
+                            ? <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span
+                                className="text-red-500"
+                                style={{ fontWeight: 'bold' }}
+                            >Invalid verification code,&nbsp;</span>
+                            check that you entered the code correctly or&nbsp;
+                            <span
+                                style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                                onClick={() => console.log('request a new verification code')}
+                            >request a new verification code</span>.
+                        </div> : <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span
+                                style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                                onClick={() => console.log('request a new verification code')}
+                            >Request a new verification code</span>
+                        </div>)}
+                        {registrationStep === 3 && <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-600" style={{ fontWeight: 'bold' }}>Checking verification code...&nbsp;</span>
+                        </div>}
+                        {registrationStep === 4 && (submittedVerificationCode ? <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Email already verified&nbsp;</span>{`on ${moment().format('LLLL')}`}
+                        </div> : <div className="text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Email verified!</span>
+                        </div>)}
+                        {(registrationStep === 0) && <span className="mt-1 font-medium text-600">
+                            Already have an API72 url?{" "}
+                            <a href="/auth/verify-api" className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
+                                Login
+                            </a>
+                        </span>}
+                    </div>
+                </div>}
+                {registrationStep === 5 && <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
                     <div className="mb-4 w-full md:w-25rem">
                         <div className="text-900 text-xl font-bold mb-2">
                             Let&lsquo;s get started
@@ -326,7 +448,7 @@ const Register: Page = () => {
                             </a>
                         </span>}
                     </div>
-                </div>
+                </div>}
             </div>
         </>
     );

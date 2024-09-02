@@ -9,6 +9,7 @@ import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable, DataTableFilterMeta } from "primereact/datatable";
 import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Rating } from "primereact/rating";
 import { Tooltip } from "primereact/tooltip";
@@ -17,10 +18,19 @@ import { ProductService } from "../../../../demo/service/ProductService";
 import { LayoutContext } from "../../../../layout/context/layoutcontext";
 
 import TreeDemo from "./tree";
+import CountdownTimer from "@/demo/components/apps/countdowntimer";
+import { renewLedgerEntry } from "@/utils/session/apiCalls";
 
 export default function APINetwork() {
     const { data: session, status } = useSession();
 
+    const [username, setUserName] = useState('');
+    const [userAPIURL, setUserAPIURL] = useState('');
+    const [apiDateRenewed, setApiDateRenewed] = useState(null);
+    const [initHours, setInitHours] = useState<number | null>(null);
+    const [displayRenewDialog, setDisplayRenewDialog] = useState<boolean>(false);
+    // 0: idle, 1: requesting renewal, 2: renewal error, 3: successfully renewed 
+    const [renewingAPI, setRenewingAPI] = useState<0 | 1 | 2 | 3>(0);
     // @ts-ignore
     const apiCreatedDate = session?.user?.data?.date_created;
     const apiCreatedDateMsg = apiCreatedDate
@@ -182,6 +192,16 @@ export default function APINetwork() {
         );
     };
 
+    // @ts-ignore
+    const expirationDateMsg = apiDateRenewed ? `on ${moment(apiDateRenewed).add(72, 'hours').calendar()}` : 'on...';
+
+    const handleRenewLedgerEntry = async () => {
+        setRenewingAPI(1);
+        const res = await renewLedgerEntry(session);
+        console.log('res: ', res);
+        setRenewingAPI(3);
+    };
+
     useEffect(() => {
         ProductService.getProductsSmall().then((data) => setProducts(data));
         const documentStyle = getComputedStyle(document.documentElement);
@@ -314,9 +334,148 @@ export default function APINetwork() {
         initFilters();
     }, [weeks, selectedWeek, layoutConfig]);
 
+    useEffect(() => {
+        // @ts-ignore
+        if (session?.user?.data) {
+            // @ts-ignore
+            setUserName(session?.user?.data?.api_username);
+            // @ts-ignore
+            setUserAPIURL(session?.user?.data?.api_url);
+            // @ts-ignore
+            setApiDateRenewed(session?.user?.data?.date_renewed);
+
+            // @ts-ignore
+            const endTime = moment(session?.user?.data?.date_renewed).add(72, 'hours');
+            const startTime = moment();
+
+            const differenceInHours = endTime.diff(startTime, 'hours', true);
+            const roundedDifference = Math.round(differenceInHours * 100) / 100;
+            setInitHours(roundedDifference);
+        }
+        
+    }, [session])
+
     return (
         <div className="grid">
-            
+            <div className="col-12">
+                <div className="flex flex-column sm:flex-row align-items-center gap-4">
+                    <div className="flex flex-column sm:flex-row align-items-center gap-3">
+                        {/* <img
+                            alt="avatar"
+                            src={`/demo/images/avatar/circle/avatar-f-1.png`}
+                            className="w-4rem h-4rem flex-shrink-0"
+                        /> */}
+                        <div className="flex flex-column align-items-center sm:align-items-start">
+                            <span className="text-900 font-bold text-4xl">
+                                {`${username}-xxxx.xxxx`}
+                            </span>
+                            <p className="text-600 m-0">
+                                {userAPIURL}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 sm:ml-auto">
+                        {/* <Button
+                            type="button"
+                            tooltip="Exchange"
+                            tooltipOptions={{ position: "bottom" }}
+                            icon="pi pi-arrows-h"
+                            outlined
+                            rounded
+                        ></Button>
+                        <Button
+                            type="button"
+                            tooltip="Withdraw"
+                            tooltipOptions={{ position: "bottom" }}
+                            icon="pi pi-download"
+                            outlined
+                            rounded
+                        ></Button>
+                        <Button
+                            type="button"
+                            tooltip="Send"
+                            tooltipOptions={{ position: "bottom" }}
+                            icon="pi pi-send"
+                            rounded
+                        ></Button> */}
+                    </div>
+                </div>
+            </div>
+            <div className="col-12 md:col-6 xl:col-4">
+                <div className="card h-full relative overflow-hidden">
+                    <svg
+                        id="visual"
+                        viewBox="0 0 900 600"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                        version="1.1"
+                        className="absolute left-0 top-0 h-full w-full z-1"
+                        preserveAspectRatio="none"
+                    >
+                        <rect
+                            x="0"
+                            y="0"
+                            width="900"
+                            height="600"
+                            fill="var(--primary-600)"
+                        ></rect>
+                        <path
+                            d="M0 400L30 386.5C60 373 120 346 180 334.8C240 323.7 300 328.3 360 345.2C420 362 480 391 540 392C600 393 660 366 720 355.2C780 344.3 840 349.7 870 352.3L900 355L900 601L870 601C840 601 780 601 720 601C660 601 600 601 540 601C480 601 420 601 360 601C300 601 240 601 180 601C120 601 60 601 30 601L0 601Z"
+                            fill="var(--primary-500)"
+                            strokeLinecap="round"
+                            strokeLinejoin="miter"
+                        ></path>
+                    </svg>
+                    <div className="z-2 relative text-white">
+                        <div className="text-xl font-semibold mb-3">
+                            Expires in
+                        </div>
+                        <div className="mb-3">
+                            {initHours !== null && <CountdownTimer
+                                duration={60 * 60 * initHours * 1000}
+                                updateInterval={3600 * 10}
+                                suffix="hrs"
+                                width={191}
+                                style={{ fontSize: 44, fontWeight: 'bold' }}
+                            />}
+                        </div>
+                        
+                        <div className="flex align-items-center justify-content-between">
+                            {/* @ts-ignore */}
+                            <span className="text-lg">{expirationDateMsg}</span>
+                            <Button className="product-badge status-yellow" label="Renew" onClick={() => setDisplayRenewDialog(true)}/>
+                            <Dialog
+                                header="Renew API"
+                                visible={displayRenewDialog}
+                                style={{ width: "30vw", minWidth: 300 }}
+                                modal
+                                onHide={() => setDisplayRenewDialog(false)}
+                            >
+                                <div className="flex flex-wrap gap-2 justify-content-between">
+                                    <p>
+                                        All APIs expire within 72 hours of the time they were created or "renewed". By clicking "Renew" you will be given a new expiration date 72 hours from now. This renewal will have no affect on the architecture and integrity of your API. 
+                                    </p>
+                                    {(renewingAPI === 0 || renewingAPI === 2) && <Button
+                                    label={{0: 'Renew', 2: 'Try again'}[renewingAPI]}
+                                    className="flex-auto"
+                                    onClick={handleRenewLedgerEntry}
+                                    ></Button>}
+                                    {renewingAPI === 1 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                                        <span className="text-600" style={{ fontWeight: 'bold' }}>Requesting renewal...&nbsp;</span>
+                                    </div>}
+                                    {renewingAPI === 2 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                                        <span className="text-red-500" style={{ fontWeight: 'bold' }}>Error:&nbsp;</span>unable to request renewal
+                                    </div>}
+                                    {renewingAPI === 3 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                                        <div className="text-blue-500" style={{ fontWeight: 'bold' }}>Successful</div>
+                                        <div>{`Your API now expires on ${moment().format('LLLL')}`}</div>
+                                    </div>}
+                                </div>
+                            </Dialog>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
                     {/* @ts-ignore */}
@@ -331,15 +490,19 @@ export default function APINetwork() {
                                     <span className="font-medium">Online</span>
                                     {/* <i className="pi pi-arrow-up text-xs ml-2"></i> */}
                                 </div>
-                                <span className="product-badge status-light">
+                                {/* <span className="product-badge status-light">
                                     VIEW
-                                </span>
+                                </span> */}
                             </div>
                         </div>
                     </div>
+                    <div className="flex align-items-center justify-content-between mt-4">
+                        {/* @ts-ignore */}
+                        <span className="text-sm">d3zua21hwcw3v.cloudfront.net</span>
+                    </div>
                 </div>
             </div>
-            <div className="col-12 md:col-4 xl:col4">
+            {/* <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
                     <span className="font-semibold text-md">MongoDB Integration</span>
                     <div className="flex justify-content-between align-items-start mt-3">
@@ -350,19 +513,21 @@ export default function APINetwork() {
                             <div className="flex flex-row">
                                 <div className="text-green-500 flex-1">
                                     <span className="font-medium">Connected</span>
-                                    {/* <i className="pi pi-arrow-up text-xs ml-2"></i> */}
                                 </div>
-                                <span className="product-badge status-light">
-                                    VIEW
-                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
             <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
-                    <span className="font-semibold text-md">Next.js Website</span>
+                    <div className="flex flex-row">
+                        <span className="font-semibold text-md flex-1">Next.js Website</span>
+                        <span className="product-badge status-light">
+                            Coming soon
+                        </span>
+                    </div>
+                    
                     <div className="flex justify-content-between align-items-start mt-3">
                         <div className="w-12">
                             <span className="text-4xl font-bold text-900">
@@ -373,11 +538,12 @@ export default function APINetwork() {
                                     <span className="font-medium">No Integration</span>
                                     {/* <i className="pi pi-arrow-up text-xs ml-2"></i> */}
                                 </div>
-                                <span className="product-badge status-light">
-                                    Coming soon
-                                </span>
                             </div>
                         </div>
+                    </div>
+                    <div className="flex align-items-center justify-content-between mt-4">
+                        {/* @ts-ignore */}
+                        <span className="text-sm">{`{ no website url generated }`}</span>
                     </div>
                 </div>
             </div>

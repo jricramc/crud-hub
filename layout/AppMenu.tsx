@@ -8,15 +8,15 @@ const AppMenu = () => {
             icon: "pi pi-home",
             items: [
                 {
-                    label: "Portal",
+                    label: "Home",
                     icon: "pi pi-fw pi-home",
-                    to: "/portal",
+                    to: "/home",
                 },
-                {
-                    label: "API Network",
-                    icon: "pi pi-fw pi-share-alt",
-                    to: "/api-network",
-                },
+                // {
+                //     label: "API Network",
+                //     icon: "pi pi-fw pi-share-alt",
+                //     to: "/api-network",
+                // },
             ],
         },
         // {

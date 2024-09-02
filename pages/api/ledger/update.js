@@ -30,7 +30,7 @@ const handler = async (req, res) => {
                                         { "upsert": true, "returnNewDocument": true } // Options: upsert to insert if document doesn't exist, returnOriginal: false to return the updated document
                                     ],
                                     "variable": {
-                                        "name": "doc_result",
+                                        "name": "ledger_entry",
                                         "return": true,
                                     }
                                 }
@@ -51,9 +51,10 @@ const handler = async (req, res) => {
                 data: requestData,
 
                 }).then((response) => {
+                    const ledger_entry = response?.data?.response?.variables?.ledger_entry?.value || {};
                     return {
                         statusCode: 200,
-                        output: { ...(response?.data || {}) },
+                        output: ledger_entry,
                     }
                 })
                 .catch((err) => {
@@ -61,11 +62,9 @@ const handler = async (req, res) => {
                         statusCode: 409,
                         output: { err }
                     };
-                })
-
-            // console.log('output: ', JSON.stringify(output)) 
+                }) 
     
-            res.status(statusCode).json({ ...output });
+            res.status(statusCode).json(output);
     
         } else {
             res.status(405).end(`Method ${method} Not Allowed`);
@@ -76,11 +75,7 @@ const handler = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    if (error.message.includes('already exists')) {
-        res.status(409).send(`stack '${stackName}' already exists`);
-    } else {
-        res.status(500).send(error.message);
-    }
+    res.status(500).send(error.message);
   }
 };
 

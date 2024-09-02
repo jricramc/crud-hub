@@ -99,4 +99,4 @@ export {
   createLedgerEntry,
   authorizeAPIUserPasskey,
   sendEmail,
-}
+};

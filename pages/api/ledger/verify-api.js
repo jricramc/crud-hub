@@ -65,11 +65,7 @@ const handler = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    if (error.message.includes('already exists')) {
-        res.status(409).send(`stack '${stackName}' already exists`);
-    } else {
-        res.status(500).send(error.message);
-    }
+    res.status(500).send(error.message);
   }
 };
 
