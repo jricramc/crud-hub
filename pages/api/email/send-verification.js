@@ -67,11 +67,11 @@ const handler = async (req, res) => {
             }
 
             const email_list_entry = response?.data?.response?.variables?.email_list_entry?.value;
-            const { complete, code } = email_list_entry?.verification || {};
+            const { complete, code, date_verified } = email_list_entry?.verification || {};
             if (complete) {
                 return {
                     statusCode: 200,
-                    output: { verified: true },
+                    output: { alreadyVerified: true, date_verified },
                 }
             }
 

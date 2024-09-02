@@ -25,7 +25,7 @@ const verifyAPIID = async (api_id: String) => {
 };
 
 const sendVerificationEmail = async (email: String) => {
-  const url = `/api/email/verification`;
+  const url = `/api/email/send-verification`;
   
   const res = await axios.post(url, {
       email,
@@ -42,7 +42,31 @@ const sendVerificationEmail = async (email: String) => {
   return Promise.reject(`error ${res.status} received from server`);
 };
 
+interface CheckEmailVerificationCodeArgs {
+  email: String;
+  code: String;
+}
+
+const checkEmailVerificationCode = async ({ email, code } : CheckEmailVerificationCodeArgs) => {
+  const url = `/api/email/check-verification`;
+  
+  const res = await axios.post(url, {
+      email, code
+    }, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (res.status === 200) {
+    console.log('res.data: ', res.data);
+    return Promise.resolve(res.data);
+  }
+  console.error(res);
+  return Promise.reject(`error ${res.status} received from server`);
+};
+
 export {
     verifyAPIID,
-    sendVerificationEmail
+    sendVerificationEmail,
+    checkEmailVerificationCode
 }

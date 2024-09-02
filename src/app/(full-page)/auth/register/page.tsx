@@ -1,6 +1,6 @@
 "use client";
 import type { Page } from "@/types";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
@@ -11,24 +11,28 @@ import { LayoutContext } from "../../../../../layout/context/layoutcontext";
 import axios from "axios";
 import { randomInteger } from "@/utils/utils";
 import type { CustomEvent } from "@/types";
-import { sendVerificationEmail } from "@/utils/client/apiCalls";
+import { checkEmailVerificationCode, sendVerificationEmail } from "@/utils/client/apiCalls";
 import moment from "moment";
 
 const Register: Page = () => {
-    const [confirmed, setConfirmed] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    console.log("searchParams?.get('email'): ", searchParams?.get('email'))
+    console.log("searchParams?.get('code'): ", searchParams?.get('code'))
+    const [confirmed, setConfirmed] = useState(false);
+    
     const { layoutConfig } = useContext(LayoutContext);
     const dark = layoutConfig.colorScheme !== "light";
 
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState<string | null>(searchParams?.has('email') ? searchParams?.get('email') : null);
 
     // 0: default, 1: sending verification email, 2: waiting for verification code, 3: checking verification code, 4: verified, 5: building api
-    const [registrationStep, setRegistrationStep] = useState<0 | 1 | 2 | 3 | 4 | 5>(0);
-    const [submittedVerificationCode, setSubmittedVerificationCode] = useState(false);
-    const [emailVerificationCode, setEmailVerificationCode] = useState('');
+    const [registrationStep, setRegistrationStep] = useState<0 | 1 | 2 | 3 | 4 | 5>(searchParams?.has('email') && searchParams?.has('code') ? 3 : 0);
+    const [emailAlreadyVerifiedDate, setEmailAlreadyVerifiedDate] = useState<string | null>(null);
+    const [emailVerificationCode, setEmailVerificationCode] = useState<string | null>(searchParams?.has('code') ? searchParams?.get('code') : null);
     const [invalidVerificationCode, setInvalidVerificationCode] = useState<boolean>(false);
 
-    const [buttonStatus, setButtonStatus] = useState(0);
+    const [buttonDeploymentStatus, setButtonDeploymentStatus] = useState(0);
     const [deployStage, setDeployStage] = useState<number | null>(null);
     const [deployStageProgress, setDeployStageProgress] = useState(0);
     const deployStageMessages = {
@@ -153,20 +157,41 @@ const Register: Page = () => {
     };
 
     const verifyVerificationCode = async () => {
+        setEmailAlreadyVerifiedDate(null);
         setRegistrationStep(3);
+
+        const res = await checkEmailVerificationCode({
+            email: email ?? '',
+            code: emailVerificationCode ?? ''
+        });
+
+        const {
+            alreadyVerified,
+            verified,
+            date_verified,
+        } = res || {};
+
+        if (alreadyVerified) {
+            setEmailAlreadyVerifiedDate(date_verified);
+        }
+        setInvalidVerificationCode(!(alreadyVerified || verified));
+        setRegistrationStep((alreadyVerified || verified) ? 4 : 2);
     };
 
     const verifyEmailAddress = async () => {
         // verifying email and or sending verfication email
+        setEmailAlreadyVerifiedDate(null);
         setRegistrationStep(1);
-        const res = await sendVerificationEmail(email).then((data) => data).catch((err) => ({ err }));
+        const res = await sendVerificationEmail(email ?? '').then((data) => data).catch((err) => ({ err }));
         const {
-            verified,
+            alreadyVerified,
             emailSent,
+            date_verified,
             err,
         } = res || {};
 
-        if (verified) {
+        if (alreadyVerified) {
+            setEmailAlreadyVerifiedDate(date_verified);
             setRegistrationStep(4);
         } else if (emailSent) {
             setRegistrationStep(2);
@@ -175,8 +200,8 @@ const Register: Page = () => {
 
     const handleDeploy = async () => {
         setDeployStageProgress(2);
-        setButtonStatus(1);
-        await axios.post('https://webhub.up.railway.app/api/deploy/coreAPI', { email }, {
+        setButtonDeploymentStatus(1);
+        await axios.post('https://webhub.up.railway.app/api/deploy/coreAPI', { email: email ?? '' }, {
             headers: {
               'Content-Type': 'application/json',
               // 'ledger-api-key': process.env.NEXT_PUBLIC_LEDGER_API_KEY,
@@ -204,7 +229,7 @@ const Register: Page = () => {
               console.log('err: ', err);
             //   setDeployStageMessage({ type: 'timeout', stage: 0 });
             //   setDeployStageProgress(0)
-            setButtonStatus(2);
+            setButtonDeploymentStatus(2);
             setDeployStageMessage({ type: 'error', stage: 0 });
           });
       };
@@ -222,6 +247,12 @@ const Register: Page = () => {
             }
         }
       }, [deployStageProgress])
+
+      useEffect(() => {
+        if (email !== null && emailVerificationCode !== null) {
+            verifyVerificationCode();
+        }
+      }, []);
 
     return (
         <>
@@ -254,21 +285,28 @@ const Register: Page = () => {
                 />
             </svg>
             <div className="px-5 min-h-screen flex justify-content-center align-items-center">
-                {[0, 1, 2, 3].includes(registrationStep) && <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
+                {[0, 1, 2, 3, 4].includes(registrationStep) && <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
                     {registrationStep !== 0 && <Button
                         className="mb-4"
                         icon="pi pi-chevron-left"
                         rounded outlined
-                        onClick={() => setRegistrationStep(0)}
+                        onClick={() => {
+                            if (registrationStep !== 3) {
+                                setRegistrationStep(0);
+                                setEmailVerificationCode(null);
+                                setInvalidVerificationCode(false);
+                            }
+                        }}
+                        disabled={registrationStep === 3}
                     />}
                     <div className="mb-4 w-full md:w-25rem">
                         <div className="text-900 text-xl font-bold mb-2">
-                            {registrationStep === 0 ? "Let's get started" : "Enter email verificaion code"}
+                            {registrationStep === 0 ? "Let's get started" : "Email verification"}
                         </div>
                         <span className="text-600 font-medium">
                             {registrationStep === 0
                                 ? "Please enter your email so we can send you your API72 information and credentials once its built and deployed."
-                                : "Please enter the verification code sent to your email."
+                                : "Please follow the email verification instructions sent to your email and enter the verification code."
                             }
                             
                         </span>
@@ -281,7 +319,7 @@ const Register: Page = () => {
                                 type="text"
                                 className="w-full md:w-25rem"
                                 placeholder="Email"
-                                value={email}
+                                value={email ?? ''}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={[1, 2, 3, 4].includes(registrationStep)}
                             />
@@ -293,23 +331,25 @@ const Register: Page = () => {
                                 type="text"
                                 className="w-full md:w-25rem"
                                 placeholder="Verification code"
-                                value={emailVerificationCode}
+                                value={emailVerificationCode ?? ''}
                                 onChange={(e) => setEmailVerificationCode(e.target.value)}
                                 disabled={registrationStep === 3 || registrationStep === 4}
                             />
                         </span>}
-                        {(registrationStep === 0 || registrationStep === 2 && emailVerificationCode.length >= 4) && <Button
-                            label={{ 0: "Send", 2: "Submit code", }[registrationStep]}
+                        {(registrationStep === 0 || registrationStep === 2 && (emailVerificationCode ?? '').length >= 4 || registrationStep === 4) && <Button
+                            label={{ 0: "Send", 2: "Submit code", 4: 'Continue'}[registrationStep]}
                             className="w-full md:w-25rem mt-2 mb-1"
                             onClick={() => {
                                 if (registrationStep === 0) {
                                     verifyEmailAddress();
                                 } else if (registrationStep === 2) {
                                     verifyVerificationCode();
+                                } else if (registrationStep === 4) {
+                                    setRegistrationStep(5);
                                 }
                                 
                             }}
-                            disabled={email.length === 0}
+                            disabled={(email ?? '').length === 0}
                         ></Button>}
                         {registrationStep === 1 && <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
                             <span className="text-600" style={{ fontWeight: 'bold' }}>Sending verification email...&nbsp;</span>
@@ -323,19 +363,19 @@ const Register: Page = () => {
                             check that you entered the code correctly or&nbsp;
                             <span
                                 style={{ textDecoration: 'underline', cursor: 'pointer' }}
-                                onClick={() => console.log('request a new verification code')}
+                                onClick={() => verifyEmailAddress()}
                             >request a new verification code</span>.
                         </div> : <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
                             <span
                                 style={{ textDecoration: 'underline', cursor: 'pointer' }}
-                                onClick={() => console.log('request a new verification code')}
+                                onClick={() => verifyEmailAddress()}
                             >Request a new verification code</span>
                         </div>)}
                         {registrationStep === 3 && <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
                             <span className="text-600" style={{ fontWeight: 'bold' }}>Checking verification code...&nbsp;</span>
                         </div>}
-                        {registrationStep === 4 && (submittedVerificationCode ? <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
-                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Email already verified&nbsp;</span>{`on ${moment().format('LLLL')}`}
+                        {registrationStep === 4 && (emailAlreadyVerifiedDate ? <div className="w-full md:w-25rem text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
+                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Email already verified&nbsp;</span>{`on ${moment(emailAlreadyVerifiedDate).format('LLLL')}`}
                         </div> : <div className="text-600 font-medium mt-1 mb-2" style={{ fontSize: '0.8rem'}}>
                             <span className="text-blue-500" style={{ fontWeight: 'bold' }}>Email verified!</span>
                         </div>)}
@@ -350,22 +390,13 @@ const Register: Page = () => {
                 {registrationStep === 5 && <div className="border-1 surface-border surface-card border-round py-7 px-4 md:px-7 z-1">
                     <div className="mb-4 w-full md:w-25rem">
                         <div className="text-900 text-xl font-bold mb-2">
-                            Let&lsquo;s get started
+                            Ready for deployment&nbsp;&nbsp;🚀
                         </div>
                         <span className="text-600 font-medium">
-                            Please enter your email so we can send you your API72 information and credentials once its built and deployed.
+                            Once you start deployment, it will take roughly 8 minutes to build and deploy your api. When your API is ready you will be emailed instructions and credentials to start utilizing your API.
                         </span>
                     </div>
                     <div className="flex flex-column">
-                        {/* <span className="p-input-icon-left w-full mb-4">
-                            <i className="pi pi-user"></i>
-                            <InputText
-                                id="username"
-                                type="text"
-                                className="w-full md:w-25rem"
-                                placeholder="Username"
-                            />
-                        </span> */}
                         <span className="p-input-icon-left w-full mb-4">
                             <i className="pi pi-envelope"></i>
                             <InputText
@@ -373,75 +404,29 @@ const Register: Page = () => {
                                 type="text"
                                 className="w-full md:w-25rem"
                                 placeholder="Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={buttonStatus === 1}
+                                value={(email ?? '')}
+                                disabled={true}
                             />
                         </span>
-                        {/* <span className="p-input-icon-left w-full mb-4">
-                            <i className="pi pi-lock z-2"></i>
-                            <Password
-                                id="password"
-                                type="password"
-                                className="w-full"
-                                inputClassName="w-full md:w-25rem"
-                                placeholder="Password"
-                                toggleMask
-                                inputStyle={{ paddingLeft: "2.5rem" }}
-                            />
-                        </span> */}
-                        {/* <div className="mb-4 flex flex-wrap">
-                            <Checkbox
-                                name="checkbox"
-                                checked={confirmed}
-                                onChange={(e) =>
-                                    setConfirmed(e.checked ?? false)
-                                }
-                                className="mr-2"
-                            ></Checkbox>
-                            <label
-                                htmlFor="checkbox"
-                                className="text-900 font-medium mr-2"
-                            >
-                                I have read the
-                            </label>
-                            <a className="text-600 cursor-pointer hover:text-primary cursor-pointer">
-                                Terms and Conditions
-                            </a>
-                        </div> */}
-                        {/* {(buttonStatus === 1 || buttonStatus === 2) && <div className="mt-3 mb-6">
-                            <Timeline
-                                value={customEvents}
-                                className="customized-timeline"
-                                opposite={(item) => item.status}
-                                marker={customizedMarker}
-                                content={(item) => (
-                                    <small className="p-text-secondary">
-                                        {item.date}
-                                    </small>
-                                )}
-                            />
-                        </div>} */}
-                        {buttonStatus !== 1 && <Button
-                            label={["Start deployment", "Building...", "Try again"][buttonStatus]}
+                        {buttonDeploymentStatus !== 1 && <Button
+                            label={["Start deployment", "Building...", "Try again"][buttonDeploymentStatus]}
                             className="w-full mb-3"
                             onClick={() => {
-                                if (buttonStatus === 0 || buttonStatus === 2) {
+                                if (buttonDeploymentStatus === 0 || buttonDeploymentStatus === 2) {
                                     handleDeploy();
                                 }
                             }}
-                            disabled={email.length === 0 || buttonStatus === 1}
+                            disabled={(email ?? '').length === 0 || buttonDeploymentStatus === 1}
                         ></Button>}
-                        {/* @ts-ignore */}
-                        {(buttonStatus === 1 || buttonStatus === 2) && <span className={`mb-3 font-medium ${deployStageMessages[deployStageMessage.type]?.textColor}`}>
-                        {/* @ts-ignore */}
-                        <div>
-                            <span className="text-blue-500" style={{ fontWeight: 'bold' }}>{deployStageProgress.toFixed(2)}%&nbsp;&nbsp;</span>
-                            {/* @ts-ignore */}
-                            <span className="text-500">{deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}</span>
-                        </div>
+                        {(buttonDeploymentStatus === 1 || buttonDeploymentStatus === 2) && <span className="mb-3 font-medium">
+                            <div>
+                                {/* @ts-ignore */}
+                                <span className={`${deployStageMessages[deployStageMessage.type]?.textColor}`} style={{ fontWeight: 'bold' }}>{deployStageProgress.toFixed(2)}%&nbsp;&nbsp;</span>
+                                {/* @ts-ignore */}
+                                <span className="text-500">{deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}</span>
+                            </div>
                         </span>}
-                        {buttonStatus === 0 && <span className="mt-1 font-medium text-600">
+                        {buttonDeploymentStatus === 0 && <span className="mt-1 font-medium text-600">
                             Already have an API72 url?{" "}
                             <a href="/auth/verify-api" className="font-semibold cursor-pointer text-900 hover:text-primary transition-colors transition-duration-300">
                                 Login
