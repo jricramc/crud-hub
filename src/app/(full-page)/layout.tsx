@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import React from "react";
+import { Suspense } from "react";
 import AppConfig from "../../../layout/AppConfig";
 
 interface FullPageLayoutProps {
@@ -15,8 +16,11 @@ interface FullPageLayoutProps {
 export default function FullPageLayout({ children }: FullPageLayoutProps) {
     return (
         <React.Fragment>
-            {children}
-            <AppConfig minimal />
+            <Suspense fallback={<>Loading...</>}>
+                {children}
+                <AppConfig minimal />
+            </Suspense>
+            
         </React.Fragment>
     );
 }

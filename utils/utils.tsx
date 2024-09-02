@@ -141,6 +141,24 @@ const randomIntegerID = (l = 8) => {
   return riid;
 };
 
+const mergeDeep = (target: any, source: Object) => {
+  // Iterate through each key in the source object
+  for (const [key, sourceVal] of Object.entries(source)) {
+    // If the value is an object and the target has the same key as an object, merge them recursively
+    if (sourceVal && typeof sourceVal === 'object' && !Array.isArray(sourceVal)) {
+      if (!target[key]) {
+        target[key] = {}; // Ensure the target has an object at this key
+      }
+      mergeDeep(target[key], sourceVal); // Recursive call
+    } else {
+      // Otherwise, just set the value from the source to the target
+      target[key] = sourceVal;
+    }
+  }
+
+  return target; // Return the updated target object
+}
+
 export {
     API72_COLORS,
     randomUsernameGenerator,
@@ -151,4 +169,5 @@ export {
     deleteLedgerEntry,
     randomInteger,
     randomIntegerID,
+    mergeDeep,
 };

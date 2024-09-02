@@ -22,11 +22,11 @@ import CountdownTimer from "@/demo/components/apps/countdowntimer";
 import { renewLedgerEntry } from "@/utils/session/apiCalls";
 
 export default function APINetwork() {
-    const { data: session, status } = useSession();
+    const { data: session, status, update: updateSession } = useSession();
 
     const [username, setUserName] = useState('');
     const [userAPIURL, setUserAPIURL] = useState('');
-    const [apiDateRenewed, setApiDateRenewed] = useState(null);
+    const [apiDateRenewed, setApiDateRenewed] = useState<string | null>(null);
     const [initHours, setInitHours] = useState<number | null>(null);
     const [displayRenewDialog, setDisplayRenewDialog] = useState<boolean>(false);
     // 0: idle, 1: requesting renewal, 2: renewal error, 3: successfully renewed 
@@ -199,6 +199,15 @@ export default function APINetwork() {
         setRenewingAPI(1);
         const res = await renewLedgerEntry(session);
         console.log('res: ', res);
+
+        updateSession({
+            user: {
+                data: {
+                    date_renewed: res.date_renewed
+                }
+            }
+        });
+        
         setRenewingAPI(3);
     };
 
@@ -342,7 +351,7 @@ export default function APINetwork() {
             // @ts-ignore
             setUserAPIURL(session?.user?.data?.api_url);
             // @ts-ignore
-            setApiDateRenewed(session?.user?.data?.date_renewed);
+            setApiDateRenewed((prevState) => { console.log(prevState, session?.user?.data?.date_renewed); return session?.user?.data?.date_renewed; });
 
             // @ts-ignore
             const endTime = moment(session?.user?.data?.date_renewed).add(72, 'hours');
@@ -350,6 +359,7 @@ export default function APINetwork() {
 
             const differenceInHours = endTime.diff(startTime, 'hours', true);
             const roundedDifference = Math.round(differenceInHours * 100) / 100;
+            console.log('roundedDifference: ', roundedDifference);
             setInitHours(roundedDifference);
         }
         
@@ -432,6 +442,7 @@ export default function APINetwork() {
                         </div>
                         <div className="mb-3">
                             {initHours !== null && <CountdownTimer
+                                key={`countdowntimer-${apiDateRenewed ?? 'default'}`}
                                 duration={60 * 60 * initHours * 1000}
                                 updateInterval={3600 * 10}
                                 suffix="hrs"
@@ -443,7 +454,13 @@ export default function APINetwork() {
                         <div className="flex align-items-center justify-content-between">
                             {/* @ts-ignore */}
                             <span className="text-lg">{expirationDateMsg}</span>
-                            <Button className="product-badge status-yellow" label="Renew" onClick={() => setDisplayRenewDialog(true)}/>
+                            <Button
+                                className="product-badge status-yellow"
+                                label="Renew"
+                                onClick={() => {
+                                    setRenewingAPI(0);
+                                    setDisplayRenewDialog(true);
+                                }}/>
                             <Dialog
                                 header="Renew API"
                                 visible={displayRenewDialog}
@@ -453,7 +470,7 @@ export default function APINetwork() {
                             >
                                 <div className="flex flex-wrap gap-2 justify-content-between">
                                     <p>
-                                        All APIs expire within 72 hours of the time they were created or "renewed". By clicking "Renew" you will be given a new expiration date 72 hours from now. This renewal will have no affect on the architecture and integrity of your API. 
+                                        All APIs expire within 72 hours of the time they were created or "renewed". <br></br><br></br>By clicking "Renew" you will be given a new expiration date 72 hours from now. This renewal will have no affect on the architecture and integrity of your API. 
                                     </p>
                                     {(renewingAPI === 0 || renewingAPI === 2) && <Button
                                     label={{0: 'Renew', 2: 'Try again'}[renewingAPI]}
@@ -468,7 +485,7 @@ export default function APINetwork() {
                                     </div>}
                                     {renewingAPI === 3 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
                                         <div className="text-blue-500" style={{ fontWeight: 'bold' }}>Successful</div>
-                                        <div>{`Your API now expires on ${moment().format('LLLL')}`}</div>
+                                        <div>{`Your API now expires ${expirationDateMsg}`}</div>
                                     </div>}
                                 </div>
                             </Dialog>
