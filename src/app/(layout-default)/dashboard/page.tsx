@@ -20,9 +20,14 @@ import { LayoutContext } from "../../../../layout/context/layoutcontext";
 import TreeDemo from "./tree";
 import CountdownTimer from "@/demo/components/apps/countdowntimer";
 import { renewLedgerEntry } from "@/utils/session/apiCalls";
+import { set } from "zod";
 
 export default function APINetwork() {
     const { data: session, status, update: updateSession } = useSession();
+
+    const actionCopyRef = useRef(null);
+
+    const [tmpWebsocketUrl, setTmpWebsocketUrl] = useState<string | null>(null);
 
     const [username, setUserName] = useState('');
     const [userAPIURL, setUserAPIURL] = useState('');
@@ -31,6 +36,10 @@ export default function APINetwork() {
     const [displayRenewDialog, setDisplayRenewDialog] = useState<boolean>(false);
     // 0: idle, 1: requesting renewal, 2: renewal error, 3: successfully renewed 
     const [renewingAPI, setRenewingAPI] = useState<0 | 1 | 2 | 3>(0);
+
+    const [displayDeployWebsocketDialog, setDisplayDeployWebsocketDialog] = useState<boolean>(false);
+    const [deployingWebsocketAPI, setDeployingWebsocketAPI] = useState<0 | 1 | 2 | 3>(0);
+
     // @ts-ignore
     const apiCreatedDate = session?.user?.data?.date_created;
     const apiCreatedDateMsg = apiCreatedDate
@@ -192,6 +201,11 @@ export default function APINetwork() {
         );
     };
 
+    const copyCode = async (event: React.MouseEvent<HTMLButtonElement>, text: string) => {
+        await navigator.clipboard.writeText(text);
+        event.preventDefault();
+    };
+
     // @ts-ignore
     const expirationDateMsg = apiDateRenewed ? `on ${moment(apiDateRenewed).add(72, 'hours').calendar()}` : 'on...';
 
@@ -208,6 +222,25 @@ export default function APINetwork() {
         });
         
         setRenewingAPI(3);
+    };
+
+    const handleDeployingWebsocketAPI = () => {
+        setDeployingWebsocketAPI(1);
+        // const res = await renewLedgerEntry(session);
+
+        // updateSession({
+        //     user: {
+        //         data: {
+        //             date_renewed: res.date_renewed
+        //         }
+        //     }
+        // });
+
+        setTimeout(() => {
+            setDeployingWebsocketAPI(3);
+            setTmpWebsocketUrl('wss://a7uirjun9k.execute-api.us-east-2.amazonaws.com/stage-test-0-eqy3zt-KMrU6-117be9d/');
+        }, 3000);
+        
     };
 
     useEffect(() => {
@@ -513,23 +546,89 @@ export default function APINetwork() {
             </div> */}
             <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
-                    <span className="font-semibold text-md">AWS Websocket API</span>
+                    <div className="flex flex-row">
+                        <span className="font-semibold text-md flex-1">AWS Websocket API</span>
+                        <span className="customer-badge status-blue">
+                            Open sandbox
+                        </span>
+                    </div>
                     <div className="flex justify-content-between align-items-start mt-3">
                         <div className="w-12">
                             <span className="text-4xl font-bold text-900">
                                 Websocket
                             </span>
                             <div className="flex flex-row">
-                                <div className="text-green-500 flex-1">
+                                {tmpWebsocketUrl ? <div className="text-green-500 flex-1">
                                     <span className="font-medium">Online</span>
-                                </div>
+                                </div> : <div className="text-color-secondary flex-1">
+                                    <span className="font-medium">Available</span>
+                                </div>}
                             </div>
                         </div>
                     </div>
-                    <div className="flex align-items-center justify-content-between mt-4">
+                    {tmpWebsocketUrl ? <div className="flex align-items-center justify-content-between mt-3">
                         {/* @ts-ignore */}
-                        <span className="text-sm">wss://a7uirjun9k.execute-api.us-east-2...</span>
-                    </div>
+                        <span
+                            className="text-sm"
+                            style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                display: '-webkit-box',
+                            }}
+                        >{tmpWebsocketUrl}</span>
+                        <button
+                            ref={actionCopyRef}
+                            tabIndex={0}
+                            className="p-link block-action-copy"
+                            onClick={(e) => copyCode(e, 'wss://a7uirjun9k.execute-api.us-east-2.amazonaws.com/stage-test-0-eqy3zt-KMrU6-117be9d/')}
+                        >
+                            <i className="pi pi-copy text-900"></i>
+                        </button>
+                        <Tooltip
+                            target={actionCopyRef as any}
+                            position="bottom"
+                            content="Copied to clipboard"
+                            event="focus"
+                        />
+                    </div> : <div className="flex align-items-center justify-content-between mt-3">
+                        <Button
+                            className="product-badge status-yellow"
+                            label="Deploy resource"
+                            onClick={() => {
+                                setDeployingWebsocketAPI(0);
+                                setDisplayDeployWebsocketDialog(true);
+                            }}/>
+                    </div>}
+                    <Dialog
+                        header="Deploy Websocket API"
+                        visible={displayDeployWebsocketDialog}
+                        style={{ width: "30vw", minWidth: 300 }}
+                        modal
+                        onHide={() => setDisplayDeployWebsocketDialog(false)}
+                    >
+                        <div className="flex flex-wrap gap-2 justify-content-between">
+                            <p>
+                                Deploying your AWS Websocket API resource takes roughly 4 minutes.<br></br><br></br> Once deployed, your dashboard will display your websocket URL which gives you access to your AWS Websocket API resource with out-of-box functionality which you can test out in our websocket sandbox environment and use immediately in your own applications.
+                            </p>
+                            {(deployingWebsocketAPI === 0 || deployingWebsocketAPI === 2) && <Button
+                            label={{0: 'Start deployment', 2: 'Try again'}[deployingWebsocketAPI]}
+                            className="flex-auto"
+                            onClick={handleDeployingWebsocketAPI}
+                            ></Button>}
+                            {deployingWebsocketAPI === 1 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                                <span className="text-600" style={{ fontWeight: 'bold' }}>Deploying AWS Websocket API...&nbsp;</span>
+                            </div>}
+                            {deployingWebsocketAPI === 2 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                                <span className="text-red-500" style={{ fontWeight: 'bold' }}>Error:&nbsp;</span>unable to finish deployment
+                            </div>}
+                            {deployingWebsocketAPI === 3 && <div className="text-600 font-medium mt-1 mt-1" style={{ fontSize: '0.8rem'}}>
+                                <div className="text-blue-500" style={{ fontWeight: 'bold' }}>Successful</div>
+                                <div>{`Your AWS Websocket API is now online!`}</div>
+                            </div>}
+                        </div>
+                    </Dialog>
                 </div>
             </div>
             {/* <div className="col-12 md:col-4 xl:col4">
@@ -571,7 +670,7 @@ export default function APINetwork() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex align-items-center justify-content-between mt-4">
+                    <div className="flex align-items-center justify-content-between mt-3">
                         {/* @ts-ignore */}
                         <span className="text-sm">{`{ no website url generated }`}</span>
                     </div>

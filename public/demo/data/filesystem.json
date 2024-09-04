@@ -16,7 +16,7 @@
                 "name":"Databases",
                 "description": "View all of your database integrations here",
                 "type": "Folder",
-                "status": "Online"
+                "status": "Coming soon"
             },
             "children":[  
                 {  
@@ -24,8 +24,7 @@
                     "data":{  
                         "name":"MongoDB API",
                         "type": "REST API",
-                        "description": "Manage and query MongoDB database through a REST API interface",
-                        "status":"No integration"
+                        "description": "Manage and query MongoDB database through a REST API interface"
                     }
                 }
             ]
@@ -36,7 +35,7 @@
                 "name":"Ledger",
                 "description": "View all of your API's architecture, event logs, and metadata",
                 "type": "Folder",
-                "status": "Online"
+                "status": "Coming soon"
             },
             "children":[
                 {  
@@ -110,8 +109,7 @@
                     "data":{  
                         "name":"DynamoDB",
                         "description": "Manage your AWS DynamoDB Integration",
-                        "type": "AWS DynamoDB",
-                        "status": "No Integration"
+                        "type": "AWS DynamoDB"
                     }
                 },
                 { 
@@ -119,8 +117,7 @@
                     "data":{  
                         "name":"S3 Bucket",
                         "description": "Manage your AWS S3 bucket Integrations",
-                        "type": "AWS S3",
-                        "status": "No Integrations"
+                        "type": "AWS S3"
                     }
                 },
                 {  
@@ -128,8 +125,7 @@
                     "data":{  
                         "name":"Lambda",
                         "description": "Manage your AWS Lambda Integrations",
-                        "type": "AWS Lambda",
-                        "status": "No Integrations"
+                        "type": "AWS Lambda"
                     }
                 }
             ]

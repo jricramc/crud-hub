@@ -4,13 +4,13 @@ import AppSubMenu from "./AppSubMenu";
 const AppMenu = () => {
     const model: MenuModel[] = [
         {
-            label: "Dashboards",
+            label: "API72",
             icon: "pi pi-home",
             items: [
                 {
-                    label: "Home",
+                    label: "Dashboard",
                     icon: "pi pi-fw pi-home",
-                    to: "/home",
+                    to: "/dashboard",
                 },
                 // {
                 //     label: "API Network",

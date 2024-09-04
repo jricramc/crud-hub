@@ -198,8 +198,6 @@ const VerifyAPI: Page = () => {
         // @ts-ignore
         if (urlStatusStates[urlStatusKey]?.valid) {
 
-            console.log('api_id: ', apiID);
-
             // @ts-ignore
             verifyAPIID(apiID).then(({ verified, api_username }) => {
                 if (verified) {

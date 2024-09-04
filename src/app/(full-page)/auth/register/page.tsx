@@ -13,6 +13,7 @@ import { randomInteger } from "@/utils/utils";
 import type { CustomEvent } from "@/types";
 import { checkEmailVerificationCode, sendVerificationEmail } from "@/utils/client/apiCalls";
 import moment from "moment";
+import { ProgressBar } from "primereact/progressbar";
 
 const Register: Page = () => {
     const router = useRouter();
@@ -335,7 +336,7 @@ const Register: Page = () => {
                             />
                         </span>}
                         {(registrationStep === 0 || registrationStep === 2 && (emailVerificationCode ?? '').length >= 4 || registrationStep === 4) && <Button
-                            label={{ 0: "Send", 2: "Submit code", 4: 'Continue'}[registrationStep]}
+                            label={{ 0: "Continue", 2: "Submit code", 4: 'Continue'}[registrationStep]}
                             className="w-full md:w-25rem mt-2 mb-1"
                             onClick={() => {
                                 if (registrationStep === 0) {
@@ -420,6 +421,13 @@ const Register: Page = () => {
                             <div>
                                 {/* @ts-ignore */}
                                 <span className={`${deployStageMessages[deployStageMessage.type]?.textColor}`} style={{ fontWeight: 'bold' }}>{deployStageProgress.toFixed(2)}%&nbsp;&nbsp;</span>
+                                {/* <div className="w-full md:w-25rem mb-2">
+                                    <ProgressBar
+                                        value={Math.floor(deployStageProgress)}
+                                        showValue={false}
+                                        style={{ borderRadius: 2, height: '0.7rem' }}
+                                    />
+                                </div> */}
                                 {/* @ts-ignore */}
                                 <span className="text-500">{deployStageMessages[deployStageMessage.type]?.stage[deployStageMessage.stage]}</span>
                             </div>
