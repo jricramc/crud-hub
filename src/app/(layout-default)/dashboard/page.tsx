@@ -19,15 +19,14 @@ import { LayoutContext } from "../../../../layout/context/layoutcontext";
 
 import TreeDemo from "./tree";
 import CountdownTimer from "@/demo/components/apps/countdowntimer";
-import { renewLedgerEntry } from "@/utils/session/apiCalls";
-import { set } from "zod";
+import { renewLedgerEntry, deployWebsocketAPIResource } from "@/utils/session/apiCalls";
 
 export default function APINetwork() {
     const { data: session, status, update: updateSession } = useSession();
 
     const actionCopyRef = useRef(null);
 
-    const [tmpWebsocketUrl, setTmpWebsocketUrl] = useState<string | null>(null);
+    const [websocketUrl, setWebsocketUrl] = useState<string | null | undefined>(undefined);
 
     const [username, setUserName] = useState('');
     const [userAPIURL, setUserAPIURL] = useState('');
@@ -224,23 +223,20 @@ export default function APINetwork() {
         setRenewingAPI(3);
     };
 
-    const handleDeployingWebsocketAPI = () => {
+    const handleDeployingWebsocketAPI = async () => {
         setDeployingWebsocketAPI(1);
-        // const res = await renewLedgerEntry(session);
+        const { websocket, err } = await deployWebsocketAPIResource(session).then(response => response).catch(err => ({ err }));
+        console.log('res ::', websocket);
 
-        // updateSession({
-        //     user: {
-        //         data: {
-        //             date_renewed: res.date_renewed
-        //         }
-        //     }
-        // });
+        updateSession({
+            user: {
+                data: {
+                    websocket,
+                }
+            }
+        });
 
-        setTimeout(() => {
-            setDeployingWebsocketAPI(3);
-            setTmpWebsocketUrl('wss://a7uirjun9k.execute-api.us-east-2.amazonaws.com/stage-test-0-eqy3zt-KMrU6-117be9d/');
-        }, 3000);
-        
+        setDeployingWebsocketAPI(3);
     };
 
     useEffect(() => {
@@ -384,6 +380,21 @@ export default function APINetwork() {
             setUserAPIURL(session?.user?.data?.api_url);
             // @ts-ignore
             setApiDateRenewed(session?.user?.data?.date_renewed);
+
+            // @ts-ignore
+            if (session?.user?.data?.websocket) {
+                const {
+                    // example: "wss://05ir9h5o2g.execute-api.us-east-2.amazonaws.com"
+                    websocket_endpoint,
+                    // example: "stage-ws00-uDpOey-k2noUc49Cb8t-6413a34"
+                    websocket_stage_name,
+                    // @ts-ignore
+                } = session?.user?.data?.websocket || {};
+                // example: 'wss://05ir9h5o2g.execute-api.us-east-2.amazonaws.com/stage-ws00-uDpOey-k2noUc49Cb8t-6413a34/'
+                setWebsocketUrl(`${websocket_endpoint}/${websocket_stage_name}/`);
+            } else {
+                setWebsocketUrl(null);
+            }
 
             // @ts-ignore
             const endTime = moment(session?.user?.data?.date_renewed).add(72, 'hours');
@@ -558,7 +569,7 @@ export default function APINetwork() {
                                 Websocket
                             </span>
                             <div className="flex flex-row">
-                                {tmpWebsocketUrl ? <div className="text-green-500 flex-1">
+                                {websocketUrl ? <div className="text-green-500 flex-1">
                                     <span className="font-medium">Online</span>
                                 </div> : <div className="text-color-secondary flex-1">
                                     <span className="font-medium">Available</span>
@@ -566,7 +577,7 @@ export default function APINetwork() {
                             </div>
                         </div>
                     </div>
-                    {tmpWebsocketUrl ? <div className="flex align-items-center justify-content-between mt-3">
+                    {websocketUrl ? <div className="flex align-items-center justify-content-between mt-3">
                         {/* @ts-ignore */}
                         <span
                             className="text-sm"
@@ -577,7 +588,7 @@ export default function APINetwork() {
                                 WebkitBoxOrient: 'vertical',
                                 display: '-webkit-box',
                             }}
-                        >{tmpWebsocketUrl}</span>
+                        >{websocketUrl}</span>
                         <button
                             ref={actionCopyRef}
                             tabIndex={0}
@@ -596,6 +607,7 @@ export default function APINetwork() {
                         <Button
                             className="product-badge status-yellow"
                             label="Deploy resource"
+                            disabled={websocketUrl === undefined}
                             onClick={() => {
                                 setDeployingWebsocketAPI(0);
                                 setDisplayDeployWebsocketDialog(true);

@@ -65,5 +65,5 @@ const checkEmailVerificationCode = async ({ email, code } : CheckEmailVerificati
 export {
     verifyAPIID,
     sendVerificationEmail,
-    checkEmailVerificationCode
+    checkEmailVerificationCode,
 }

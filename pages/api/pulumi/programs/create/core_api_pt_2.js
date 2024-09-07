@@ -1059,7 +1059,7 @@ exports.handler = async (event) => {
                 const response = ({ body, status }) => {
                     return {
                         statusCode: status,
-                        body: JSON.stringify({ body }),
+                        body: JSON.stringify({ ...body }),
                     };
                 }
 
@@ -1176,20 +1176,26 @@ exports.handler = async (event) => {
                         });
                         
                     if (createWebsocketAPIResult.type === 'success') {
-                        const createWebsocketAPIResult = await saveWebsocketToLedger(createWebsocketAPIResult.resource)
+                        const websocketAPILedgerResult = await saveWebsocketToLedger(createWebsocketAPIResult.resource)
                             .then(responseData => {
-                                // console.log('Response data:', responseData);
-                                return { type: 'success', responseData }
+                                console.log('Response data:', responseData);
+                                try {
+                                    const obj = JSON.parse(responseData);
+                                    const { websocket_stage_name, websocket_endpoint, date_created} = obj?.data?.websocket || {};
+                                    return { type: 'success', websocket: { websocket_stage_name, websocket_endpoint, date_created } }
+                                } catch (err) {
+                                    return { type: 'error', err }
+                                }
                             })
                             .catch(err => {
-                                // console.error('Error:', err);
+                                console.error('Error:', err);
                                 // throw err; // Re-throw the error to be caught by the Lambda handler
                                 return { type: 'error', err }
                             });
                         
                         return response({
                             body: {
-                                createWebsocketAPIResult,
+                                websocketAPILedgerResult,
                                 complete: true,
                             },
                             status: 200,
