@@ -1118,7 +1118,8 @@ exports.handler = async (event) => {
                             path: '/api/ledger/update',
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'ledger-api-key': '${process.env.NEXT_PUBLIC_LEDGER_API_KEY}',
                             }
                         };
 
@@ -1156,7 +1157,6 @@ exports.handler = async (event) => {
                                     websocketStageName: { value: websocket_stage_name },
                                     websocketAPI: { value: websocket_api },
                                     websocketEndpoint: { value: websocket_endpoint },
-                                    cloudfrontDistribution: { value: cloudfront_distribution },
                                     socketName: { value: socket_name },
                                     unique_socket_name: { value: unique_socketName },
 
