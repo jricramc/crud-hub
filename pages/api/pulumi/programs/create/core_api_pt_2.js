@@ -1036,6 +1036,8 @@ exports.handler = async (event) => {
         }
     );
 
+    const websocketResourceIdString = pulumi.interpolate`${websocketResourceId}`;
+
     const createWebsocketAPI = new aws.lambda.Function(
         `create-websocket-api-lambda-${rid}`,
         {
@@ -1068,7 +1070,7 @@ exports.handler = async (event) => {
                         apiUrl: "${apiUrl}",
                         socketName: name,
                         rid: "${rid}",
-                        websocketResourceId: "${websocketResourceId}",
+                        websocketResourceId: "${websocketResourceIdString}",
                         lam_role_arn: "${lam_role_arn}",
                     };
 

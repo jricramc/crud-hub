@@ -316,7 +316,8 @@ const VerifyAPI: Page = () => {
                             Please enter your 8 digit user passkey for your API72 url.
                         </span>
                         <div className="text-600 font-medium mt-1 mb-4" style={{ fontSize: '0.8rem'}}>
-                            <span className="text-green-500" style={{ fontWeight: 'bold' }}>Verified API:&nbsp;</span>https://u0thn4gdw3.execute-api.us-east-2.amazonaws.com/v3/
+                            <span className="text-green-500" style={{ fontWeight: 'bold' }}>Verified API:&nbsp;</span>
+                            {apiURLValue}
                         </div>
                         {/* <div className="flex align-items-center mt-1">
                             <i className="pi pi-user text-600"></i>
