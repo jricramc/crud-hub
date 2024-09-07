@@ -559,9 +559,13 @@ export default function APINetwork() {
                 <div className="card h-full">
                     <div className="flex flex-row">
                         <span className="font-semibold text-md flex-1">AWS Websocket API</span>
-                        <span className="customer-badge status-blue">
+                        <a
+                            className="customer-badge status-blue"
+                            href="https://webhub-sandbox.up.railway.app/websocket-api/sandbox"
+                            target="_blank"
+                        >
                             Open sandbox
-                        </span>
+                        </a>
                     </div>
                     <div className="flex justify-content-between align-items-start mt-3">
                         <div className="w-12">

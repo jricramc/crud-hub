@@ -18,10 +18,10 @@ const handler = async (req, res) => {
         await stack.workspace.installPlugin("aws", "v4.0.0");
         await stack.setConfig("aws:region", { value: "us-east-2" });
         await stack.up({ onOutput: () => {} }).then((...args) => {
-          console.log("args: ", JSON.stringify(args[0]?.outputs?.websocketAPI || {}));
+          // console.log("args: ", JSON.stringify(args[0]?.outputs?.websocketAPI || {}));
           res.status(200).json({ type: 'success', ...args });
         }).catch((...args) => {
-          console.log('...args: ', args);
+          // console.log('...args: ', args);
           res.status(200).json({ type: 'error', ...args });
         });
     } else res.status(405).end(`Method ${method} Not Allowed`);

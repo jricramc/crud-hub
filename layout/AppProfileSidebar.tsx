@@ -1,11 +1,13 @@
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Badge } from "primereact/badge";
 import { Sidebar } from "primereact/sidebar";
 import { useContext } from "react";
 import { LayoutContext } from "./context/layoutcontext";
+import { useRouter } from "next/navigation";
 
 const AppProfileSidebar = () => {
     const { data: session } = useSession();
+    const router = useRouter();
 
     const { layoutState, setLayoutState } = useContext(LayoutContext);
 
@@ -77,7 +79,10 @@ const AppProfileSidebar = () => {
                         </a>
                     </li> */}
                     <li>
-                        <a className="cursor-pointer flex surface-border mb-3 p-3 align-items-center border-1 surface-border border-round hover:surface-hover transition-colors transition-duration-150">
+                        <a
+                            className="cursor-pointer flex surface-border mb-3 p-3 align-items-center border-1 surface-border border-round hover:surface-hover transition-colors transition-duration-150"
+                            onClick={async () => signOut({ callbackUrl: '/auth/verify-api', redirect: true })}
+                        >
                             <span>
                                 <i className="pi pi-power-off text-xl text-primary"></i>
                             </span>

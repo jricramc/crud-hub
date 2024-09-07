@@ -159,7 +159,7 @@ const VerifyAPI: Page = () => {
     useEffect(() => {
         if (verificationStatus === 3) {
             if (redirectCountdown === 0) {
-                router.push('/home');
+                router.push('/dashboard');
             } else {
                 setTimeout(() => {
                     setRedirectCountdown((prevState) => prevState - 1);
@@ -423,7 +423,7 @@ const VerifyAPI: Page = () => {
                                 className="flex-auto"
                                 onClick={() => {
                                     if (verificationStatus === 3) {
-                                        router.push('/home')
+                                        router.push('/dashboard')
                                     } else {
                                         verifyUserPasskey();
                                     }
