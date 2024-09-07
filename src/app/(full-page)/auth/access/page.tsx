@@ -39,12 +39,12 @@ const AccessDenied: Page = () => {
                         You don&lsquo;t have the permissions to access this page
                     </p>
                     <Button
-                        onClick={() => router.push("/")}
+                        onClick={() => router.push("/auth/register")}
                         severity="help"
                         raised
                         className="font-medium"
                     >
-                        Go to Dashboard
+                        Go to login
                     </Button>
                 </div>
             </div>

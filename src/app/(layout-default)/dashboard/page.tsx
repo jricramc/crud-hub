@@ -1,5 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import moment from 'moment';
 import type { ChartDataState, ChartOptionsState, Demo } from "@/types";
 import { ChartData, ChartOptions } from "chart.js";
@@ -23,6 +24,7 @@ import { renewLedgerEntry, deployWebsocketAPIResource } from "@/utils/session/ap
 
 export default function APINetwork() {
     const { data: session, status, update: updateSession } = useSession();
+    const router = useRouter();
 
     const actionCopyRef = useRef(null);
 
@@ -403,9 +405,11 @@ export default function APINetwork() {
             const differenceInHours = endTime.diff(startTime, 'hours', true);
             const roundedDifference = Math.round(differenceInHours * 100) / 100;
             setInitHours(roundedDifference);
+        } else if (status === 'unauthenticated') {
+            router.push('/auth/access');
         }
         
-    }, [session])
+    }, [session, status])
 
     return (
         <div className="grid">
