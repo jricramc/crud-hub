@@ -13,7 +13,7 @@ const _webhub_host = extractDomain(process.env.NEXT_PUBLIC_WEBHUB_HOST || public
 const handler = async ({
     rid, apiID, rootResourceId,
     ec2InstanceId, ec2InstanceName, ec2InstancePublicDns,
-    apiName, apiUrl, lam_role_arn, executionArn, secretRid,
+    apiName, apiUrl, lam_role_arn, executionArn, secretRid, API72_LEDGER_ACCESS_ID,
 }) => {
      
     
@@ -75,11 +75,21 @@ const handler = async ({
     },
     { dependsOn: [] });
 
+    /*
+        /aws/websocket
+    */
+    const folderMainWSAPIResource = new aws.apigateway.Resource(`folder-Main-WSAPI-Resource-${rid}`, {
+        restApi: apiID,
+        parentId: folderMainAWSResource.id,
+        pathPart: "websocket",
+    },
+    { dependsOn: [] });
+
 
     const lambdaResourceId = folderMainLambdaResource.id;
     const dynamodbResourceId = folderMainDynamoDBResource.id;
     const s3ResourceId = folderMainS3Resource.id;
-
+    const websocketResourceId = folderMainWSAPIResource.id;
 
 
 
@@ -206,6 +216,28 @@ const handler = async ({
         folderCreateServiceDBS3Resource,
     ]});
 
+    /*
+        /create/service/websocket
+    */
+        const folderCreateServiceWSAPIResource = new aws.apigateway.Resource(`folder-create-service-wsapi-resource-${rid}`, {
+            restApi: apiID,
+            parentId: folderCreateServiceResource.id,
+            pathPart: "websocket",
+        }, { dependsOn: [
+            folderCreateServiceResource,
+        ]});
+    
+        /*
+            /create/service/websocket/{ws-name}
+        */
+        const folderCreateServiceWSNameResource = new aws.apigateway.Resource(`folder-create-service-wsName-resource-${rid}`, {
+            restApi: apiID,
+            parentId: folderCreateServiceWSAPIResource.id,
+            pathPart: "{ws-name}",
+        }, { dependsOn: [
+            folderCreateServiceWSAPIResource,
+        ]});
+
 
     /*
     **  METHOD
@@ -229,6 +261,16 @@ const handler = async ({
         apiKeyRequired: false,
     }, { dependsOn: [
         folderCreateServiceLambdaNameResource
+    ]});
+
+    const methodCreateServiceWSAPI = new aws.apigateway.Method(`create-service-wsapi-post-method-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceWSNameResource.id,
+        httpMethod: "POST",
+        authorization: "NONE",
+        apiKeyRequired: false,
+    }, { dependsOn: [
+        folderCreateServiceWSNameResource
     ]});
 
     const methodCreateServiceBucketName = new aws.apigateway.Method(`create-service-bucket-name-get-method-${rid}`, {
@@ -994,6 +1036,182 @@ exports.handler = async (event) => {
         }
     );
 
+    const createWebsocketAPI = new aws.lambda.Function(
+        `create-websocket-api-lambda-${rid}`,
+        {
+            code: new pulumi.asset.AssetArchive({
+                "index.js": new pulumi.asset.StringAsset(`
+
+                const https = require('https');
+                
+                const RID = (l = 8) => {
+                    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let rid = '';
+                    for (let i = 0; i < l; i += 1) {
+                        const r = Math.random() * c.length;
+                        rid += c.substring(r, r + 1);
+                    }
+                    return rid;
+                };
+
+                const response = ({ body, status }) => {
+                    return {
+                        statusCode: status,
+                        body: JSON.stringify({ body }),
+                    };
+                }
+
+                const createWSAPIPostRequest = (name) => {
+                    const data = {
+                        apiKey: "${process.env.NEXT_PUBLIC_MONGODB_API_KEY}",
+                        apiID: "${apiID}",
+                        apiUrl: "${apiUrl}",
+                        socketName: name,
+                        rid: "${rid}",
+                        websocketResourceId: "${websocketResourceId}",
+                        lam_role_arn: "${lam_role_arn}",
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${_webhub_host}',
+                            path: '/api/deploy/websocketAPI',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+                const saveWebsocketToLedger = (resource) => {
+                    
+                    const data = {
+                        query: { 'ledger_access_id': '${API72_LEDGER_ACCESS_ID}' },
+                        $set: { 'data.websocket': resource },
+                    };
+
+                    return new Promise((resolve, reject) => {
+                        const options = {
+                            host: '${_webhub_host}',
+                            path: '/api/ledger/update',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+
+                        const req = https.request(options, (res) => {
+                            let responseData = '';
+                            
+                            res.on('data', (chunk) => {
+                                responseData += chunk;
+                            });
+
+                            res.on('end', () => {
+                                resolve(responseData); // Resolve with the complete response data
+                            });
+                        });
+
+                        req.on('error', (e) => {
+                            reject(e.message);
+                        });
+
+                        req.write(JSON.stringify(data));
+                        req.end();
+                    });
+                };
+
+
+                exports.handler = async (event) => {
+                    const { 'ws-name': wsName } = event.pathParameters || {};
+                    const createWebsocketAPIResult = await createWSAPIPostRequest(wsName)
+                        .then(responseData => {
+                            // console.log('Response data:', responseData);
+                            try {
+                            const obj = JSON.parse(responseData);
+                            if (obj.type === 'success') {
+                                const {
+                                    websocketStageName: { value: websocket_stage_name },
+                                    websocketAPI: { value: websocket_api },
+                                    websocketEndpoint: { value: websocket_endpoint },
+                                    cloudfrontDistribution: { value: cloudfront_distribution },
+                                    socketName: { value: socket_name },
+                                    unique_socket_name: { value: unique_socketName },
+
+                                } = obj['0']['outputs'];
+                                return { type: 'success', resource: { socketName: socket_name, uniqueSocketName: unique_socketName, websocket_stage_name, websocket_api, websocket_endpoint, date_created: new Date() } }
+                            } else {
+                                return { type: 'error', err: 'pulumi returned an error code' }
+                            }
+                            } catch (err) {
+                                return { type: 'error', err }
+                            }
+                        })
+                        .catch(err => {
+                            // console.error('Error:', err);
+                            // throw err; // Re-throw the error to be caught by the Lambda handler
+                            return { type: 'error', err }
+                        });
+                        
+                    if (createWebsocketAPIResult.type === 'success') {
+                        const createWebsocketAPIResult = await saveWebsocketToLedger(createWebsocketAPIResult.resource)
+                            .then(responseData => {
+                                // console.log('Response data:', responseData);
+                                return { type: 'success', responseData }
+                            })
+                            .catch(err => {
+                                // console.error('Error:', err);
+                                // throw err; // Re-throw the error to be caught by the Lambda handler
+                                return { type: 'error', err }
+                            });
+                        
+                        return response({
+                            body: {
+                                createWebsocketAPIResult,
+                                complete: true,
+                            },
+                            status: 200,
+                        });
+                    
+                    }
+                    
+                    return response({
+                        body: {
+                            createWebsocketAPIResult,
+                            complete: false,
+                        },
+                        status: 409,
+                    });
+                };
+                `),
+            }),
+            role: lam_role_arn,
+            handler: "index.handler",
+            runtime: "nodejs18.x",
+            timeout: 120, 
+        }
+    );
+
 
     /*
     **  INTEGRATIONS
@@ -1025,6 +1243,20 @@ exports.handler = async (event) => {
         folderCreateServiceLambdaNameResource,
         methodCreateServiceLambda,
         createLambdaCrudApiLambda,
+    ]});
+
+    const integrationCreateServiceWSAPI = new aws.apigateway.Integration(`create-service-wsapi-integration-${rid}`, {
+        restApi: apiID,
+        resourceId: folderCreateServiceWSNameResource.id,
+        httpMethod: methodCreateServiceWSAPI.httpMethod,
+        type: "AWS_PROXY",
+        integrationHttpMethod: "POST",
+        uri: createWebsocketAPI.invokeArn,
+        timeoutInMillis: 120000, // Set the integration timeout to match the Lambda timeout
+    }, { dependsOn: [
+        folderCreateServiceWSNameResource,
+        methodCreateServiceWSAPI,
+        createWebsocketAPI,
     ]});
 
     const integrationCreateServiceBucketName = new aws.apigateway.Integration(`create-service-bucket-name-integration-${rid}`, {
@@ -1078,6 +1310,15 @@ exports.handler = async (event) => {
         createLambdaCrudApiLambda,
     ]});
 
+    const createServiceWSApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-ws-api-gateway-invoke-permission-${rid}`, {
+        action: 'lambda:InvokeFunction',
+        function: createWebsocketAPI.name,
+        principal: 'apigateway.amazonaws.com',
+        sourceArn: pulumi.interpolate`${executionArn}/*/*`
+    }, { dependsOn: [
+        createWebsocketAPI,
+    ]});
+
     const createServiceBucketNameApiGatewayInvokePermission = new aws.lambda.Permission(`create-service-bucket-name-api-gateway-invoke-permission-${rid}`, {
         action: 'lambda:InvokeFunction',
         function: createS3CrudApiLambda.name,
@@ -1113,6 +1354,8 @@ exports.handler = async (event) => {
         methodCreateServiceCloudfrontS3Name, integrationCreateServiceCloudfrontS3Name,
         // create/service/lambda/{name}
         methodCreateServiceLambda, integrationCreateServiceLambda,
+        // create/service/websocket/{ws-name}
+        methodCreateServiceWSAPI, integrationCreateServiceWSAPI,
     ] });
 
     /*
@@ -1201,6 +1444,7 @@ exports.handler = async (event) => {
         lambdaResourceId,
         dynamodbResourceId,
         s3ResourceId,
+        websocketResourceId,
         ec2CloudfrontDistribution,
     };
 };

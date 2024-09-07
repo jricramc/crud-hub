@@ -69,6 +69,7 @@ const handler = async (req, res) => {
                 lam_role_arn,
                 executionArn: execution_arn,
                 secretRid,
+                API72_LEDGER_ACCESS_ID,
             })
           });
 
@@ -89,6 +90,7 @@ const handler = async (req, res) => {
               lambdaResourceId: { value: lambda_resource_id },
               dynamodbResourceId: { value: dynamodb_resource_id },
               s3ResourceId: { value: s3_resource_id },
+              websocketResourceId: { value: websocket_resource_id },
               ec2CloudfrontDistribution: { value: ec2_cloud_front_distribution }
             } = upRes2.output;
 
@@ -111,6 +113,7 @@ const handler = async (req, res) => {
               lambda_resource_id,
               dynamodb_resource_id,
               s3_resource_id,
+              websocket_resource_id,
               lam_role_arn,
               execution_arn,
               ec2_instance: {
