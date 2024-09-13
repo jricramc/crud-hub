@@ -561,7 +561,7 @@ export default function APINetwork() {
             </div> */}
             <div className="col-12 md:col-4 xl:col4">
                 <div className="card h-full">
-                    <div className="flex flex-row">
+                    <div className="flex flex-row" style={{ alignItems: 'flex-start' }}>
                         <span className="font-semibold text-md flex-1">AWS Websocket API</span>
                         <a
                             className="customer-badge status-blue"
@@ -601,7 +601,7 @@ export default function APINetwork() {
                             ref={actionCopyRef}
                             tabIndex={0}
                             className="p-link block-action-copy"
-                            onClick={(e) => copyCode(e, 'wss://a7uirjun9k.execute-api.us-east-2.amazonaws.com/stage-test-0-eqy3zt-KMrU6-117be9d/')}
+                            onClick={(e) => copyCode(e, websocketUrl)}
                         >
                             <i className="pi pi-copy text-900"></i>
                         </button>
