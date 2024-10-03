@@ -28,9 +28,16 @@ yarn-error.log*
 .env*.local
 .env
 
+# turbo
+.turbo
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# env files
+.contentlayer
+.env
